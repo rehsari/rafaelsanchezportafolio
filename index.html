@@ -938,7 +938,7 @@ footer {
       </div>
     </div>
 
-    <div class="pcard reveal d2" data-project="pixelgame" data-id="game" data-f="ux game product visual"
+    <div class="pcard reveal d2" data-project="pixelgame" data-id="game" data-f="ux game product visual" data-mobile-bg="images/callisto-result1.jpg"
          style="grid-column:span 4;">
       <div class="card-bg" style="overflow:hidden;">
         <video autoplay muted loop playsinline preload="none" poster="images/callisto-result1.jpg"
@@ -1855,14 +1855,13 @@ if ('IntersectionObserver' in window) {
     v.removeAttribute('loop');
 
     if (isTouchDevice) {
-      /* On mobile: hide video, show data-mobile-bg on the pcard instead */
+      /* On mobile: hide video, set background directly on pcard */
       var pcard = v.closest('.pcard');
       var mobileBg = pcard ? pcard.getAttribute('data-mobile-bg') : null;
-      if (mobileBg) {
-        var cardBg = v.closest('.card-bg') || v.parentElement;
-        cardBg.style.backgroundImage = 'url(' + mobileBg + ')';
-        cardBg.style.backgroundSize = 'cover';
-        cardBg.style.backgroundPosition = 'center';
+      if (mobileBg && pcard) {
+        pcard.style.backgroundImage = 'url(' + mobileBg + ')';
+        pcard.style.backgroundSize = 'cover';
+        pcard.style.backgroundPosition = 'center';
       }
       v.style.display = 'none';
       return;
