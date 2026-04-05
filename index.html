@@ -293,6 +293,9 @@ section { padding: 100px 48px; position: relative; z-index: 2; }
   filter: brightness(0.75) saturate(0.9);
 }
 video.card-bg { width: 100%; height: 100%; object-fit: cover; }
+video::-webkit-media-controls { display: none !important; }
+video::-webkit-media-controls-enclosure { display: none !important; }
+video::-webkit-media-controls-panel { display: none !important; }
 .pcard:hover .card-bg { transform: scale(1.06); filter: brightness(0.88) saturate(1); }
 
 .card-ov {
@@ -1193,6 +1196,7 @@ const PROJECTS = {
     accent: "linear-gradient(90deg,#5500bb,#9933ff)",
     caseStudy: "https://drive.google.com/file/d/1nIHutsvigg8HqGb3iOhPbZQ8nuD1SALs/preview",
     proto: "https://www.figma.com/embed?embed_host=share&url=https://www.figma.com/proto/DxMew8YhX3WAtXESoshI5R/Herway?node-id=191-452&t=zeKj0o8s9zVh0mao-1",
+    thumb: "images/herway-thumb.jpg",
     images: [],
     sections: [
       { n:"01", t:"THE PROBLEM", b:"Generic transit apps don't account for gender. For low-income women, public transportation isn't just inconvenient, it's unsafe. HerWay was designed to close that gap.", img:"images/herway-transit.jpg" },
@@ -1840,6 +1844,12 @@ if ('IntersectionObserver' in window) {
       v.currentTime = 0;
       v.play().catch(function(){});
     });
+    v.addEventListener('timeupdate', function() {
+      if (v.duration && v.currentTime >= v.duration - 0.2) {
+        v.currentTime = 0;
+        v.play().catch(function(){});
+      }
+    });
     videoObserver.observe(v);
   });
 } else {
@@ -2037,14 +2047,19 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       var isLast = i === sections.length - 1;
       var protoHtml = '';
       if (isLast && d.proto) {
-        var protoFullUrl = d.proto.replace('https://www.figma.com/embed?embed_host=share&url=', '');
-        protoHtml =
-          '<div class="proto-wrap">' +
-            '<div class="proto-frame">' +
-              '<iframe data-src="' + d.proto + '" allowfullscreen title="' + d.title + ' prototype"></iframe>' +
-            '</div>' +
-            '<a class="proto-fullscreen" href="' + protoFullUrl + '" target="_blank" rel="noopener">Open fullscreen ↗</a>' +
-          '</div>';
+        var isMobile = window.innerWidth <= 1024 || isTouchDevice;
+        if (isMobile && d.thumb) {
+          protoHtml = '<div class="cs-img contain-light" style="margin-top:32px;"><img src="' + d.thumb + '" alt="' + d.title + '" loading="lazy" style="width:100%;border-radius:4px;"></div>';
+        } else {
+          var protoFullUrl = d.proto.replace('https://www.figma.com/embed?embed_host=share&url=', '');
+          protoHtml =
+            '<div class="proto-wrap">' +
+              '<div class="proto-frame">' +
+                '<iframe data-src="' + d.proto + '" allowfullscreen title="' + d.title + ' prototype"></iframe>' +
+              '</div>' +
+              '<a class="proto-fullscreen" href="' + protoFullUrl + '" target="_blank" rel="noopener">Open fullscreen ↗</a>' +
+            '</div>';
+        }
       }
       if (s.imgHero && s.img) {
         return '<div class="case-block-hero">' +
