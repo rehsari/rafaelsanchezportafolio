@@ -623,7 +623,7 @@ video::-webkit-media-controls-panel { display: none !important; }
   display: flex; align-items: center; gap: 6px; transition: color 0.2s;
 }
 .csoc:hover { color: var(--text); }
-.csoc::before { content: '↗&#xFE0E;'; font-size: 11px; }
+.csoc::before { content: '↗'; font-size: 11px; }
 
 /* FOOTER */
 footer {
@@ -955,7 +955,7 @@ footer {
     </div>
 
     <!-- ROW 3: (5+4+3=12) ordered by impressiveness -->
-    <div class="pcard reveal" data-project="velisar" data-id="visual" data-f="visual creative"
+    <div class="pcard reveal" data-project="velisar" data-id="visual" data-f="visual creative" data-mobile-bg="images/velisar-mobile.jpg"
          style="grid-column:span 5;">
       <div class="card-bg">
         <video autoplay muted loop playsinline preload="none" poster="images/velisar-poster.jpg"
@@ -1293,7 +1293,7 @@ const PROJECTS = {
     tools: "p5.js · Perlin Noise · Particle Systems",
     context: "Generative Art: Sandwind Calendar",
     accent: "linear-gradient(90deg,#1a0830,#7a3800,#c85a00)",
-    sketch: "https://editor.p5js.org/rehsari/present/rGGR0tVu-",
+    sketch: "https://editor.p5js.org/rehsari/full/rGGR0tVu-",
     sketchNote: "Click anywhere to advance through 5 wind phases  ·  Move mouse to disturb particles",
     sections: [
       { n:"01", t:"CONCEPT", b:"Velisar is a fictional desert planet that measures time through wind cycles. Five phases called Drifts, each with its own sky color, particle density, and storm intensity. The system is entirely data-driven: all visual properties for each phase live in a single configuration object, making behavior predictable and tweakable without touching drawing code." },
