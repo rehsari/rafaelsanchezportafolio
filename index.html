@@ -516,7 +516,7 @@ video::-webkit-media-controls-panel { display: none !important; }
 .case-imgs { display: grid; grid-template-columns: repeat(var(--imgs-count, 3), 1fr); gap: 10px; margin-top: 32px; }
 .case-imgs img { width: 100%; height: auto; display: block; }
 .case-imgs.square img { height: 420px; object-fit: cover; object-position: center; }
-@media(max-width:640px){ .case-imgs { gap: 6px; } }
+@media(max-width:640px){ .case-imgs { gap: 6px; } .case-imgs.square img { height: 180px; } }
 .case-vid { width: 100%; height: auto; display: block; margin-top: 32px; border-radius: 2px; }
 .case-chart { width: 100%; margin-top: 32px; position: relative; }
 .case-chart::after {
@@ -927,7 +927,7 @@ footer {
       </div>
     </div>
 
-    <div class="pcard reveal d1" data-project="shiroiblock" data-id="visual" data-f="visual" data-mobile-bg="images/shiroi-mobile.jpg"
+    <div class="pcard reveal d1" data-project="shiroiblock" data-id="visual" data-f="visual" data-mobile-bg="images/shiroi-mobile.jpg" data-mobile-bg-pos="40% center"
          style="grid-column:span 4;">
       <video class="card-bg" autoplay muted loop playsinline preload="none" src="images/shiroi-thumb.mp4" poster="images/shiroi-result.jpg"></video>
       <div class="card-ov"></div><div class="card-glitch"></div>
@@ -1861,7 +1861,7 @@ if ('IntersectionObserver' in window) {
       if (mobileBg && pcard) {
         pcard.style.backgroundImage = 'url(' + mobileBg + ')';
         pcard.style.backgroundSize = 'cover';
-        pcard.style.backgroundPosition = 'center';
+        pcard.style.backgroundPosition = pcard.getAttribute('data-mobile-bg-pos') || 'center';
       }
       v.style.display = 'none';
       return;
