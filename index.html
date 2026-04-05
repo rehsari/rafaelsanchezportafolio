@@ -437,6 +437,7 @@ video.card-bg { width: 100%; height: 100%; object-fit: cover; }
 .sketch-frame {
   border: 1px solid var(--border); border-top: none;
   position: relative; height: 82vh; overflow: hidden;
+  touch-action: none; user-select: none; -webkit-user-select: none;
 }
 .sketch-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 .sketch-note {
@@ -1834,6 +1835,10 @@ if ('IntersectionObserver' in window) {
     v.preload = 'auto';
     v.addEventListener('loadedmetadata', function() {
       v.currentTime = 0.001;
+    });
+    v.addEventListener('ended', function() {
+      v.currentTime = 0;
+      v.play().catch(function(){});
     });
     videoObserver.observe(v);
   });
