@@ -916,7 +916,7 @@ footer {
   <div class="projects-grid">
 
     <!-- ROW 1–2: feature left + two stacked right -->
-    <div class="pcard feature reveal" data-project="herway" data-id="ux" data-f="ux"
+    <div class="pcard feature reveal" data-project="herway" data-id="ux" data-f="ux" data-mobile-bg="images/herway-mobile.jpg"
          style="grid-column:span 8; grid-row:span 2;">
       <div class="card-bg" style="background-image:url(images/herway-thumb.jpg); background-position: left center;"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
@@ -927,7 +927,7 @@ footer {
       </div>
     </div>
 
-    <div class="pcard reveal d1" data-project="shiroiblock" data-id="visual" data-f="visual"
+    <div class="pcard reveal d1" data-project="shiroiblock" data-id="visual" data-f="visual" data-mobile-bg="images/shiroi-mobile.jpg"
          style="grid-column:span 4;">
       <video class="card-bg" autoplay muted loop playsinline preload="none" src="images/shiroi-thumb.mp4" poster="images/shiroi-result.jpg"></video>
       <div class="card-ov"></div><div class="card-glitch"></div>
@@ -1039,7 +1039,7 @@ footer {
       </div>
     </div>
 
-    <div class="pcard reveal d2" data-project="glitterbomb" data-id="green" data-f="product illustration game"
+    <div class="pcard reveal d2" data-project="glitterbomb" data-id="green" data-f="product illustration game" data-mobile-bg="images/glitterbomb-mobile.jpg"
          style="grid-column:span 4;">
       <video class="card-bg" autoplay muted loop playsinline preload="none" src="images/glitterbomb-thumb.mp4" poster="images/glitterbomb-model.png"></video>
       <div class="card-ov"></div><div class="card-glitch"></div>
@@ -1051,7 +1051,7 @@ footer {
     </div>
 
     <!-- ROW 7: ModuleCraft -->
-    <div class="pcard reveal" data-project="modulecraft" data-id="lblue" data-f="product visual"
+    <div class="pcard reveal" data-project="modulecraft" data-id="lblue" data-f="product visual" data-mobile-bg="images/modulecraft-mobile.jpg"
          style="grid-column:span 5;">
       <div class="card-bg" style="background-image:url(images/modulecraft-thumb.jpg);"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
@@ -1811,6 +1811,19 @@ var CHARS = '!<>-_\\/[]{}=+*^?#$%@&ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs
 /* Video thumbnails — play only when visible, pause when off screen */
 var cardVideos = document.querySelectorAll('video.card-bg, .card-bg video');
 
+/* On mobile, swap static card backgrounds too (non-video cards) */
+if (isTouchDevice) {
+  document.querySelectorAll('.pcard[data-mobile-bg]').forEach(function(card) {
+    var mobileBg = card.getAttribute('data-mobile-bg');
+    var cardBg = card.querySelector('.card-bg');
+    if (cardBg && !cardBg.querySelector('video')) {
+      cardBg.style.backgroundImage = 'url(' + mobileBg + ')';
+      cardBg.style.backgroundSize = 'cover';
+      cardBg.style.backgroundPosition = 'center';
+    }
+  });
+}
+
 function setVideoSpeed(v) {
   var src = v.src || v.getAttribute('src') || '';
   if (src.indexOf('callisto') !== -1 || src.indexOf('shiroi') !== -1) {
@@ -1842,13 +1855,14 @@ if ('IntersectionObserver' in window) {
     v.removeAttribute('loop');
 
     if (isTouchDevice) {
-      /* On mobile: hide video, show poster as static background image */
-      var poster = v.getAttribute('poster');
-      if (poster) {
-        var parent = v.closest('.card-bg') || v.parentElement;
-        parent.style.backgroundImage = 'url(' + poster + ')';
-        parent.style.backgroundSize = 'cover';
-        parent.style.backgroundPosition = 'center';
+      /* On mobile: hide video, show data-mobile-bg on the pcard instead */
+      var pcard = v.closest('.pcard');
+      var mobileBg = pcard ? pcard.getAttribute('data-mobile-bg') : null;
+      if (mobileBg) {
+        var cardBg = v.closest('.card-bg') || v.parentElement;
+        cardBg.style.backgroundImage = 'url(' + mobileBg + ')';
+        cardBg.style.backgroundSize = 'cover';
+        cardBg.style.backgroundPosition = 'center';
       }
       v.style.display = 'none';
       return;
