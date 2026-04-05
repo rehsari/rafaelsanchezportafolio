@@ -731,6 +731,7 @@ footer {
 /* ── Tablet + mobile (≤1024px) ── */
 @media(max-width:1024px){
   .modal-close-label { display: none; }
+  .modal-close { right: 20px; }
   nav { padding: 18px 24px; }
   .nav-links { display: none; }
   .nav-social { display: none; }
@@ -1360,7 +1361,7 @@ const PROJECTS = {
       { n:"02", t:"ON PAPER FIRST", b:"The character started in Procreate. Silhouette and proportions locked down before anything went into 3D. Decisions made on paper are easier than decisions made in geometry.", img:"images/glitterbomb-sketch.jpg", imgLight:true },
       { n:"03", t:"MODELING", b:"Built in Blender to match the logic of the reference era: readable shapes and exaggerated proportions. Nothing too subtle.", img:"images/glitterbomb-model.png" },
       { n:"04", t:"UV & TEXTURES", b:"UV unwrapped, then textured in Procreate and brought back into Blender. Color blocking, gloss, and material work all done in this pass.", img:"images/glitterbomb-uv.png", imgPosition:"center 70%" },
-      { n:"05", t:"THE RENDER", b:"The final render is styled after the visual noise of old CRT screens: the color fringing, film grain, and bleed that gave that generation of games their look. Those effects are layered in post. The green hair and pointed silhouette still cut through. The distortion was a core part of the identity.", vid:"https://player.vimeo.com/video/1180005761?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1&controls=0&title=0&byline=0&portrait=0" }
+      { n:"05", t:"THE RENDER", b:"The final render is styled after the visual noise of old CRT screens: the color fringing, film grain, and bleed that gave that generation of games their look. Those effects are layered in post. The green hair and pointed silhouette still cut through. The distortion was a core part of the identity.", vid:"https://player.vimeo.com/video/1180005761?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1&background=1&controls=0&title=0&byline=0&portrait=0" }
     ]
   },
   modulecraft: {
@@ -1828,6 +1829,7 @@ if ('IntersectionObserver' in window) {
     entries.forEach(function(entry) {
       var v = entry.target;
       if (entry.isIntersecting) {
+        if (v.duration && v.currentTime >= v.duration - 0.3) v.currentTime = 0;
         v.play().then(function() { setVideoSpeed(v); }).catch(function(){});
       } else {
         v.pause();
@@ -1837,6 +1839,7 @@ if ('IntersectionObserver' in window) {
 
   cardVideos.forEach(function(v) {
     v.removeAttribute('autoplay');
+    v.removeAttribute('loop');
     v.preload = 'auto';
     v.addEventListener('loadedmetadata', function() {
       v.currentTime = 0.001;
