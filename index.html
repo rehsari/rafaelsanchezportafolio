@@ -398,6 +398,12 @@ video::-webkit-media-controls-panel { display: none !important; }
   margin-bottom: 56px;
 }
 .cs-btn:hover { background: rgba(232,228,220,0.06); border-color: rgba(232,228,220,0.7); }
+.cs-back-btn {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
+  padding: 10px 20px; border: 1px solid var(--border); background: transparent;
+  color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; gap: 10px;
+  transition: border-color 0.2s, color 0.2s;
+}
 .cs-btn-arrow {
   display: inline-flex; align-items: center; justify-content: center;
   width: 18px; height: 18px; font-size: 13px; line-height: 1;
@@ -533,6 +539,23 @@ video::-webkit-media-controls-panel { display: none !important; }
 .chart-bar { height: 100%; width: 0; transition: width 2.0s cubic-bezier(0.16,1,0.3,1); will-change: width; }
 .chart-val { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; color: rgba(255,255,255,0.7); width: 42px; flex-shrink: 0; text-align: right; white-space: nowrap; font-weight: 500; overflow: hidden; }
 .chart-caption { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.18em; color: rgba(255,255,255,0.2); text-transform: uppercase; margin-top: 24px; }
+/* ── Reflection block ── */
+.case-reflection {
+  margin-top: 64px; padding: 32px 0 0 0;
+  border-top: 1px solid rgba(232,228,220,0.08);
+  position: relative;
+}
+.case-reflection::before {
+  content: 'REFLECTION';
+  display: block; font-family: var(--font-mono); font-size: 8px;
+  letter-spacing: 0.22em; color: rgba(232,228,220,0.22);
+  margin-bottom: 20px;
+}
+.case-reflection p {
+  font-size: 14px; line-height: 1.9; color: rgba(232,228,220,0.52);
+  margin: 0 0 18px 0; font-style: italic;
+}
+.case-reflection p:last-child { margin-bottom: 0; }
 .case-flow-wrap { width: 100%; margin-top: 32px; }
 .case-flow { width: 100%; overflow-x: auto; scrollbar-width: none; cursor: grab; }
 .case-flow::-webkit-scrollbar { display: none; }
@@ -551,6 +574,57 @@ video::-webkit-media-controls-panel { display: none !important; }
   .case-flow * { user-select: none; -webkit-user-select: none; }
   .flow-nodes { min-width: 720px; }
 }
+/* ── Decision Accordion ── */
+.case-decisions { width: 100%; margin-top: 32px; }
+.decision-item { border-bottom: 1px solid rgba(232,228,220,0.08); }
+.decision-item:first-child { border-top: 1px solid rgba(232,228,220,0.08); }
+.decision-trigger {
+  width: 100%; display: flex; align-items: center; gap: 16px;
+  padding: 20px 0; cursor: pointer; background: none; border: none;
+  text-align: left; position: relative;
+}
+.decision-trigger::before {
+  content: ''; position: absolute; left: -20px; top: 0; bottom: 0;
+  width: 2px;
+  transform: scaleY(0); transform-origin: top;
+  transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
+}
+.decision-item.open .decision-trigger::before { transform: scaleY(1); }
+.decision-n {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em;
+  color: rgba(232,228,220,0.3); flex-shrink: 0;
+  transition: color 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.decision-title {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: rgba(232,228,220,0.5); flex: 1;
+  transition: color 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.decision-icon {
+  width: 14px; height: 14px; flex-shrink: 0; position: relative;
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.decision-icon::before, .decision-icon::after {
+  content: ''; position: absolute; background: rgba(232,228,220,0.4);
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.25s ease;
+}
+.decision-icon::before { width: 1px; height: 100%; left: 50%; top: 0; transform: translateX(-50%); }
+.decision-icon::after  { width: 100%; height: 1px; top: 50%; left: 0; transform: translateY(-50%); }
+.decision-item.open .decision-icon::before { transform: translateX(-50%) scaleY(0); opacity: 0; }
+/* CSS Grid approach — no layout shift, true smooth animation */
+.decision-body-wrap {
+  display: grid; grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s cubic-bezier(0.16,1,0.3,1);
+}
+.decision-item.open .decision-body-wrap { grid-template-rows: 1fr; }
+.decision-body-inner { overflow: hidden; }
+.decision-body {
+  padding: 4px 0 24px 30px; font-size: 14px; line-height: 1.85;
+  color: rgba(232,228,220,0.58); margin: 0;
+}
+.decision-body + .decision-body { padding-top: 0; margin-top: 14px; }
+@media(max-width:640px) { .decision-body { padding-left: 0; font-size: 13px; } }
+
 .journey-map { width: 100%; margin-top: 32px; }
 .journey-curve-wrap { width: 100%; height: 70px; margin-bottom: 0; }
 .journey-svg { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -1204,7 +1278,14 @@ const PROJECTS = {
       { n:"01", t:"THE PROBLEM", b:"Generic transit apps don't account for gender. For low-income women, public transportation isn't just inconvenient, it's unsafe. HerWay was designed to close that gap.", img:"images/herway-transit.jpg" },
       { n:"02", t:"WHAT WE BUILT", b:"A mobile app where safety is built into the system, not bolted on. Entry uses on-device verification: your document is checked locally and never stored. The real safety model is community-based: strength in numbers. Riders share real-time safety alerts, connect with others on the same route, and report incidents directly in-app. Route planning and live tracking are the baseline. The community is the feature.", imgs:["images/herway-context1.jpg","images/herway-context2.jpg"] },
       { n:"03", t:"HOW WE GOT THERE", b:"Field research: site observations, interviews with transit riders, competitive analysis. 40+ wireframes and mockups iterated through usability testing with the actual target demographic.", img:"images/herway-figma.png", imgLight:true },
-      { n:"04", t:"THE RESULT", b:"A functional prototype that reframes the commute from a source of stress to something community-supported and reliable." }
+      { n:"04", t:"KEY DECISIONS", b:"Four choices that defined what HerWay became — and what it refused to be.", decisions: [
+        { title: "Community as the safety layer", body: "The project started as a way to increase safety in public transportation without relying on police or external systems. Early ideas leaned toward typical safety features, but those depend on institutions we don't control and that many users don't fully trust.\n\nAt the same time, the data showed something important. Public transportation isn't as unsafe as people think, but perception — especially for women — is heavily shaped by what they hear and experience indirectly.\n\nThe direction shifted toward safety by numbers. Being surrounded by people who understand the same concerns creates a different kind of safety, one that feels immediate and shared. Instead of adding a community as a feature, the app was built around it." },
+        { title: "Safety-weighted routing over shortest path", body: "Most navigation tools prioritize speed. That wasn't the goal here.\n\nEven though the system is generally safe, users — especially women — often feel unsafe because of uncertainty, not just actual risk. The idea was to reflect that reality in the product.\n\nRoutes are not just about getting somewhere quickly, but about feeling comfortable along the way. The experience prioritizes environments that feel more active, familiar, or socially present rather than simply the shortest option." },
+        { title: "Structure without overwhelm", body: "The app required multiple screens and interactions to support different functions. The challenge wasn't reducing complexity, but organizing it in a way that doesn't overwhelm the user.\n\nEach section was designed to feel distinct while still connected. Users can move through the app in different ways depending on what they need, without being forced into a single flow.\n\nAt the same time, the system avoids giving too many redundant options for the same action. The goal was to keep the experience flexible, but still clear." },
+        { title: "Trust through local verification", body: "For the idea of community-based safety to work, there needed to be a level of trust between users. That required a barrier to entry.\n\nThe approach was local verification using ID and face scanning. The key decision was that this data never leaves the device and is not stored externally.\n\nThis keeps the system private while still ensuring that the community remains gated and secure." }
+      ]},
+      { n:"05", t:"THE RESULT", b:"A functional prototype that reframes the commute from a source of stress to something community-supported and reliable." },
+      { reflection: true, body: "This has been one of my favorite projects to work on because it pushed me to engage with issues I don't personally experience. It forced me to step outside of my own assumptions and pay attention to how others move through the world.\n\nListening became a key part of the process. Instead of jumping straight into solutions, I had to slow down and understand where concerns were coming from, especially when they weren't obvious to me. Many of the insights came from small, repeated moments of discomfort that shape how safe someone feels over time.\n\nTaking on this role meant being more intentional with decisions. It wasn't just about making something functional, but about making sure the direction respected the people it was designed for. Empathy became a tool for deciding what to prioritize and what to avoid.\n\nThis project also changed how I think about safety. It's not only about reducing risk, but about how an experience feels in the moment. That shift influenced the entire design." }
     ]
   },
   pixelgame: {
@@ -2033,6 +2114,27 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       return html;
     }
 
+    function buildDecisionsHTML(decisions, accent) {
+      var colors = (accent || '').match(/#[0-9a-fA-F]{3,6}/g) || ['#ffffff'];
+      var c = colors[colors.length - 1];
+      var html = '<div class="case-decisions">';
+      decisions.forEach(function(item, i) {
+        var num = (i + 1) < 10 ? '0' + (i + 1) : '' + (i + 1);
+        html += '<div class="decision-item">';
+        html += '<button class="decision-trigger" data-accent="' + c + '" type="button" style="--project-accent:' + c + '">';
+        html += '<span class="decision-n">' + num + '</span>';
+        html += '<span class="decision-title">' + item.title + '</span>';
+        html += '<span class="decision-icon"></span>';
+        html += '</button>';
+        var bodyHtml = item.body.split('\n\n').map(function(p) { return '<p class="decision-body">' + p + '</p>'; }).join('');
+        html += '<div class="decision-body-wrap"><div class="decision-body-inner">' + bodyHtml + '</div></div>';
+        html += '</div>';
+      });
+      html += '<div class="chart-caption" style="margin-top:16px;">Click any item to expand</div>';
+      html += '</div>';
+      return html;
+    }
+
     function buildJourneyHTML(journey, id, accent) {
       var stages = journey.stages || [];
       var colors = (accent || '').match(/#[0-9a-fA-F]{3,6}/g) || ['#ffffff'];
@@ -2074,8 +2176,19 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       '<div class="sketch-frame"><iframe src="' + d.sketch + '" allowfullscreen title="' + d.title + '"></iframe></div>' +
       (d.sketchNote ? '<div class="sketch-note">' + d.sketchNote + '</div>' : '') +
     '</div>' : '';
+    // Find last non-reflection index so prototype attaches correctly
+    var lastRealIdx = sections.reduce(function(acc, s, idx) { return s.reflection ? acc : idx; }, 0);
+
     var sectionsHtml = sections.map(function(s, i) {
-      var isLast = i === sections.length - 1;
+      // Reflection — renders as a numbered section with italic body
+      if (s.reflection) {
+        var num = i < 9 ? '0' + (i + 1) : '' + (i + 1);
+        var paras = s.body.split('\n\n').map(function(p) {
+          return '<p class="case-body" style="margin-bottom:20px;">' + p + '</p>';
+        }).join('');
+        return '<div class="case-block"><div class="case-num">' + num + '</div><h3 class="case-title">REFLECTION</h3>' + paras + '</div>';
+      }
+      var isLast = i === lastRealIdx;
       var protoHtml = '';
       if (isLast && d.proto) {
         var isMobile = window.innerWidth <= 1024 || isTouchDevice;
@@ -2124,13 +2237,36 @@ document.querySelectorAll('.pcard').forEach(function(card) {
         (s.chart ? buildChartHTML(s.chart, id, d.accent || '') : '') +
         (s.flow ? buildFlowHTML(s.flow, d.accent || '') : '') +
         (s.journey ? buildJourneyHTML(s.journey, id, d.accent || '') : '') +
+        (s.decisions ? buildDecisionsHTML(s.decisions, d.accent || '') : '') +
         (s.imgsAfter ? '<div class="case-imgs" style="--imgs-count:' + (s.imgsAfterColumns || s.imgsAfter.length) + ';' + (s.imgsAfterColumns === 1 ? 'max-width:62%;margin-left:auto;margin-right:auto;' : '') + '">' + s.imgsAfter.map(function(src){ return '<img src="' + src + '" alt="' + s.t + '" loading="lazy">'; }).join('') + '</div>' : '') +
         (i === 0 ? sketchHtml : '') +
         protoHtml +
         '</div>';
     }).join('');
 
+    // Close button at end of case study
+    var accentEnd = (d.accent || '').match(/#[0-9a-fA-F]{3,6}/g) || ['#e8e4dc'];
+    var btnAccent = accentEnd[accentEnd.length - 1];
+    sectionsHtml += '<div style="padding:64px 0 32px;"><button class="cs-back-btn" data-accent="' + btnAccent + '">← Back to Projects</button></div>';
+
     msections.innerHTML = sectionsHtml;
+
+    // Close case study button
+    var backBtn = msections.querySelector('.cs-back-btn');
+    if (backBtn) {
+      var btnAcc = backBtn.getAttribute('data-accent') || '#e8e4dc';
+      backBtn.addEventListener('mouseenter', function() {
+        backBtn.style.borderColor = btnAcc;
+        backBtn.style.color = 'var(--text)';
+      });
+      backBtn.addEventListener('mouseleave', function() {
+        backBtn.style.borderColor = '';
+        backBtn.style.color = '';
+      });
+      backBtn.addEventListener('click', function() {
+        closeModal();
+      });
+    }
 
     // Flow drag-scroll — listeners stored so they can be removed on modal close
     var flowCleanups = [];
@@ -2154,6 +2290,38 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       });
     });
     modal._flowCleanups = flowCleanups;
+
+    // Decision accordion — one open at a time, first open by default
+    msections.querySelectorAll('.case-decisions').forEach(function(container) {
+      var items = container.querySelectorAll('.decision-item');
+
+      function openItem(item) {
+        var accent = item.querySelector('.decision-trigger').getAttribute('data-accent');
+        item.classList.add('open');
+        item.querySelector('.decision-title').style.color = accent;
+        item.querySelector('.decision-n').style.color = accent;
+        container.classList.add('decisions-active');
+      }
+
+      function closeItem(item) {
+        item.classList.remove('open');
+        item.querySelector('.decision-title').style.color = '';
+        item.querySelector('.decision-n').style.color = '';
+      }
+
+      // All closed by default
+
+      items.forEach(function(item) {
+        item.querySelector('.decision-trigger').addEventListener('click', function() {
+          var isOpen = item.classList.contains('open');
+          // Close all
+          items.forEach(function(i) { closeItem(i); });
+          container.classList.remove('decisions-active');
+          // Toggle: if it was closed, open it; if it was open, leave closed
+          if (!isOpen) openItem(item);
+        });
+      });
+    });
 
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
