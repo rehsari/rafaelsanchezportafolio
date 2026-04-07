@@ -1760,6 +1760,18 @@ function addTrail(x, y) {
   document.getElementById('hero').addEventListener('mouseleave', function() {
     mouseX = -9999; mouseY = -9999;
   });
+  document.getElementById('hero').addEventListener('touchmove', function(e) {
+    var rect = canvas.getBoundingClientRect();
+    var t = e.touches[0];
+    mouseX = t.clientX - rect.left;
+    mouseY = t.clientY - rect.top;
+  }, { passive: true });
+  document.getElementById('hero').addEventListener('touchend', function() {
+    mouseX = -9999; mouseY = -9999;
+  });
+  document.getElementById('hero').addEventListener('touchcancel', function() {
+    mouseX = -9999; mouseY = -9999;
+  });
 
   function rand(a, b) { return a + Math.random() * (b - a); }
 
@@ -2514,6 +2526,14 @@ if (heroTitle) {
     heroTitle.style.transform = 'translate(' + x + 'px,' + y + 'px)';
   });
   document.getElementById('hero').addEventListener('mouseleave', function() {
+    heroTitle.style.transform = 'translate(0,0)';
+  });
+  document.getElementById('hero').addEventListener('touchmove', function(e) {
+    var x = (e.touches[0].clientX / window.innerWidth - 0.5) * 8;
+    var y = (e.touches[0].clientY / window.innerHeight - 0.5) * 4;
+    heroTitle.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+  }, { passive: true });
+  document.getElementById('hero').addEventListener('touchend', function() {
     heroTitle.style.transform = 'translate(0,0)';
   });
 }
