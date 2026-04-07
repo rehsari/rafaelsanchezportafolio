@@ -2528,14 +2528,6 @@ if (heroTitle) {
   document.getElementById('hero').addEventListener('mouseleave', function() {
     heroTitle.style.transform = 'translate(0,0)';
   });
-  document.getElementById('hero').addEventListener('touchmove', function(e) {
-    var x = (e.touches[0].clientX / window.innerWidth - 0.5) * 8;
-    var y = (e.touches[0].clientY / window.innerHeight - 0.5) * 4;
-    heroTitle.style.transform = 'translate(' + x + 'px,' + y + 'px)';
-  }, { passive: true });
-  document.getElementById('hero').addEventListener('touchend', function() {
-    heroTitle.style.transform = 'translate(0,0)';
-  });
 }
 /* BG CANVAS */
 (function() {
