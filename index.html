@@ -366,7 +366,9 @@ video::-webkit-media-controls-panel { display: none !important; }
   text-transform: uppercase; color: rgba(232,228,220,0.65);
   display: flex; align-items: center; gap: 10px;
   cursor: pointer; transition: color 0.2s; background: none; border: none;
+  visibility: hidden;
 }
+#modal.open .modal-close { visibility: visible; }
 .modal-close:hover { color: var(--text); }
 .modal-close-x {
   width: 42px; height: 42px; border: 1px solid rgba(232,228,220,0.3);
@@ -1029,7 +1031,7 @@ footer {
     </div>
 
     <!-- ROW 3: (5+4+3=12) ordered by impressiveness -->
-    <div class="pcard reveal" data-project="velisar" data-id="visual" data-f="visual creative" data-mobile-bg="images/velisar-mobile.jpg"
+    <div class="pcard reveal" data-project="velisar" data-id="visual" data-f="visual creative"
          style="grid-column:span 5;">
       <div class="card-bg">
         <video autoplay muted loop playsinline preload="none" poster="images/velisar-poster.jpg"
@@ -1967,21 +1969,24 @@ if ('IntersectionObserver' in window) {
   }, { threshold: 0.1 });
 
   cardVideos.forEach(function(v) {
-    v.removeAttribute('autoplay');
-    v.removeAttribute('loop');
-
     if (isTouchDevice) {
-      /* On mobile: hide video, set background directly on pcard */
+      /* On mobile: only swap to static image if data-mobile-bg is set */
       var pcard = v.closest('.pcard');
       var mobileBg = pcard ? pcard.getAttribute('data-mobile-bg') : null;
       if (mobileBg && pcard) {
         pcard.style.backgroundImage = 'url(' + mobileBg + ')';
         pcard.style.backgroundSize = 'cover';
         pcard.style.backgroundPosition = pcard.getAttribute('data-mobile-bg-pos') || 'center';
+        v.style.display = 'none';
+        return;
       }
-      v.style.display = 'none';
+      /* No static thumbnail — keep autoplay/loop, let video play natively on mobile */
       return;
     }
+
+    /* Desktop: remove autoplay/loop and use IntersectionObserver instead */
+    v.removeAttribute('autoplay');
+    v.removeAttribute('loop');
 
     v.preload = 'auto';
     v.addEventListener('loadedmetadata', function() {
