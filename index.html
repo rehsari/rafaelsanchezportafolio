@@ -1128,7 +1128,7 @@ footer {
       </div>
     </div>
 
-    <!-- ROW 7: ModuleCraft -->
+    <!-- ROW 7: ModuleCraft + Breadboard Hero -->
     <div class="pcard reveal" data-project="modulecraft" data-id="lblue" data-f="product visual" data-mobile-bg="images/modulecraft-mobile.jpg"
          style="grid-column:span 5;">
       <div class="card-bg" style="background-image:url(images/modulecraft-thumb.jpg);"></div>
@@ -1137,6 +1137,17 @@ footer {
       <div class="card-info">
         <div class="card-cat">Product & 3D</div>
         <div class="card-name">MODULECRAFT</div>
+      </div>
+    </div>
+
+    <div class="pcard reveal d1" data-project="breadboardhero" data-id="ux" data-f="ux creative"
+         style="grid-column:span 7;">
+      <div class="card-bg" style="background-image:linear-gradient(135deg,#1a0405 0%,#3a0a10 40%,#0a2a14 100%);"></div>
+      <div class="card-ov"></div><div class="card-glitch"></div>
+      <div class="card-arr">↗&#xFE0E;</div>
+      <div class="card-info">
+        <div class="card-cat">Creative Coding</div>
+        <div class="card-name">BREADBOARD HERO</div>
       </div>
     </div>
 
@@ -1448,17 +1459,23 @@ const PROJECTS = {
   signify: {
     tag: "UX / Interaction",
     title: "SIGNIFY AR",
-    duration: "Ongoing", role: "UX Designer / Developer",
-    tools: "MediaPipe, Figma, Tailwind CSS",
+    duration: "4 Weeks", role: "UX Designer / Developer",
+    tools: "Figma, Claude Code, Illustrator",
     context: "Accessibility — ASL Translation",
     accent: "linear-gradient(90deg,#004d44,#00b89c)",
     images: [],
     sections: [
-      { n:"01", t:"THE PROBLEM", b:"Professional ASL interpreters cost $50 to $150 per hour and need to be booked in advance. For the estimated 500,000 ASL users in the US, that creates a tax on every interaction hearing people take for granted: a doctor's appointment, a class lecture, a job interview, a landlord meeting. Signify AR is built on a simpler premise: your camera is already there. The interpreter should not have to be.", img:"images/signify-problem.jpg" },
-      { n:"02", t:"THE IDEA", b:"Hand tracking reads your signs in real time. AI identifies the gesture. Text-to-speech speaks it out loud, or subtitles display it on screen. The hearing person does not need anything installed. The signing person just opens a browser. Everything runs on-device: no account, no subscription, no data leaving the browser.", img:"images/signify-logo.png", imgLeft:true },
-      { n:"03", t:"WHERE IT WORKS", b:"Video calls: signs become live captions for the other person, no interpreter bridging the gap. Classrooms: laptop open on the desk, signs become spoken words the professor hears. In-person: doctor's office, job interview, customer service counter, any situation where you would normally need to schedule someone days in advance. Everyday interactions too short to justify an interpreter but still frustrating without one." },
-      { n:"04", t:"THE BUILD", b:"Built with MediaPipe Hands for skeletal hand tracking and Fingerpose for gesture classification, both running entirely in the browser. The core challenge was latency: gesture recognition needs to feel like conversation or it breaks the flow. A commit-and-cooldown system holds a sign stable for 750ms before registering it, then locks out for 1.2 seconds to prevent repeat noise. A training mode lets users expand vocabulary beyond the base ASL set.", imgs:["images/signify-onboarding.jpg","images/signify-ar.jpg"], imgsSquare:true },
-      { n:"05", t:"NEXT STEPS", b:"The prototype is functional but the work is not done. The next step is conducting research directly with ASL users to validate accuracy, surface gaps in the gesture library, and understand where the experience breaks in real-world conditions. The AI is still being trained. The goal is a tool that actually earns the trust of the community it is built for." }
+      { n:"01", t:"THE PROBLEM", b:"Over 10 million people in the U.S. live with speech, voice, or language disorders. Many rely on American Sign Language, a visual language most people around them do not understand. Bridging that gap often means paying $50 to $150 an hour for an interpreter. For a doctor's visit. A lecture. A job interview. Interactions that take seconds for most people turn into something that requires planning or gets avoided entirely.", img:"images/signify-problem.jpg" },
+      { n:"02", t:"THE RESEARCH", b:"The work started with secondary research across accessibility forums, Reddit, and documentation on how people navigate everyday communication. Three structured tests were run to pressure-check assumptions around interaction flow. What came back consistently was that typing breaks the interaction. It does not just slow things down, it strips away the language itself. ASL is not a substitute for text. It is a visual language built on movement, space, and expression. That shift shaped the direction of the project.", img:"images/signify-logo.png", imgLeft:true },
+      { n:"03", t:"THE BUILD", b:"The project started as a hand tracking experiment using MediaPipe and JavaScript. As the interaction became more engaging, the direction shifted toward a real use case. A small local model was built to recognize a limited set of gestures, running entirely on-device. Claude Code was used to move quickly through development. ASL depends on movement, timing, and context, not static positions. Early attempts to support too many signs made the system unreliable, so scope was reduced to a smaller stable set, prioritizing consistency over range.", imgs:["images/signify-onboarding.jpg","images/signify-ar.jpg"], imgsSquare:true },
+      { n:"04", t:"KEY DECISIONS", b:"Some of the choices that shaped how Signify AR came together.", decisions: [
+        { title: "STARTING FROM A PLAYFUL EXPERIMENT", body: "The project did not begin as an accessibility tool. It started as a hand tracking test through a JJK-inspired interaction. The direction shifted once it became clear the same system could be applied to something real. Not starting with a fixed outcome made it easier to follow what actually worked. It also changed how the project evolved. Instead of forcing a solution early, the direction came from the interaction itself and what felt worth developing further." },
+        { title: "KEEPING THE MODEL LOCAL", body: "Running everything on-device was a deliberate decision. Accessibility tools should work offline and protect user data. Requiring a server or account adds friction where it matters most. Keeping the model local also made the system feel more immediate. There is no delay from sending data elsewhere, which helps preserve the flow of interaction instead of interrupting it." },
+        { title: "EXPANDING BEYOND SIGNING", body: "The original focus was supporting ASL as the main interaction. After feedback, especially thinking about university environments, the system expanded to include live translation and transcription. It became a flexible communication layer instead of a single-use tool. Different situations require different levels of support. The system needed to adapt instead of forcing one way of communicating across every context." },
+        { title: "NARROWING SCOPE TO BUILD TRUST", body: "Trying to recognize too many signs early on made everything unreliable. Reducing to a smaller set of gestures and getting those right mattered more than coverage. In a communication tool, reliability matters more than range. This shifted the focus from ambition to trust. A smaller system that works consistently is more useful than a larger one that fails unpredictably." }
+      ]},
+      { n:"05", t:"NEXT STEPS", b:"Improving gesture recognition accuracy comes first. Expanding the system requires more training data and testing with ASL users. Mobile is the right platform. The interaction needs to be available in the moment. Wearable AR is the longer-term direction, allowing the system to sit in the background and activate when needed. The biggest gap is real-world testing across different environments and contexts." },
+      { n:"06", t:"REFLECTION", b:"This project made me realize I was approaching communication too much like a system to optimize. At the start, the focus was on recognition, accuracy, and getting something to work. But ASL doesn't fit into that mindset. It's not just inputs and outputs, it's continuous, expressive, and shaped by context in ways that are hard to reduce. It forced me to step back and rethink what I was actually designing. Not just a tool that translates, but an interaction that respects how communication already happens." }
     ]
   },
   glitterbomb: {
@@ -1528,6 +1545,26 @@ const PROJECTS = {
     ],
     sections: [
       { n:"01", t:"PHOTOGRAPHY", b:"Something I do in my free time. I like taking photos and editing them." }
+    ]
+  },
+  breadboardhero: {
+    tag: "Creative Coding · Physical Computing",
+    title: "BREADBOARD HERO",
+    duration: "3 Weeks", role: "Designer · Developer",
+    tools: "Arduino · Processing · Breadboard · Joystick · LEDs",
+    context: "Music-Based Interaction System",
+    accent: "linear-gradient(90deg,#aa0011,#00aa44)",
+    images: [],
+    sections: [
+      { n:"01", t:"OVERVIEW", b:"Breadboard Hero is a small music-based interaction system inspired by rhythm games like Guitar Hero. Instead of building a full guitar controller, the project uses a breadboard, Arduino, a joystick, a button, and LED feedback to create a simple physical interface for playing along with music.\n\nThe goal was to make a system where the player reacts to visual cues on screen and uses the physical controls to respond. If the player hits the correct input, a green light turns on. If they miss or press the wrong input, a red light turns on.\n\nThe project combines Arduino for the physical controls and Processing for the sound, visuals, and gameplay." },
+      { n:"02", t:"THE BRIEF", b:"The assignment was to create a music-making system using Arduino and Processing. The system needed to include a physical interface, sound, visuals, and a way for the hardware to control the software.\n\nFor my project, I decided to make a live-performance style rhythm game. The player is not composing music from scratch. Instead, they are performing with the system by matching cues, pressing controls at the right time, and getting immediate feedback." },
+      { n:"03", t:"CONCEPT", b:"The idea came from Guitar Hero because I liked how it turns music into a physical reaction game. The player has to listen, watch, and respond quickly. I wanted to recreate a smaller version of that feeling using the materials I had available.\n\nSince the interface was built on a breadboard, the project became more about testing the interaction than creating a polished controller. The joystick and button became the main way to play the game, while the lights helped the player understand if they were doing it correctly.\n\nEven though the setup was simple, it still created a clear loop: watch the cue, move the joystick, press the button, hear the sound, and receive feedback." },
+      { n:"04", t:"INTERFACE", b:"The physical interface was built directly on a breadboard. It used a joystick, a button, and two LEDs connected to an Arduino.\n\nThe joystick controlled the direction or note input. The button worked as the main trigger. The green LED showed when the player got the input right, and the red LED showed when the player got it wrong.\n\nThe controls were simple on purpose. I wanted the player to understand the system quickly without needing a long explanation. The breadboard also made it easy to test and adjust the controls while building the project." },
+      { n:"05", t:"SOFTWARE + SOUND", b:"Processing was used to create the software side of the project. It received the Arduino input through serial communication and used that information to control the visuals and sounds.\n\nThe sound was triggered through Processing using the Sound library. Instead of creating complex synthetic sounds, the system worked more like a rhythm game where the player's actions triggered audio feedback.\n\nThe visuals showed cues on the screen so the player knew when and how to respond. This made the hardware and software depend on each other. The screen gave the instruction, and the breadboard controller gave the response." },
+      { n:"06", t:"VISUALS", b:"The visuals were designed to support the rhythm-game feeling. The player had to follow what appeared on screen and react with the joystick and button.\n\nThe visuals were not just decoration. They were part of the interaction because they told the player what input was expected. This helped connect the music, timing, and physical controls into one experience." },
+      { n:"07", t:"FEEDBACK", b:"The feedback system was one of the most important parts of the project. The green and red lights made the interaction easier to understand right away.\n\nWhen the player got the correct input, the green light turned on. When the player missed, the red light turned on. This made the game feel more responsive and gave the player a reason to keep trying.\n\nThe lights also made the breadboard feel more active. Even though the interface was very simple, the feedback helped it feel like a real controller." },
+      { n:"08", t:"WHAT I LEARNED", b:"This project helped me understand how physical computing can change the way software feels. Pressing a button on a breadboard is simple, but when it connects to sound, visuals, and feedback, it starts to feel like an actual interaction.\n\nI also learned that timing matters a lot in music-based systems. If the input, sound, or visual feedback feels delayed, the whole experience feels wrong. Because of that, the project made me think more carefully about how hardware and software communicate.\n\nThe breadboard setup was not polished, but it was useful because it let me test the idea quickly. It helped me focus on the interaction first instead of getting stuck trying to make the object look finished." },
+      { reflection: true, body: "Breadboard Hero is a rough but playful prototype that uses Arduino and Processing to turn simple hardware into a rhythm game controller. It is inspired by Guitar Hero, but instead of recreating the full guitar, it focuses on the basic interaction behind it: reacting to music, hitting the right input, and getting immediate feedback. The project showed me that an interface does not have to be perfect to communicate an idea. Even with a joystick, a button, LEDs, and a breadboard, the system was able to create a small performance loop between the player, the music, and the screen." }
     ]
   }
 };
