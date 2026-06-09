@@ -1684,12 +1684,114 @@ const PROJECTS = {
     tools: "Arduino · Processing · Breadboard · Joystick · LEDs",
     context: "Music-Based Interaction System",
     accent: "linear-gradient(90deg,#aa0011,#00aa44)",
+    sketch: "https://editor.p5js.org/rehsari/full/n_BsUOWO0",
+    sketchNote: "Connect to Arduino · Start song · Move the joystick to scroll lanes · Press the button to hit notes",
+    sketchOn: 4,
     images: [],
     sections: [
-      { n:"01", t:"OVERVIEW", b:"Breadboard Hero is a small music-based interaction system inspired by rhythm games like Guitar Hero. Instead of building a full guitar controller, the project uses a breadboard, Arduino, a joystick, a button, and LED feedback to create a simple physical interface for playing along with music.\n\nThe goal was to make a system where the player reacts to visual cues on screen and uses the physical controls to respond. If the player hits the correct input, a green light turns on. If they miss or press the wrong input, a red light turns on.\n\nThe project combines Arduino for the physical controls and Processing for the sound, visuals, and gameplay." },
+      { n:"01", t:"OVERVIEW", b:"Breadboard Hero is a small music-based interaction system inspired by rhythm games like Guitar Hero. Instead of building a full guitar controller, the project uses a breadboard, Arduino, a joystick, a button, and LED feedback to create a simple physical interface for playing along with music.\n\nThe goal was to make a system where the player reacts to visual cues on screen and uses the physical controls to respond. If the player hits the correct input, a green light turns on. If they miss or press the wrong input, a red light turns on.\n\nThe project combines Arduino for the physical controls and Processing for the sound, visuals, and gameplay.",
+        code: { file: "musicmachine.ino", lang: "arduino · guitar hero mode", body:
+`// musicmachine.ino  —  guitar hero mode
+// Joystick scrolls the lane cursor (A0), button (pin 2) hits the note.
+// p5 sends back "HIT" or "MISS" so we can flash:
+//   pin 4 = HIT (correct)   pin 5 = MISS (wrong)
+
+const int LR_PIN     = A0;
+const int UD_PIN     = A1;
+const int BUTTON_PIN = 2;
+const int HIT_LED    = 5;
+const int MISS_LED   = 4;
+
+const bool BTN_PRESSED = HIGH;   // flip to LOW if you switch to INPUT_PULLUP
+
+const int NUM_SOUNDS = 8;
+int selectedSound = 0;
+int lastBtnState = !BTN_PRESSED;
+unsigned long lastSelectChange = 0;
+
+// Non-blocking LED flash timers
+unsigned long hitLedOffAt  = 0;
+unsigned long missLedOffAt = 0;
+const unsigned long FLASH_MS = 200;
+
+String serialBuf = "";
+
+void setup() {
+  pinMode(BUTTON_PIN, INPUT);
+  pinMode(HIT_LED, OUTPUT);
+  pinMode(MISS_LED, OUTPUT);
+  Serial.begin(115200);
+  sendSelection();
+}
+
+void loop() {
+  handleJoystick();
+  handleButton();
+  handleSerial();
+  updateLeds();
+}
+
+void handleJoystick() {
+  // Cooldown so the joystick steps one lane at a time, slightly snappier now
+  if (millis() - lastSelectChange < 130) return;
+
+  int lr = analogRead(LR_PIN);
+  if (lr < 350) {
+    selectedSound = (selectedSound - 1 + NUM_SOUNDS) % NUM_SOUNDS;
+    sendSelection();
+    lastSelectChange = millis();
+  } else if (lr > 650) {
+    selectedSound = (selectedSound + 1) % NUM_SOUNDS;
+    sendSelection();
+    lastSelectChange = millis();
+  }
+}
+
+void handleButton() {
+  int state = digitalRead(BUTTON_PIN);
+  if (state == BTN_PRESSED && lastBtnState != BTN_PRESSED) {
+    Serial.print("PLAY ");
+    Serial.println(selectedSound);
+  }
+  lastBtnState = state;
+}
+
+void handleSerial() {
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c == '\\n') {
+      if (serialBuf == "HIT") {
+        digitalWrite(HIT_LED, HIGH);
+        hitLedOffAt = millis() + FLASH_MS;
+      } else if (serialBuf == "MISS") {
+        digitalWrite(MISS_LED, HIGH);
+        missLedOffAt = millis() + FLASH_MS;
+      }
+      serialBuf = "";
+    } else if (c != '\\r') {
+      serialBuf += c;
+    }
+  }
+}
+
+void updateLeds() {
+  if (hitLedOffAt && millis() > hitLedOffAt) {
+    digitalWrite(HIT_LED, LOW);
+    hitLedOffAt = 0;
+  }
+  if (missLedOffAt && millis() > missLedOffAt) {
+    digitalWrite(MISS_LED, LOW);
+    missLedOffAt = 0;
+  }
+}
+
+void sendSelection() {
+  Serial.print("SELECT ");
+  Serial.println(selectedSound);
+}` } },
       { n:"02", t:"THE BRIEF", b:"The assignment was to create a music-making system using Arduino and Processing. The system needed to include a physical interface, sound, visuals, and a way for the hardware to control the software.\n\nFor my project, I decided to make a live-performance style rhythm game. The player is not composing music from scratch. Instead, they are performing with the system by matching cues, pressing controls at the right time, and getting immediate feedback." },
       { n:"03", t:"CONCEPT", b:"The idea came from Guitar Hero because I liked how it turns music into a physical reaction game. The player has to listen, watch, and respond quickly. I wanted to recreate a smaller version of that feeling using the materials I had available.\n\nSince the interface was built on a breadboard, the project became more about testing the interaction than creating a polished controller. The joystick and button became the main way to play the game, while the lights helped the player understand if they were doing it correctly.\n\nEven though the setup was simple, it still created a clear loop: watch the cue, move the joystick, press the button, hear the sound, and receive feedback." },
-      { n:"04", t:"INTERFACE", b:"The physical interface was built directly on a breadboard. It used a joystick, a button, and two LEDs connected to an Arduino.\n\nThe joystick controlled the direction or note input. The button worked as the main trigger. The green LED showed when the player got the input right, and the red LED showed when the player got it wrong.\n\nThe controls were simple on purpose. I wanted the player to understand the system quickly without needing a long explanation. The breadboard also made it easy to test and adjust the controls while building the project." },
+      { n:"04", t:"INTERFACE", img:"images/guitarHero.jpg", imgLight:true, b:"The physical interface was built directly on a breadboard. It used a joystick, a button, and two LEDs connected to an Arduino.\n\nThe joystick controlled the direction or note input. The button worked as the main trigger. The green LED showed when the player got the input right, and the red LED showed when the player got it wrong.\n\nThe controls were simple on purpose. I wanted the player to understand the system quickly without needing a long explanation. The breadboard also made it easy to test and adjust the controls while building the project." },
       { n:"05", t:"SOFTWARE + SOUND", b:"Processing was used to create the software side of the project. It received the Arduino input through serial communication and used that information to control the visuals and sounds.\n\nThe sound was triggered through Processing using the Sound library. Instead of creating complex synthetic sounds, the system worked more like a rhythm game where the player's actions triggered audio feedback.\n\nThe visuals showed cues on the screen so the player knew when and how to respond. This made the hardware and software depend on each other. The screen gave the instruction, and the breadboard controller gave the response." },
       { n:"06", t:"VISUALS", b:"The visuals were designed to support the rhythm-game feeling. The player had to follow what appeared on screen and react with the joystick and button.\n\nThe visuals were not just decoration. They were part of the interaction because they told the player what input was expected. This helped connect the music, timing, and physical controls into one experience." },
       { n:"07", t:"FEEDBACK", b:"The feedback system was one of the most important parts of the project. The green and red lights made the interaction easier to understand right away.\n\nWhen the player got the correct input, the green light turned on. When the player missed, the red light turned on. This made the game feel more responsive and gave the player a reason to keep trying.\n\nThe lights also made the breadboard feel more active. Even though the interface was very simple, the feedback helped it feel like a real controller." },
