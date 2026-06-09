@@ -1260,7 +1260,7 @@ footer {
 
     <div class="pcard reveal d1" data-project="breadboardhero" data-id="ux" data-f="ux creative"
          style="grid-column:span 7;">
-      <div class="card-bg" style="background-image:linear-gradient(135deg,#1a0405 0%,#3a0a10 40%,#0a2a14 100%);"></div>
+      <div class="card-bg" style="background-image:url(images/guitarHero.jpg); background-position: center 30%;"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
@@ -1272,7 +1272,7 @@ footer {
     <!-- ROW 8: CRAPP-E -->
     <div class="pcard feature reveal" data-project="crappe" data-id="green" data-f="ux creative product"
          style="grid-column:span 12;">
-      <div class="card-bg" style="background-image:linear-gradient(120deg,#0a1408 0%,#142a10 45%,#2a4a18 100%);"></div>
+      <div class="card-bg" style="background-image:url(images/crappe-build.jpg); background-position: center 60%;"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
@@ -1689,7 +1689,8 @@ const PROJECTS = {
     sketchOn: 4,
     images: [],
     sections: [
-      { n:"01", t:"OVERVIEW", b:"Breadboard Hero is a small music-based interaction system inspired by rhythm games like Guitar Hero. Instead of building a full guitar controller, the project uses a breadboard, Arduino, a joystick, a button, and LED feedback to create a simple physical interface for playing along with music.\n\nThe goal was to make a system where the player reacts to visual cues on screen and uses the physical controls to respond. If the player hits the correct input, a green light turns on. If they miss or press the wrong input, a red light turns on.\n\nThe project combines Arduino for the physical controls and Processing for the sound, visuals, and gameplay.",
+      { n:"01", t:"OVERVIEW", vid:"https://player.vimeo.com/video/1199640069?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1&controls=0&title=0&byline=0&portrait=0", b:"Breadboard Hero is a small music-based interaction system inspired by rhythm games like Guitar Hero. Instead of building a full guitar controller, the project uses a breadboard, Arduino, a joystick, a button, and LED feedback to create a simple physical interface for playing along with music.\n\nThe goal was to make a system where the player reacts to visual cues on screen and uses the physical controls to respond. If the player hits the correct input, a green light turns on. If they miss or press the wrong input, a red light turns on.\n\nThe project combines Arduino for the physical controls and Processing for the sound, visuals, and gameplay." },
+      { n:"02", t:"THE BRIEF", b:"The assignment was to create a music-making system using Arduino and Processing. The system needed to include a physical interface, sound, visuals, and a way for the hardware to control the software.\n\nFor my project, I decided to make a live-performance style rhythm game. The player is not composing music from scratch. Instead, they are performing with the system by matching cues, pressing controls at the right time, and getting immediate feedback.",
         code: { file: "musicmachine.ino", lang: "arduino · guitar hero mode", body:
 `// musicmachine.ino  —  guitar hero mode
 // Joystick scrolls the lane cursor (A0), button (pin 2) hits the note.
@@ -1789,7 +1790,6 @@ void sendSelection() {
   Serial.print("SELECT ");
   Serial.println(selectedSound);
 }` } },
-      { n:"02", t:"THE BRIEF", b:"The assignment was to create a music-making system using Arduino and Processing. The system needed to include a physical interface, sound, visuals, and a way for the hardware to control the software.\n\nFor my project, I decided to make a live-performance style rhythm game. The player is not composing music from scratch. Instead, they are performing with the system by matching cues, pressing controls at the right time, and getting immediate feedback." },
       { n:"03", t:"CONCEPT", b:"The idea came from Guitar Hero because I liked how it turns music into a physical reaction game. The player has to listen, watch, and respond quickly. I wanted to recreate a smaller version of that feeling using the materials I had available.\n\nSince the interface was built on a breadboard, the project became more about testing the interaction than creating a polished controller. The joystick and button became the main way to play the game, while the lights helped the player understand if they were doing it correctly.\n\nEven though the setup was simple, it still created a clear loop: watch the cue, move the joystick, press the button, hear the sound, and receive feedback." },
       { n:"04", t:"INTERFACE", img:"images/guitarHero.jpg", imgLight:true, b:"The physical interface was built directly on a breadboard. It used a joystick, a button, and two LEDs connected to an Arduino.\n\nThe joystick controlled the direction or note input. The button worked as the main trigger. The green LED showed when the player got the input right, and the red LED showed when the player got it wrong.\n\nThe controls were simple on purpose. I wanted the player to understand the system quickly without needing a long explanation. The breadboard also made it easy to test and adjust the controls while building the project." },
       { n:"05", t:"SOFTWARE + SOUND", b:"Processing was used to create the software side of the project. It received the Arduino input through serial communication and used that information to control the visuals and sounds.\n\nThe sound was triggered through Processing using the Sound library. Instead of creating complex synthetic sounds, the system worked more like a rhythm game where the player's actions triggered audio feedback.\n\nThe visuals showed cues on the screen so the player knew when and how to respond. This made the hardware and software depend on each other. The screen gave the instruction, and the breadboard controller gave the response." },
