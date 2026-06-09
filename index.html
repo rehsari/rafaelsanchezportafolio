@@ -639,6 +639,61 @@ video::-webkit-media-controls-panel { display: none !important; }
 @media(max-width:640px){
   .case-deploy table { min-width: 760px; }
 }
+/* ── Code Viewer ── */
+.case-code {
+  margin-top: 32px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.45);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.case-code-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+}
+.case-code-head-title { display: flex; align-items: center; gap: 12px; }
+.case-code-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--code-accent, #88cc00);
+  box-shadow: 0 0 8px var(--code-accent, #88cc00);
+}
+.case-code-body {
+  max-height: 540px;
+  overflow: auto;
+  padding: 18px 0;
+  scrollbar-width: thin;
+}
+.case-code-body::-webkit-scrollbar { height: 8px; width: 8px; }
+.case-code-body::-webkit-scrollbar-track { background: transparent; }
+.case-code-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+.case-code-line {
+  display: flex; padding: 0 24px 0 0;
+  font-family: var(--font-mono); font-size: 11.5px;
+  line-height: 1.75;
+}
+.case-code-line:hover { background: rgba(255,255,255,0.025); }
+.case-code-ln {
+  flex-shrink: 0; width: 44px;
+  text-align: right; padding-right: 16px; margin-right: 18px;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.18);
+  user-select: none; font-variant-numeric: tabular-nums;
+}
+.case-code-content {
+  flex: 1; min-width: 0; white-space: pre;
+  color: rgba(232,228,220,0.78);
+}
+.case-code .tok-c { color: rgba(232,228,220,0.3); font-style: italic; }
+.case-code .tok-s { color: #d8a86e; }
+.case-code .tok-k { color: var(--code-accent, #88cc00); }
+.case-code .tok-f { color: #5fb0c2; }
+.case-code .tok-p { color: #d97070; }
+.case-code .tok-n { color: #d49ad3; }
 /* ── Decision Accordion ── */
 .case-decisions { width: 100%; margin-top: 32px; }
 .decision-item { border-bottom: 1px solid rgba(232,228,220,0.08); }
@@ -1657,7 +1712,128 @@ const PROJECTS = {
       { n:"01", t:"OVERVIEW", img:"images/crappe-build.jpg", b:"CRAPP-E is a small connected alarm bot that detects movement nearby and reacts when it is moved or changed. The name comes from the way the prototype looks: somewhere between WALL-E, a broken security robot, and a pile of electronics being held together by tape.\n\nEven though CRAPP-E looks messy, the idea behind it is more intentional. I wanted to build an object that could observe the behavior around it over time, not just react once something had already happened. Most alarms are simple: nothing happens until someone touches the object or crosses a line. I was more interested in the moments before that. When does someone get close? Do they hesitate? Do they try to test the object? Does the object change the way people move around it?\n\nCRAPP-E uses an ultrasonic sensor attached to a servo to scan the space in front of it. The movement makes it feel like a tiny paranoid robot looking around. It also detects when the object itself is changed, shifted, or tampered with. The data is framed as if it were being sent to Adafruit IO over time, then translated into a p5.js military-style dashboard that shows movement, alert levels, and tamper events.\n\nThe final result is not a clean consumer product. It is a rough, taped-up connected object that makes its environment feel watched." },
       { n:"02", t:"GUIDING QUESTION", b:"The project started with one question: Can a messy little robot make people more aware of how they move around a protected object?\n\nI wanted CRAPP-E to observe a behavior that normally disappears immediately: small movements around a personal object or workspace. Someone walking by, stopping near it, reaching toward it, or moving the object slightly are all tiny actions that are easy to ignore. CRAPP-E turns those moments into something visible.\n\nThe project also explores Shikake, because the object does not only track behavior. It affects behavior. Once people notice the sensor sweeping back and forth, they become more aware of themselves. They either avoid it, test it, or interact with it on purpose. That change in behavior became part of the project." },
       { n:"03", t:"CONTEXT", b:"CRAPP-E was designed to live on a desk, shelf, or small workspace. I imagined it protecting something personal, like a laptop, notebook, tools, or an object someone does not want moved.\n\nI did not want it to disappear into the environment. A lot of smart devices try to be invisible, but CRAPP-E does the opposite. It looks fragile, taped together, and slightly ridiculous. That roughness made people notice it more. It also made the device feel less like a normal alarm and more like a character.\n\nThe scanning motion was important because it gave the object personality. Even when nothing was happening, the servo movement made it feel like CRAPP-E was checking the room." },
-      { n:"04", t:"SYSTEM OVERVIEW", b:"CRAPP-E was built around three main behaviors. It scans the space with an ultrasonic sensor rotating on a servo, measuring distance from different angles. It detects nearby movement by recording how close something is and where the sensor was pointing. And it detects tampering through a second sensor that fires when CRAPP-E is moved, tilted, or physically changed.\n\nFor the prototype, I built the scanning mechanism using an Arduino/Uno-style setup, an ultrasonic sensor, and a servo. For the connected version of the project, the system is framed through an ESP32 so the sensor readings can be sent to Adafruit IO over Wi-Fi.\n\nThe data was organized into four feeds: distance-feed (how close something is to CRAPP-E), angle-feed (where the ultrasonic sensor is pointing during the scan), tamper-feed (whether the object has been moved or changed), and alert-feed (a simplified alarm state based on the readings). This helped the project move beyond raw sensor values. The system could start building a small story of what happened around the object over time." },
+      { n:"04", t:"SYSTEM OVERVIEW", b:"CRAPP-E was built around three main behaviors. It scans the space with an ultrasonic sensor rotating on a servo, measuring distance from different angles. It detects nearby movement by recording how close something is and where the sensor was pointing. And it detects tampering through a second sensor that fires when CRAPP-E is moved, tilted, or physically changed.\n\nFor the prototype, I built the scanning mechanism using an Arduino/Uno-style setup, an ultrasonic sensor, and a servo. For the connected version of the project, the system is framed through an ESP32 so the sensor readings can be sent to Adafruit IO over Wi-Fi.\n\nThe data was organized into four feeds: distance-feed (how close something is to CRAPP-E), angle-feed (where the ultrasonic sensor is pointing during the scan), tamper-feed (whether the object has been moved or changed), and alert-feed (a simplified alarm state based on the readings). This helped the project move beyond raw sensor values. The system could start building a small story of what happened around the object over time.",
+        code: { file: "crappe.ino", lang: "arduino · 115200 baud", body:
+`// CRAPP-E
+// Tape-covered alarm bot — ultrasonic sweep + sweep-fingerprint tamper detection
+// Sends events over USB serial at 115200 baud. No WiFi required.
+
+#include <Servo.h>
+#include "Arduino_LED_Matrix.h"
+
+const int TRIG_PIN   = 2;
+const int ECHO_PIN   = 3;
+const int SERVO_PIN  = 9;
+const int ALERT_LED  = 13;
+
+const int   SWEEP_MIN  = 0;
+const int   SWEEP_MAX  = 180;
+const int   SWEEP_STEP = 5;
+const int   STEP_DELAY = 35;     // ms between steps
+const float DETECT_CM  = 80.0;   // counts as "movement"
+const float CLOSE_CM   = 35.0;   // counts as "close approach"
+
+Servo servo;
+ArduinoLEDMatrix matrix;
+
+const int BINS = (SWEEP_MAX - SWEEP_MIN) / SWEEP_STEP + 1;
+float lastSweep[BINS];
+float curSweep[BINS];
+int   sweepIdx = 0;
+bool  baselineReady = false;
+unsigned long lastTamperMs = 0;
+
+int angle = SWEEP_MIN;
+int dir   = 1;
+
+int alertLevel = 0;
+int contactsThisSweep = 0;
+int closeThisSweep = 0;
+
+float readDistanceCm() {
+  digitalWrite(TRIG_PIN, LOW);  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH); delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  long us = pulseIn(ECHO_PIN, HIGH, 20000UL);
+  if (us == 0) return -1;
+  return us * 0.0343f / 2.0f;
+}
+
+void compareForTamper() {
+  // Tamper = the spatial fingerprint of the room changed in lots of places.
+  // That's what happens when someone shifts the whole device.
+  if (!baselineReady) { baselineReady = true; return; }
+  int changed = 0, valid = 0;
+  for (int i = 0; i < BINS; i++) {
+    if (curSweep[i] > 0 && lastSweep[i] > 0) {
+      valid++;
+      if (fabs(curSweep[i] - lastSweep[i]) > 25.0) changed++;
+    }
+  }
+  if (valid >= BINS / 2) {
+    float ratio = (float)changed / valid;
+    if (ratio > 0.55 && millis() - lastTamperMs > 5000) {
+      Serial.print("→ tamper ratio ");
+      Serial.println(ratio, 2);
+      lastTamperMs = millis();
+    }
+  }
+}
+
+void setup() {
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(ALERT_LED, OUTPUT);
+  Serial.begin(115200);
+  servo.attach(SERVO_PIN);
+  servo.write(SWEEP_MIN);
+  matrix.begin();
+  for (int i = 0; i < BINS; i++) { lastSweep[i] = -1; curSweep[i] = -1; }
+  delay(500);
+  Serial.println("CRAPP-E online");
+}
+
+void loop() {
+  servo.write(angle);
+  delay(STEP_DELAY);
+  float d = readDistanceCm();
+  curSweep[sweepIdx] = d;
+
+  // Per-step telemetry: lets the dashboard draw the live sweep arm.
+  Serial.print("ANG "); Serial.print(angle);
+  Serial.print(" ");   Serial.println(d > 0 ? d : -1, 1);
+
+  if (d > 0 && d < DETECT_CM) {
+    contactsThisSweep++;
+    if (d < CLOSE_CM) closeThisSweep++;
+    Serial.print("→ contact angle "); Serial.print(angle);
+    Serial.print(" distance ");       Serial.println(d, 1);
+  }
+
+  sweepIdx++;
+  angle += dir * SWEEP_STEP;
+  if (angle >= SWEEP_MAX) { angle = SWEEP_MAX; dir = -1; }
+  if (angle <= SWEEP_MIN) {
+    angle = SWEEP_MIN; dir = 1;
+
+    compareForTamper();
+
+    int newLevel = 0;
+    if (contactsThisSweep > 0) newLevel = 1;
+    if (closeThisSweep > 0)    newLevel = 2;
+    if (millis() - lastTamperMs < 3000) newLevel = 3;
+    if (newLevel != alertLevel) {
+      alertLevel = newLevel;
+      Serial.print("ALERT "); Serial.println(alertLevel);
+    }
+    digitalWrite(ALERT_LED, alertLevel > 0 ? HIGH : LOW);
+
+    for (int i = 0; i < BINS; i++) { lastSweep[i] = curSweep[i]; curSweep[i] = -1; }
+    sweepIdx = 0;
+    contactsThisSweep = 0;
+    closeThisSweep = 0;
+  }
+}` } },
       { n:"05", t:"SENSORS + INPUTS", b:"The ultrasonic sensor measured how close something was to CRAPP-E. Since it was attached to a servo, it scanned instead of staying still. This made the readings feel more spatial, almost like a tiny radar. A single close reading could mean someone walked past. Multiple close readings could mean someone stayed near the object. A sudden change could mean someone quickly moved into the space.\n\nThe servo did more than move the sensor. It became part of the expression of the object. The motion made CRAPP-E feel alive, nervous, and aware. The servo sweep also gave the p5.js visualization a clear visual language. The dashboard could use the angle of the servo to create a radar-like sweep.\n\nThe second sensor was used to detect when CRAPP-E itself was moved or changed. This was important because distance alone could not explain the whole story. Someone walking by is different from someone touching the device. Someone standing near it is different from someone picking it up. The tamper sensor helped separate those actions." },
       { n:"06", t:"DATA STRATEGY", b:"The project was not about saving every number. It was about deciding what was worth remembering.\n\nCRAPP-E recorded distance readings during each scan, the servo angle connected to each distance reading, close movement events, sudden changes in proximity, tamper events, and alert level changes over time. It ignored tiny changes in distance, readings outside the useful range, repeated values that did not show a real change, random sensor spikes, and moments where nothing meaningful happened.\n\nThis mattered because too much data can make the project harder to understand. Since Adafruit IO also has limits around how often data can be sent, I treated those limits as part of the design. CRAPP-E did not need to record everything. It needed to record moments where the behavior changed." },
       { n:"07", t:"ALERT LOGIC", img:"images/crappe-dashboard.jpg", imgLight:true, b:"To make the data easier to understand, I translated the readings into four alert states. Level 0 — Idle: nothing nearby, CRAPP-E is scanning normally. Level 1 — Movement Nearby: something enters the detection range. Level 2 — Close Approach: something stays close or moves directly toward CRAPP-E. Level 3 — Tamper Event: CRAPP-E is moved, shifted, tilted, or physically changed.\n\nThis made the system feel less like a spreadsheet and more like an alarm with personality. The alert level became a simple way to understand what CRAPP-E thought was happening." },
@@ -2398,6 +2574,46 @@ document.querySelectorAll('.pcard').forEach(function(card) {
         '</div>';
     }
 
+    function highlightArduinoLine(line) {
+      var s = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      var slots = [];
+      function reserve(html) {
+        slots.push(html);
+        return '\u0001' + String.fromCharCode(0xE000 + slots.length - 1) + '\u0001';
+      }
+      var ci = s.indexOf('//');
+      if (ci !== -1) {
+        var c = s.substring(ci);
+        s = s.substring(0, ci) + reserve('<span class="tok-c">' + c + '</span>');
+      }
+      s = s.replace(/"([^"]*)"/g, function(m) { return reserve('<span class="tok-s">' + m + '</span>'); });
+      s = s.replace(/^(\s*)(#\w+)/, function(m, sp, p) { return sp + reserve('<span class="tok-p">' + p + '</span>'); });
+      s = s.replace(/\b(\d+\.?\d*f?)\b/g, function(m) { return reserve('<span class="tok-n">' + m + '</span>'); });
+      s = s.replace(/\b(Serial|millis|delay|delayMicroseconds|digitalWrite|pinMode|pulseIn|fabs|begin|attach|setup|loop|print|println|write|read)\b/g, function(m) { return reserve('<span class="tok-f">' + m + '</span>'); });
+      s = s.replace(/\b(const|int|void|float|bool|long|unsigned|if|else|for|while|return|true|false|HIGH|LOW|INPUT|OUTPUT)\b/g, function(m) { return reserve('<span class="tok-k">' + m + '</span>'); });
+      s = s.replace(/\u0001([\uE000-\uF8FF])\u0001/g, function(m, ch) { return slots[ch.charCodeAt(0) - 0xE000]; });
+      return s;
+    }
+
+    function buildCodeHTML(code, accent) {
+      var colors = (accent || '').match(/#[0-9a-fA-F]{3,6}/g) || ['#88cc00'];
+      var c = colors[colors.length - 1];
+      var lines = (code.body || '').split('\n');
+      var pad = ('' + lines.length).length;
+      var rows = lines.map(function(line, i) {
+        var n = '' + (i + 1);
+        while (n.length < pad) n = '0' + n;
+        return '<div class="case-code-line"><span class="case-code-ln">' + n + '</span><span class="case-code-content">' + highlightArduinoLine(line) + '</span></div>';
+      }).join('');
+      return '<div class="case-code" style="--code-accent:' + c + '">' +
+        '<div class="case-code-head">' +
+          '<div class="case-code-head-title"><span class="case-code-dot"></span><span>' + (code.file || 'sketch.ino') + '</span></div>' +
+          '<span>' + (code.lang || 'arduino') + '</span>' +
+        '</div>' +
+        '<div class="case-code-body">' + rows + '</div>' +
+      '</div>';
+    }
+
     function buildJourneyHTML(journey, id, accent) {
       var stages = journey.stages || [];
       var colors = (accent || '').match(/#[0-9a-fA-F]{3,6}/g) || ['#ffffff'];
@@ -2502,6 +2718,7 @@ document.querySelectorAll('.pcard').forEach(function(card) {
         (s.journey ? buildJourneyHTML(s.journey, id, d.accent || '') : '') +
         (s.decisions ? buildDecisionsHTML(s.decisions, d.accent || '') : '') +
         (s.deploy ? buildDeployHTML(s.deploy, d.accent || '') : '') +
+        (s.code ? buildCodeHTML(s.code, d.accent || '') : '') +
         (s.imgsAfter ? '<div class="case-imgs" style="--imgs-count:' + (s.imgsAfterColumns || s.imgsAfter.length) + ';' + (s.imgsAfterColumns === 1 ? 'max-width:62%;margin-left:auto;margin-right:auto;' : '') + '">' + s.imgsAfter.map(function(src){ return '<img src="' + src + '" alt="' + s.t + '" loading="lazy">'; }).join('') + '</div>' : '') +
         (i === (typeof d.sketchOn === 'number' ? d.sketchOn : 0) ? sketchHtml : '') +
         protoHtml +
