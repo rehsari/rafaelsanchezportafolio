@@ -576,6 +576,69 @@ video::-webkit-media-controls-panel { display: none !important; }
   .case-flow * { user-select: none; -webkit-user-select: none; }
   .flow-nodes { min-width: 720px; }
 }
+/* ── Deployment Table ── */
+.case-deploy { width: 100%; margin-top: 32px; }
+.case-deploy-scroll { width: 100%; overflow-x: auto; scrollbar-width: none; }
+.case-deploy-scroll::-webkit-scrollbar { display: none; }
+.case-deploy table { width: 100%; border-collapse: collapse; min-width: 720px; }
+.case-deploy thead th {
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: rgba(255,255,255,0.35);
+  text-align: left; font-weight: 500;
+  padding: 0 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.12);
+  white-space: nowrap;
+}
+.case-deploy thead th.num { text-align: right; }
+.case-deploy tbody td {
+  padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 12px; color: rgba(232,228,220,0.65); vertical-align: top;
+  line-height: 1.55;
+}
+.case-deploy tbody tr:last-child td { border-bottom: none; }
+.case-deploy td.deploy-day {
+  position: relative; padding-left: 22px;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--text); font-weight: 500;
+  white-space: nowrap;
+}
+.case-deploy td.deploy-day::before {
+  content: ''; position: absolute; left: 0; top: 18px; bottom: 18px; width: 2px;
+  background: var(--deploy-accent, var(--text));
+}
+.case-deploy td.deploy-meta {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+  color: rgba(232,228,220,0.55); white-space: nowrap;
+}
+.case-deploy td.deploy-method {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+  color: rgba(232,228,220,0.45);
+}
+.case-deploy td.num {
+  font-family: var(--font-mono); font-size: 13px; text-align: right;
+  color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums;
+}
+.case-deploy td.num.zero { color: rgba(232,228,220,0.22); }
+.case-deploy td.num.flag { color: var(--deploy-accent, var(--text)); }
+.case-deploy td.deploy-notes {
+  font-style: italic; color: rgba(232,228,220,0.42);
+  min-width: 280px; max-width: 360px;
+}
+.case-deploy tfoot td {
+  padding: 18px 16px 0; border-top: 1px solid rgba(255,255,255,0.12);
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: rgba(255,255,255,0.45);
+}
+.case-deploy tfoot td.num {
+  text-align: right; font-size: 12px; letter-spacing: 0.04em;
+  color: var(--text);
+}
+.case-deploy-caption {
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.2); text-transform: uppercase; margin-top: 18px;
+}
+@media(max-width:640px){
+  .case-deploy table { min-width: 760px; }
+}
 /* ── Decision Accordion ── */
 .case-decisions { width: 100%; margin-top: 32px; }
 .decision-item { border-bottom: 1px solid rgba(232,228,220,0.08); }
@@ -1151,6 +1214,18 @@ footer {
       </div>
     </div>
 
+    <!-- ROW 8: CRAPP-E -->
+    <div class="pcard feature reveal" data-project="crappe" data-id="green" data-f="ux creative product"
+         style="grid-column:span 12;">
+      <div class="card-bg" style="background-image:linear-gradient(120deg,#0a1408 0%,#142a10 45%,#2a4a18 100%);"></div>
+      <div class="card-ov"></div><div class="card-glitch"></div>
+      <div class="card-arr">↗&#xFE0E;</div>
+      <div class="card-info">
+        <div class="card-cat">Connected Object · Physical Computing</div>
+        <div class="card-name">CRAPP—E</div>
+      </div>
+    </div>
+
   </div>
 
   <div style="display:flex; justify-content:flex-end; margin-top:24px;">
@@ -1565,6 +1640,55 @@ const PROJECTS = {
       { n:"07", t:"FEEDBACK", b:"The feedback system was one of the most important parts of the project. The green and red lights made the interaction easier to understand right away.\n\nWhen the player got the correct input, the green light turned on. When the player missed, the red light turned on. This made the game feel more responsive and gave the player a reason to keep trying.\n\nThe lights also made the breadboard feel more active. Even though the interface was very simple, the feedback helped it feel like a real controller." },
       { n:"08", t:"WHAT I LEARNED", b:"This project helped me understand how physical computing can change the way software feels. Pressing a button on a breadboard is simple, but when it connects to sound, visuals, and feedback, it starts to feel like an actual interaction.\n\nI also learned that timing matters a lot in music-based systems. If the input, sound, or visual feedback feels delayed, the whole experience feels wrong. Because of that, the project made me think more carefully about how hardware and software communicate.\n\nThe breadboard setup was not polished, but it was useful because it let me test the idea quickly. It helped me focus on the interaction first instead of getting stuck trying to make the object look finished." },
       { reflection: true, body: "Breadboard Hero is a rough but playful prototype that uses Arduino and Processing to turn simple hardware into a rhythm game controller. It is inspired by Guitar Hero, but instead of recreating the full guitar, it focuses on the basic interaction behind it: reacting to music, hitting the right input, and getting immediate feedback. The project showed me that an interface does not have to be perfect to communicate an idea. Even with a joystick, a button, LEDs, and a breadboard, the system was able to create a small performance loop between the player, the music, and the screen." }
+    ]
+  },
+  crappe: {
+    tag: "Connected Object · Physical Computing · Data Viz",
+    title: "CRAPP—E",
+    duration: "1-Week Deployment", role: "Designer · Developer",
+    tools: "Arduino · ESP32 · Adafruit IO · p5.js · Servo · Ultrasonic Sensor",
+    context: "A Tape-Covered Alarm Bot That Watches Its Space",
+    accent: "linear-gradient(90deg,#1a3300,#88cc00)",
+    images: [],
+    sections: [
+      { n:"01", t:"OVERVIEW", b:"CRAPP-E is a small connected alarm bot that detects movement nearby and reacts when it is moved or changed. The name comes from the way the prototype looks: somewhere between WALL-E, a broken security robot, and a pile of electronics being held together by tape.\n\nEven though CRAPP-E looks messy, the idea behind it is more intentional. I wanted to build an object that could observe the behavior around it over time, not just react once something had already happened. Most alarms are simple: nothing happens until someone touches the object or crosses a line. I was more interested in the moments before that. When does someone get close? Do they hesitate? Do they try to test the object? Does the object change the way people move around it?\n\nCRAPP-E uses an ultrasonic sensor attached to a servo to scan the space in front of it. The movement makes it feel like a tiny paranoid robot looking around. It also detects when the object itself is changed, shifted, or tampered with. The data is framed as if it were being sent to Adafruit IO over time, then translated into a p5.js military-style dashboard that shows movement, alert levels, and tamper events.\n\nThe final result is not a clean consumer product. It is a rough, taped-up connected object that makes its environment feel watched." },
+      { n:"02", t:"GUIDING QUESTION", b:"The project started with one question: Can a messy little robot make people more aware of how they move around a protected object?\n\nI wanted CRAPP-E to observe a behavior that normally disappears immediately: small movements around a personal object or workspace. Someone walking by, stopping near it, reaching toward it, or moving the object slightly are all tiny actions that are easy to ignore. CRAPP-E turns those moments into something visible.\n\nThe project also explores Shikake, because the object does not only track behavior. It affects behavior. Once people notice the sensor sweeping back and forth, they become more aware of themselves. They either avoid it, test it, or interact with it on purpose. That change in behavior became part of the project." },
+      { n:"03", t:"CONTEXT", b:"CRAPP-E was designed to live on a desk, shelf, or small workspace. I imagined it protecting something personal, like a laptop, notebook, tools, or an object someone does not want moved.\n\nI did not want it to disappear into the environment. A lot of smart devices try to be invisible, but CRAPP-E does the opposite. It looks fragile, taped together, and slightly ridiculous. That roughness made people notice it more. It also made the device feel less like a normal alarm and more like a character.\n\nThe scanning motion was important because it gave the object personality. Even when nothing was happening, the servo movement made it feel like CRAPP-E was checking the room." },
+      { n:"04", t:"SYSTEM OVERVIEW", b:"CRAPP-E was built around three main behaviors. It scans the space with an ultrasonic sensor rotating on a servo, measuring distance from different angles. It detects nearby movement by recording how close something is and where the sensor was pointing. And it detects tampering through a second sensor that fires when CRAPP-E is moved, tilted, or physically changed.\n\nFor the prototype, I built the scanning mechanism using an Arduino/Uno-style setup, an ultrasonic sensor, and a servo. For the connected version of the project, the system is framed through an ESP32 so the sensor readings can be sent to Adafruit IO over Wi-Fi.\n\nThe data was organized into four feeds: distance-feed (how close something is to CRAPP-E), angle-feed (where the ultrasonic sensor is pointing during the scan), tamper-feed (whether the object has been moved or changed), and alert-feed (a simplified alarm state based on the readings). This helped the project move beyond raw sensor values. The system could start building a small story of what happened around the object over time." },
+      { n:"05", t:"SENSORS + INPUTS", b:"The ultrasonic sensor measured how close something was to CRAPP-E. Since it was attached to a servo, it scanned instead of staying still. This made the readings feel more spatial, almost like a tiny radar. A single close reading could mean someone walked past. Multiple close readings could mean someone stayed near the object. A sudden change could mean someone quickly moved into the space.\n\nThe servo did more than move the sensor. It became part of the expression of the object. The motion made CRAPP-E feel alive, nervous, and aware. The servo sweep also gave the p5.js visualization a clear visual language. The dashboard could use the angle of the servo to create a radar-like sweep.\n\nThe second sensor was used to detect when CRAPP-E itself was moved or changed. This was important because distance alone could not explain the whole story. Someone walking by is different from someone touching the device. Someone standing near it is different from someone picking it up. The tamper sensor helped separate those actions." },
+      { n:"06", t:"DATA STRATEGY", b:"The project was not about saving every number. It was about deciding what was worth remembering.\n\nCRAPP-E recorded distance readings during each scan, the servo angle connected to each distance reading, close movement events, sudden changes in proximity, tamper events, and alert level changes over time. It ignored tiny changes in distance, readings outside the useful range, repeated values that did not show a real change, random sensor spikes, and moments where nothing meaningful happened.\n\nThis mattered because too much data can make the project harder to understand. Since Adafruit IO also has limits around how often data can be sent, I treated those limits as part of the design. CRAPP-E did not need to record everything. It needed to record moments where the behavior changed." },
+      { n:"07", t:"ALERT LOGIC", b:"To make the data easier to understand, I translated the readings into four alert states. Level 0 — Idle: nothing nearby, CRAPP-E is scanning normally. Level 1 — Movement Nearby: something enters the detection range. Level 2 — Close Approach: something stays close or moves directly toward CRAPP-E. Level 3 — Tamper Event: CRAPP-E is moved, shifted, tilted, or physically changed.\n\nThis made the system feel less like a spreadsheet and more like an alarm with personality. The alert level became a simple way to understand what CRAPP-E thought was happening." },
+      { n:"08", t:"FORM + PLACEMENT", b:"The form of CRAPP-E was shaped by the limitations of the build. The electronics were exposed, the structure was rough, and tape became part of the look. At first, that felt like a weakness, but eventually it became one of the strongest parts of the project.\n\nBecause CRAPP-E looked so handmade, people reacted to it differently. They were more curious about it. Some people wanted to test how close they could get before it reacted. Others avoided getting too close because the scanning sensor made it feel like it was watching them.\n\nThe object was placed near a workspace facing outward. This position gave it a clear guarding role. It was not hidden. It was intentionally visible, almost like a small warning sign." },
+      { n:"09", t:"SHIKAKE: CHANGING BEHAVIOR THROUGH AWARENESS", b:"The Shikake part of CRAPP-E came from the fact that it changed the mood of the environment. Before CRAPP-E was there, walking past the workspace was normal. After CRAPP-E was placed there, the same movement felt noticed. The servo sweep made people more aware of their body in the space.\n\nSome people interacted with it like a toy. They waved at it, leaned into its range, or moved around it to see how it would react. Other people treated it more like a fragile alarm and avoided touching it. Both reactions were useful because they showed that CRAPP-E was not just passively collecting data. It was influencing behavior.\n\nThat became the most interesting part of the project. The object looked silly, but it still changed how people acted around it." },
+      { n:"10", t:"ONE-WEEK DEPLOYMENT", b:"For the one-week deployment, CRAPP-E was placed near a personal workspace and tested during daily two-hour sessions. The original goal was to send the data live through Wi-Fi into Adafruit IO during each session, but the deployment did not go perfectly. Spectrum went down for most of the week, so CRAPP-E was only able to send data online for the first two days.\n\nAt first, this felt like the project had failed because the connected part of the system was limited. But it also became one of the most important constraints of the project. Instead of stopping the deployment, I changed the system so CRAPP-E could hold the data locally and transfer it later through USB-C. This meant the data was not fully live anymore, but the behavior was still being captured over time.\n\nBecause of that, the week became a mix of live data and stored data. The first two sessions were captured through Wi-Fi, while the rest of the week was collected locally and uploaded afterward. It was not the cleanest version of the project, but it made the system feel more realistic. Connected objects depend on infrastructure, and when that infrastructure breaks, the design has to respond.",
+        deploy: {
+          caption: "7 sessions · 2 hours each · 314 movement events · 57 close approaches · 1 tamper",
+          columns: [
+            { key: "day", label: "Day", day: true },
+            { key: "session", label: "Session", meta: true },
+            { key: "method", label: "Collection Method", method: true },
+            { key: "movement", label: "Movement", num: true },
+            { key: "close", label: "Close", num: true },
+            { key: "tamper", label: "Tamper", num: true, flag: true },
+            { key: "notes", label: "Notes", notes: true }
+          ],
+          rows: [
+            { day: "MON", session: "2h", method: "Wi-Fi / Adafruit IO", movement: 62, close: 14, tamper: 0, notes: "First session had the most testing. People waved at it and tried to see when it would react." },
+            { day: "TUE", session: "2h", method: "Wi-Fi / Adafruit IO", movement: 55, close: 11, tamper: 0, notes: "Still curious, but the movement started to feel more like normal pass-by behavior." },
+            { day: "WED", session: "2h", method: "Local / USB-C transfer", movement: 41, close: 7, tamper: 0, notes: "Internet was down, so the system started storing readings locally." },
+            { day: "THU", session: "2h", method: "Local / USB-C transfer", movement: 38, close: 5, tamper: 0, notes: "Calmest session. Mostly small movement spikes from people walking past." },
+            { day: "FRI", session: "2h", method: "Local / USB-C transfer", movement: 49, close: 9, tamper: 1, notes: "The only tamper event came from adjusting CRAPP-E after the servo looked slightly misaligned." },
+            { day: "SAT", session: "2h", method: "Local / USB-C transfer", movement: 34, close: 6, tamper: 0, notes: "Quieter session, with a few longer close readings near the desk." },
+            { day: "SUN", session: "2h", method: "Local / USB-C transfer", movement: 35, close: 5, tamper: 0, notes: "Final session was mostly short bursts of movement before transferring the stored data." }
+          ],
+          totals: { day: "TOTAL", session: "14h", method: "", movement: 314, close: 57, tamper: 1, notes: "" }
+        }
+      },
+      { n:"11", t:"WHAT THE DATA SHOWED", b:"The most interesting pattern was that the number of events decreased after the first two sessions. At first, CRAPP-E attracted curiosity because it looked strange, taped-up, and alive. People wanted to test it. After a few days, it became part of the environment, and the movement data became more routine.\n\nThe tamper event was rare, which made it stand out more clearly. Most people moved around CRAPP-E or tested it from a distance, but they did not actually touch or move it. That helped separate general curiosity from physical interaction.\n\nThe limitation was that the data was not as complete or clean as I wanted. Since the Wi-Fi failed, the system could not send live data for the full week. The local storage workaround helped save the deployment, but it changed the experience. The p5.js visualization was no longer showing a fully live system. Instead, it became a mix of live readings from the first two sessions and replayed data from the rest of the week.\n\nEven though that was a problem, it also revealed something important about connected objects. The connection is part of the design. When the internet failed, CRAPP-E had to become more self-sufficient. If I developed this further, I would build local storage into the system from the beginning so it could keep recording even when Wi-Fi is unreliable." },
+      { n:"12", t:"P5.JS VISUALIZATION", b:"The final p5.js visualization was designed as a military-style dashboard. I did not want it to look like a normal chart or analytics screen. Since CRAPP-E already felt like a tiny taped-up security robot, the visualization needed to match that personality.\n\nThe dashboard used a radar-inspired interface. The servo angle became the radar sweep. Distance readings became blips on the screen. Tamper events created stronger visual interruptions, like warning flashes or system alerts. The visualization included a rotating radar sweep, movement blips based on distance, alert levels that changed the intensity of the interface, a timeline of activity across the week, tamper events shown as warning moments, and a system-status area that made CRAPP-E feel like a little machine reporting back.\n\nThe visual style was intentionally dramatic. It made small everyday movements feel more important, almost like the device was overreacting to normal life. That exaggeration fit the personality of CRAPP-E." },
+      { n:"13", t:"WHAT THE SYSTEM REVEALED", b:"CRAPP-E revealed that a lot of security happens before someone actually touches something. The interesting behavior was not only the tamper event. It was the approach, the pause, the curiosity, and the way people reacted to being noticed.\n\nThe project also showed that rough prototypes can still create strong interactions. CRAPP-E looked messy, but that made it more approachable and memorable. People did not ignore it. They wanted to understand what it was doing.\n\nIt also revealed that data does not have to be perfectly objective to be useful. The system could not fully understand intention, but it could show patterns: when the space was active, when people came close, and when the object was physically disturbed." },
+      { n:"14", t:"WHAT IT COULD NOT CAPTURE", b:"CRAPP-E could sense movement, distance, angle, and tampering, but it could not understand why something happened. It could not tell if someone was curious, careless, joking, or actually trying to move the object.\n\nThe ultrasonic sensor also had limitations. Some surfaces were harder to read, and quick movement could create messy values. The servo made the project more expressive, but it also meant the system only measured what it was facing during the scan.\n\nThe Wi-Fi issue also limited the project. Since Spectrum failed for most of the week, CRAPP-E could not stay fully connected for the whole deployment. The local USB-C transfer helped recover the data, but it changed the system from a live connected object into a partly stored and replayed one. This made the project feel a little imperfect, but that also matched the concept. CRAPP-E was not a perfect security device. It was a weird little alarm bot trying its best to understand its environment." },
+      { reflection: true, body: "CRAPP-E taught me that a connected object does not need to be invisible or polished to be effective. Sometimes the roughness is what makes people pay attention.\n\nThe taped-up form, the servo movement, and the radar dashboard all gave the project a personality. It felt like a small nervous robot guarding its space, even though it was built from simple sensors and messy materials.\n\nThe most important part of the project was realizing that the device was not only recording behavior. It was participating in it. People changed how they moved because CRAPP-E was there. They noticed the object, tested it, avoided it, and reacted to it.\n\nThe deployment also showed me that technical constraints are part of the design. I wanted the system to work live through Wi-Fi for the whole week, but that did not happen. Having to change CRAPP-E so it could store data locally made the project less clean, but more realistic. A connected object still needs to know what to do when the connection fails.\n\nIn the end, CRAPP-E became less about making a perfect alarm and more about asking what happens when a handmade object starts watching back." }
     ]
   }
 };
@@ -2230,6 +2354,47 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       return html;
     }
 
+    function buildDeployHTML(deploy, accent) {
+      var colors = (accent || '').match(/#[0-9a-fA-F]{3,6}/g) || ['#ffffff'];
+      var c = colors[colors.length - 1];
+      var cols = deploy.columns || [];
+      var rows = deploy.rows || [];
+      var totals = deploy.totals;
+      var caption = deploy.caption || '';
+      var thead = '<thead><tr>' + cols.map(function(col) {
+        return '<th class="' + (col.num ? 'num' : '') + '">' + col.label + '</th>';
+      }).join('') + '</tr></thead>';
+      var tbody = '<tbody>' + rows.map(function(r) {
+        return '<tr>' + cols.map(function(col) {
+          var v = r[col.key];
+          if (col.day) return '<td class="deploy-day">' + v + '</td>';
+          if (col.meta) return '<td class="deploy-meta">' + v + '</td>';
+          if (col.method) return '<td class="deploy-method">' + v + '</td>';
+          if (col.notes) return '<td class="deploy-notes">' + v + '</td>';
+          if (col.num) {
+            var cls = 'num';
+            if (v === 0 || v === '0') cls += ' zero';
+            else if (col.flag) cls += ' flag';
+            return '<td class="' + cls + '">' + v + '</td>';
+          }
+          return '<td>' + v + '</td>';
+        }).join('') + '</tr>';
+      }).join('') + '</tbody>';
+      var tfoot = '';
+      if (totals) {
+        tfoot = '<tfoot><tr>' + cols.map(function(col) {
+          var v = totals[col.key];
+          if (v === undefined) return '<td></td>';
+          if (col.num) return '<td class="num">' + v + '</td>';
+          return '<td>' + v + '</td>';
+        }).join('') + '</tr></tfoot>';
+      }
+      return '<div class="case-deploy" style="--deploy-accent:' + c + '">' +
+        '<div class="case-deploy-scroll"><table>' + thead + tbody + tfoot + '</table></div>' +
+        (caption ? '<div class="case-deploy-caption">' + caption + '</div>' : '') +
+        '</div>';
+    }
+
     function buildJourneyHTML(journey, id, accent) {
       var stages = journey.stages || [];
       var colors = (accent || '').match(/#[0-9a-fA-F]{3,6}/g) || ['#ffffff'];
@@ -2333,6 +2498,7 @@ document.querySelectorAll('.pcard').forEach(function(card) {
         (s.flow ? buildFlowHTML(s.flow, d.accent || '') : '') +
         (s.journey ? buildJourneyHTML(s.journey, id, d.accent || '') : '') +
         (s.decisions ? buildDecisionsHTML(s.decisions, d.accent || '') : '') +
+        (s.deploy ? buildDeployHTML(s.deploy, d.accent || '') : '') +
         (s.imgsAfter ? '<div class="case-imgs" style="--imgs-count:' + (s.imgsAfterColumns || s.imgsAfter.length) + ';' + (s.imgsAfterColumns === 1 ? 'max-width:62%;margin-left:auto;margin-right:auto;' : '') + '">' + s.imgsAfter.map(function(src){ return '<img src="' + src + '" alt="' + s.t + '" loading="lazy">'; }).join('') + '</div>' : '') +
         (i === 0 ? sketchHtml : '') +
         protoHtml +
