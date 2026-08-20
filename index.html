@@ -957,6 +957,306 @@ footer {
 }
 /* ── Hide hamburger when menu is open (mob-close handles it) ── */
 .hamburger.open { opacity: 0; pointer-events: none; transition: opacity 0.15s ease; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   NIBBLE-LM · portfolio assistant
+═══════════════════════════════════════════════════════════════════════ */
+#nibble-trigger {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 9500;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+}
+#nibble-trigger:hover {
+  transform: translateY(-1px);
+  border-color: var(--text);
+}
+#nibble-trigger .nibble-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(224,0,0,0.7);
+  animation: nibble-pulse 2.6s ease-in-out infinite;
+}
+@keyframes nibble-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+body.nibble-open #nibble-trigger { opacity: 0; pointer-events: none; }
+
+/* Panel */
+#nibble-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  max-width: 100vw;
+  height: 100vh;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  z-index: 9500;
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  font-family: var(--font-body);
+}
+body.nibble-open #nibble-panel { transform: translateX(0); }
+
+/* Backdrop (mobile only, gentle dim) */
+#nibble-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 9499;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
+
+/* Header */
+.nibble-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.nibble-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.nibble-title .nibble-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(224,0,0,0.6);
+}
+.nibble-close {
+  background: transparent;
+  border: 0;
+  color: rgba(232,228,220,0.55);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.18s ease;
+}
+.nibble-close:hover { color: var(--text); }
+
+/* Message area */
+.nibble-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.nibble-body::-webkit-scrollbar { width: 6px; }
+.nibble-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Empty state */
+.nibble-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 12px;
+}
+.nibble-empty-heading {
+  font-family: var(--font-body);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+.nibble-empty-sub {
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(232,228,220,0.5);
+  margin: 0;
+}
+.nibble-suggested {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+.nibble-suggested button {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  text-align: left;
+  padding: 12px 12px 12px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(42,42,42,0.6);
+  color: rgba(232,228,220,0.75);
+  font-family: var(--font-body);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+.nibble-suggested button:hover { color: var(--text); }
+.nibble-suggested button::before {
+  content: "↳";
+  color: rgba(232,228,220,0.4);
+  font-size: 14px;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+/* Messages */
+.nibble-msg {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+  animation: nibble-msg-in 0.24s ease-out;
+}
+@keyframes nibble-msg-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.nibble-msg.user {
+  align-self: flex-end;
+  max-width: 82%;
+  padding: 10px 14px;
+  background: rgba(232,228,220,0.06);
+  border: 1px solid var(--border);
+  border-radius: 12px 12px 4px 12px;
+  color: var(--text);
+}
+.nibble-msg.assistant {
+  align-self: flex-start;
+  max-width: 100%;
+  color: rgba(232,228,220,0.92);
+  white-space: pre-wrap;
+}
+.nibble-msg.assistant a.nibble-open-btn {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 6px 12px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+}
+.nibble-msg.assistant a.nibble-open-btn:hover { filter: brightness(1.15); }
+.nibble-msg.error {
+  align-self: flex-start;
+  color: rgba(232,228,220,0.55);
+  font-style: italic;
+  font-size: 13px;
+}
+
+/* Typing indicator */
+.nibble-typing {
+  align-self: flex-start;
+  display: inline-flex;
+  gap: 4px;
+  padding: 10px 4px;
+}
+.nibble-typing span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(232,228,220,0.4);
+  animation: nibble-typing 1.2s ease-in-out infinite;
+}
+.nibble-typing span:nth-child(2) { animation-delay: 0.15s; }
+.nibble-typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes nibble-typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30%           { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Input */
+.nibble-input-wrap {
+  padding: 14px 16px 18px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.nibble-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(232,228,220,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color 0.18s ease;
+}
+.nibble-input-row:focus-within { border-color: rgba(232,228,220,0.35); }
+.nibble-input {
+  flex: 1;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  resize: none;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  max-height: 120px;
+  min-height: 22px;
+  padding: 0;
+}
+.nibble-input::placeholder { color: rgba(232,228,220,0.35); }
+.nibble-send {
+  background: transparent;
+  border: 0;
+  color: rgba(232,228,220,0.55);
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 16px;
+  line-height: 1;
+  transition: color 0.18s ease;
+}
+.nibble-send:hover { color: var(--text); }
+.nibble-send:disabled { opacity: 0.25; cursor: not-allowed; }
+.nibble-hint {
+  margin-top: 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(232,228,220,0.3);
+}
+
+/* Mobile takeover */
+@media (max-width: 640px) {
+  #nibble-panel { width: 100vw; border-left: 0; }
+  #nibble-trigger { right: 16px; bottom: 16px; padding: 10px 14px 10px 12px; font-size: 12px; }
+}
 </style>
 </head>
 <body>
@@ -2902,5 +3202,212 @@ if (heroTitle) {
   });
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     NIBBLE-LM · portfolio assistant
+════════════════════════════════════════════════════════════════════ -->
+<button id="nibble-trigger" type="button" aria-label="Open NibbleLM assistant">
+  <span class="nibble-dot"></span>
+  Ask NibbleLM
+</button>
+
+<div id="nibble-backdrop"></div>
+
+<aside id="nibble-panel" aria-hidden="true" aria-label="NibbleLM assistant panel">
+  <div class="nibble-header">
+    <span class="nibble-title"><span class="nibble-dot"></span>NibbleLM</span>
+    <button class="nibble-close" id="nibble-close" type="button" aria-label="Close">✕</button>
+  </div>
+  <div class="nibble-body" id="nibble-body">
+    <div class="nibble-empty" id="nibble-empty">
+      <h3 class="nibble-empty-heading">Ask about Rafael's work.</h3>
+      <p class="nibble-empty-sub">Small assistant. Only knows what's on this portfolio. Say what you're curious about.</p>
+      <div class="nibble-suggested">
+        <button type="button" data-prompt="What projects should I look at first?">What projects should I look at first?</button>
+        <button type="button" data-prompt="Show me his creative coding work">Show me his creative coding work</button>
+        <button type="button" data-prompt="Something with hardware or physical design">Something with hardware or physical design</button>
+      </div>
+    </div>
+  </div>
+  <div class="nibble-input-wrap">
+    <div class="nibble-input-row">
+      <textarea class="nibble-input" id="nibble-input" rows="1" placeholder="Ask about Rafael..."></textarea>
+      <button class="nibble-send" id="nibble-send" type="button" aria-label="Send">↑</button>
+    </div>
+    <div class="nibble-hint">Enter to send · Shift+Enter for newline</div>
+  </div>
+</aside>
+
+<script>
+(function() {
+  var trigger = document.getElementById('nibble-trigger');
+  var panel   = document.getElementById('nibble-panel');
+  var backdrop = document.getElementById('nibble-backdrop');
+  var closeBtn = document.getElementById('nibble-close');
+  var bodyEl  = document.getElementById('nibble-body');
+  var emptyEl = document.getElementById('nibble-empty');
+  var input   = document.getElementById('nibble-input');
+  var sendBtn = document.getElementById('nibble-send');
+  var modalEl = document.getElementById('modal');
+
+  var history = [];
+  var currentProjectId = null;
+  var inFlight = false;
+
+  /* Track which project is currently open (for pageContext) */
+  document.querySelectorAll('.pcard').forEach(function(card) {
+    card.addEventListener('click', function() {
+      currentProjectId = card.getAttribute('data-project');
+    });
+  });
+  var mclose = document.getElementById('mclose');
+  if (mclose) mclose.addEventListener('click', function() { currentProjectId = null; });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modalEl && modalEl.classList.contains('open')) {
+      currentProjectId = null;
+    }
+  });
+
+  /* Panel open/close */
+  function openPanel() {
+    document.body.classList.add('nibble-open');
+    panel.setAttribute('aria-hidden', 'false');
+    setTimeout(function() { input.focus(); }, 220);
+  }
+  function closePanel() {
+    document.body.classList.remove('nibble-open');
+    panel.setAttribute('aria-hidden', 'true');
+  }
+  trigger.addEventListener('click', openPanel);
+  closeBtn.addEventListener('click', closePanel);
+  backdrop.addEventListener('click', closePanel);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.body.classList.contains('nibble-open')) closePanel();
+  });
+
+  /* Suggested prompts */
+  document.querySelectorAll('.nibble-suggested button').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      sendMessage(btn.getAttribute('data-prompt'));
+    });
+  });
+
+  /* Input handling */
+  input.addEventListener('input', function() {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  });
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      var text = input.value.trim();
+      if (text) sendMessage(text);
+    }
+  });
+  sendBtn.addEventListener('click', function() {
+    var text = input.value.trim();
+    if (text) sendMessage(text);
+  });
+
+  /* Rendering */
+  function removeEmpty() {
+    if (emptyEl && emptyEl.parentNode) emptyEl.parentNode.removeChild(emptyEl);
+  }
+  function addMessage(role, content) {
+    removeEmpty();
+    var el = document.createElement('div');
+    el.className = 'nibble-msg ' + role;
+    el.textContent = content;
+    bodyEl.appendChild(el);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+    return el;
+  }
+  function addTyping() {
+    removeEmpty();
+    var el = document.createElement('div');
+    el.className = 'nibble-typing';
+    el.innerHTML = '<span></span><span></span><span></span>';
+    bodyEl.appendChild(el);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+    return el;
+  }
+
+  /* Send */
+  function sendMessage(text) {
+    if (inFlight) return;
+    inFlight = true;
+    sendBtn.disabled = true;
+
+    input.value = '';
+    input.style.height = 'auto';
+
+    addMessage('user', text);
+    history.push({ role: 'user', content: text });
+
+    var typing = addTyping();
+
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: history,
+        pageContext: {
+          current_project_id: currentProjectId,
+          current_page: 'home'
+        }
+      })
+    })
+    .then(function(res) {
+      return res.json().then(function(data) { return { ok: res.ok, data: data }; });
+    })
+    .then(function(result) {
+      typing.remove();
+      if (!result.ok) {
+        addMessage('error', (result.data && result.data.error) || 'Something went sideways. Try again.');
+        return;
+      }
+      var content = (result.data.content || '').trim();
+      var toolCall = result.data.toolCall;
+
+      if (content) {
+        var el = addMessage('assistant', content);
+        if (toolCall && toolCall.name === 'open_project') {
+          el.insertAdjacentHTML('beforeend',
+            '<br><a class="nibble-open-btn" data-open-project="' + toolCall.args.project_id + '">Open project</a>'
+          );
+        }
+        history.push({ role: 'assistant', content: content });
+      }
+      if (toolCall && toolCall.name === 'open_project') {
+        setTimeout(function() { openProjectById(toolCall.args.project_id); }, content ? 700 : 0);
+      }
+    })
+    .catch(function() {
+      typing.remove();
+      addMessage('error', 'NibbleLM lost connection. Try again in a moment.');
+    })
+    .then(function() {
+      inFlight = false;
+      sendBtn.disabled = false;
+    });
+  }
+
+  function openProjectById(id) {
+    var card = document.querySelector('.pcard[data-project="' + id + '"]');
+    if (!card) return;
+    currentProjectId = id;
+    card.click();
+  }
+
+  /* Delegate clicks on the inline "Open project" button */
+  bodyEl.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-open-project]');
+    if (!btn) return;
+    e.preventDefault();
+    openProjectById(btn.getAttribute('data-open-project'));
+  });
+})();
+</script>
+
 </body>
 </html>

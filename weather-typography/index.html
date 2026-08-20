@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Weather — 10 Square Compositions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#111; --paper:#f5f3ec; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#ece8e0;color:#111;font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+  body{padding:48px 32px 120px}
+  header{max-width:1280px;margin:0 auto 48px;display:flex;justify-content:space-between;align-items:flex-end;gap:32px;border-bottom:1px solid #111;padding-bottom:16px}
+  header h1{font-size:14px;font-weight:400;text-transform:uppercase;letter-spacing:.18em}
+  header p{font-size:12px;max-width:560px;line-height:1.5;letter-spacing:.02em}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:48px 32px;max-width:1280px;margin:0 auto}
+  @media (max-width:760px){.grid{grid-template-columns:1fr}}
+
+  .item{display:flex;flex-direction:column;gap:14px}
+  .square{
+    width:100%; aspect-ratio:1/1;
+    background:var(--paper); color:var(--ink);
+    position:relative; overflow:hidden;
+    container-type:size; container-name:sq;
+    border:1px solid #111;
+  }
+  .meta{display:flex;justify-content:space-between;gap:16px;font-size:11px;line-height:1.45;letter-spacing:.04em}
+  .meta .n{text-transform:uppercase;font-weight:700;letter-spacing:.18em}
+  .meta .rules{max-width:66%;text-align:right;color:#444}
+
+  /* ════════════════ 01 — left rectangle, void right ════════════════ */
+  .c1{padding:7cqw;height:100%;display:flex;align-items:center}
+  .c1 .block{width:56%; font-size:3.4cqw; font-weight:400; line-height:1.55; text-align:justify}
+  .c1 .block p + p{margin-top:1.4em}
+
+  /* ════════════════ 02 — two-column Q&A ladder ════════════════ */
+  .c2{padding:7cqw;height:100%;display:grid;grid-template-rows:repeat(6,1fr)}
+  .c2 .row{display:flex;justify-content:space-between;align-items:end;gap:2cqw;border-bottom:1px solid #111;padding-bottom:.8em}
+  .c2 .row:last-child{border-bottom:0}
+  .c2 .ask{font-size:3.2cqw;font-weight:400;text-transform:lowercase;word-spacing:.2em;line-height:1}
+  .c2 .ans{font-size:3.2cqw;font-weight:400;text-transform:uppercase;letter-spacing:.18em;line-height:1;text-align:right;white-space:nowrap}
+
+  /* ════════════════ 03 — right-anchored ladder, black spine ════════════════ */
+  .c3{padding:7cqw;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;gap:.55em}
+  .c3 .ln{font-size:3.2cqw;line-height:1.15;text-align:right;display:block;max-width:84%}
+  .c3 .lt{font-weight:300;text-transform:lowercase}
+  .c3 .bd{font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+  .c3 .bk{font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+
+  /* ════════════════ 04 — quiet · small centered body with space play · 1 off-grid ════════════════ */
+  .c4{padding:6cqw;height:100%;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5cqw}
+  .c4 .hero{
+    font-size:14cqw; font-weight:900; line-height:.9;
+    text-transform:uppercase; letter-spacing:-.04em;
+    text-align:center;
+  }
+  .c4 .body{
+    font-size:1.8cqw; line-height:2.6; text-align:center;
+    max-width:74%; word-spacing:1.1em; letter-spacing:.08em;
+  }
+  .c4 .body .lt{font-weight:300; text-transform:lowercase}
+  .c4 .body .bd{font-weight:700; text-transform:uppercase; letter-spacing:.3em}
+  .c4 .body .bk{font-weight:900; text-transform:uppercase; letter-spacing:.2em}
+  .c4 .off-wrap{
+    position:absolute; right:3cqw; top:50%; width:6cqw; height:62cqw;
+    transform:translateY(-50%);
+  }
+  .c4 .off{
+    position:absolute; left:50%; top:50%;
+    transform: translate(-50%,-50%) rotate(-90deg);
+    font-size:1.8cqw; font-weight:300;
+    text-transform:lowercase; letter-spacing:.62em;
+    white-space:nowrap;
+  }
+
+  /* ════════════════ 05 — diagonal opposition: SANTA MONICA top, SUNNY bottom-right ════════════════ */
+  .c5{padding:6cqw;height:100%;position:relative}
+  .c5 .santa{
+    position:absolute; left:6cqw; right:6cqw; top:6cqw;
+    font-size:5.4cqw; font-weight:400;
+    text-transform:uppercase; letter-spacing:.48em;
+    border-bottom:1px solid #111; padding-bottom:.6em;
+  }
+  .c5 .body{
+    position:absolute; left:6cqw; top:24cqw; width:52%;
+    font-size:2.6cqw; line-height:1.55; text-align:justify;
+    word-spacing:.08em;
+  }
+  .c5 .body .lt{font-weight:300}
+  .c5 .body .bd{font-weight:700; text-transform:uppercase; letter-spacing:.06em}
+  .c5 .body .bk{font-weight:900; text-transform:uppercase; letter-spacing:.04em}
+  .c5 .sunny{
+    position:absolute; right:0; bottom:0;
+    font-size:34cqw; font-weight:900; line-height:.84;
+    text-transform:uppercase; letter-spacing:-.05em;
+    padding:0 4cqw 3cqw 0;
+  }
+  .c5 .date{
+    position:absolute; left:6cqw; bottom:5cqw;
+    font-size:2.4cqw; font-weight:700; text-transform:uppercase; letter-spacing:.5em;
+  }
+
+  /* ════════════════ 06 — extreme grid left · open scatter right · no center line ════════════════ */
+  .c6{padding:4cqw;height:100%;position:relative}
+  .c6 .l{
+    position:absolute; left:4cqw; top:4cqw; bottom:4cqw; width:28%;
+    display:flex; flex-direction:column; gap:.5em;
+  }
+  .c6 .l span{font-size:2.8cqw; line-height:1.2}
+  .c6 .l .lt{font-weight:300;text-transform:lowercase}
+  .c6 .l .bd{font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+  .c6 .l .bk{font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+  .c6 .l .tr{font-weight:700;text-transform:uppercase;letter-spacing:.5em}
+  .c6 .r{
+    position:absolute; left:38%; right:4cqw; top:4cqw; bottom:4cqw;
+  }
+  .c6 .r span{position:absolute; line-height:1; white-space:nowrap; text-transform:lowercase}
+  .c6 .r .w1{ top:2%;  left:38%; font-weight:300; font-size:2.4cqw; transform:rotate(-8deg)}
+  .c6 .r .w2{ top:12%; right:0;  font-weight:700; font-size:3.6cqw; letter-spacing:.04em}
+  .c6 .r .w3{ top:24%; left:8%;  font-weight:300; font-size:2.6cqw}
+  .c6 .r .w4{ top:36%; right:18%;font-weight:400; font-size:2.6cqw; transform:rotate(4deg)}
+  .c6 .r .w5{ top:46%; left:-2%; font-weight:900; font-size:11cqw; text-transform:uppercase; letter-spacing:-.04em}
+  .c6 .r .w6{ top:66%; right:0;  font-weight:300; font-size:2.4cqw; transform:rotate(-3deg)}
+  .c6 .r .w7{ top:74%; left:22%; font-weight:700; font-size:2.8cqw; text-transform:uppercase; letter-spacing:.5em}
+  .c6 .r .w8{ top:86%; left:0;   font-weight:300; font-size:2.4cqw}
+  .c6 .r .w9{ top:90%; right:2%; font-weight:900; font-size:5cqw; text-transform:uppercase; letter-spacing:-.02em}
+
+  /* ════════════════ 07 — arc dome + horizon + grounded body ════════════════ */
+  .c7{padding:0;height:100%;position:relative}
+  .c7 .arc{position:absolute;left:0;right:0;top:0;height:55%;pointer-events:none}
+  .c7 .arc text{font-family:Arial,Helvetica,sans-serif;font-weight:900;font-size:62px;text-transform:uppercase;letter-spacing:.06em;fill:#111}
+  .c7 .horizon{position:absolute;left:7cqw;right:7cqw;top:55%;height:1px;background:#111}
+  .c7 .post{
+    position:absolute; font-size:2.4cqw; font-weight:700;
+    text-transform:uppercase; letter-spacing:.46em;
+  }
+  .c7 .pTL{top:5cqw; left:7cqw}
+  .c7 .pTR{top:5cqw; right:7cqw}
+  .c7 .pBL{bottom:5cqw; left:7cqw}
+  .c7 .pBR{bottom:5cqw; right:7cqw}
+  .c7 .body{
+    position:absolute; left:7cqw; right:7cqw; top:60%; bottom:14cqw;
+    display:flex; flex-direction:column; justify-content:center; gap:.4em;
+  }
+  .c7 .body .row{font-size:2.8cqw; line-height:1.2; display:flex; justify-content:space-between; align-items:baseline; gap:1em}
+  .c7 .body .lt{font-weight:300; text-transform:lowercase}
+  .c7 .body .bd{font-weight:700; text-transform:uppercase; letter-spacing:.06em}
+  .c7 .body .bk{font-weight:900; text-transform:uppercase; letter-spacing:.04em}
+  .c7 .body .tr{font-weight:400; text-transform:lowercase; letter-spacing:.34em}
+
+  /* ════════════════ 08 — diagonal SUNNY bisects, text in triangles ════════════════ */
+  .c8{padding:0;height:100%;position:relative}
+  .c8 .diag{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+  .c8 .diag text{font-family:Arial,Helvetica,sans-serif;font-weight:400;font-size:78px;text-transform:uppercase;letter-spacing:.52em;fill:#111}
+  .c8 .triUL{
+    position:absolute; left:7cqw; top:7cqw; width:50%;
+    font-size:2.4cqw; font-weight:400; line-height:1.8;
+    text-transform:uppercase; letter-spacing:.36em;
+  }
+  .c8 .triBR{
+    position:absolute; right:7cqw; bottom:7cqw; width:50%;
+    font-size:2.4cqw; font-weight:400; line-height:1.8;
+    text-transform:uppercase; letter-spacing:.36em;
+    text-align:right;
+  }
+
+  /* ════════════════ 09 — dominant serif italic + scaffolding ════════════════ */
+  .c9{background:var(--paper);color:#111;padding:0;height:100%;position:relative;overflow:hidden}
+  .c9 .top{
+    position:absolute; left:6cqw; right:6cqw; top:5cqw;
+    display:flex; justify-content:space-between; align-items:flex-start;
+    font-family:Arial; font-size:2cqw; font-weight:700;
+    text-transform:uppercase; letter-spacing:.34em;
+    padding-bottom:1.2em; border-bottom:1px solid #111;
+  }
+  .c9 .hero{
+    position:absolute; left:3cqw; right:3cqw; bottom:3cqw;
+    font-family:'Instrument Serif',serif; font-style:italic; font-weight:400;
+    font-size:42cqw; line-height:.86; letter-spacing:-.04em;
+    white-space:nowrap;
+  }
+  .c9 .annot{
+    position:absolute; right:6cqw; top:18cqw; width:44%;
+    font-family:Arial; font-size:2.1cqw; line-height:1.55;
+    text-align:right;
+  }
+  .c9 .annot .lt{font-weight:300}
+  .c9 .annot .bd{font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+  .c9 .annot .bk{font-weight:900;text-transform:uppercase;letter-spacing:.04em}
+  .c9 .badge{
+    position:absolute; right:6cqw; bottom:6cqw;
+    font-family:Arial; font-size:2.4cqw; font-weight:700;
+    text-transform:uppercase; letter-spacing:.5em;
+    z-index:2;
+  }
+
+  /* ════════════════ 10 — cyberpunk: black bg, white type, pure typography ════════════════ */
+  .c10{background:#0a0a0a;color:#f5f5f5;padding:6cqw;height:100%;position:relative;display:grid;grid-template-rows:auto 1fr auto;gap:3cqw;font-family:Arial}
+  .c10 .top{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:1.6cqw; font-weight:700; text-transform:uppercase; letter-spacing:.5em;
+  }
+  .c10 .top .id{letter-spacing:.04em}
+  .c10 .core{align-self:center}
+  .c10 .core .label{
+    font-family:Arial; font-size:1.5cqw; font-weight:400;
+    text-transform:uppercase; letter-spacing:.6em; opacity:.7;
+    margin-bottom:1.4em;
+  }
+  .c10 .core .serif{
+    font-family:'Instrument Serif',serif; font-style:italic; font-weight:400;
+    font-size:22cqw; line-height:.85; letter-spacing:-.02em;
+  }
+  .c10 .core .body{
+    font-family:Arial; font-size:1.8cqw; font-weight:400; line-height:1.7;
+    max-width:78%; margin-top:1.6em;
+  }
+  .c10 .core .body .bd{font-weight:700; text-transform:uppercase; letter-spacing:.04em}
+  .c10 .core .body .pre{opacity:.55}
+  .c10 .bot{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:1.6cqw; font-weight:700; text-transform:uppercase; letter-spacing:.5em;
+  }
+  .c10 .bot .end{letter-spacing:.04em; opacity:.55}
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Weather · 10 Square Typographic Compositions</h1>
+  <p>Full script preserved verbatim. Arial only — Instrument Serif joins 09 and 10. Square 10 inverts to black per the cyberpunk brief.</p>
+</header>
+
+<main class="grid">
+
+  <!-- 01 — Left rectangle of justified text -->
+  <div class="item">
+    <div class="square">
+      <div class="c1">
+        <div class="block">
+          <p>The weather for today 06/22/2026 for Santa Monica will be sunny.</p>
+          <p>Tonight expected conditions to be cloudy.</p>
+          <p>Today’s temperature rage will be 61F to 71F and tomorrow will range from 60F to 73F.</p>
+        </div>
+      </div>
+    </div>
+    <div class="meta"><span class="n">01</span><span class="rules">one size · one weight — justified left block, right void. Shape: tall rectangle.</span></div>
+  </div>
+
+  <!-- 02 — Two-column ladder -->
+  <div class="item">
+    <div class="square">
+      <div class="c2">
+        <div class="row"><span class="ask">the weather for today</span><span class="ans">06/22/2026</span></div>
+        <div class="row"><span class="ask">for</span><span class="ans">Santa Monica</span></div>
+        <div class="row"><span class="ask">will be</span><span class="ans">Sunny</span></div>
+        <div class="row"><span class="ask">tonight expected conditions to be</span><span class="ans">Cloudy</span></div>
+        <div class="row"><span class="ask">today’s temperature rage will be</span><span class="ans">61F – 71F</span></div>
+        <div class="row"><span class="ask">and tomorrow will range from</span><span class="ans">60F – 73F</span></div>
+      </div>
+    </div>
+    <div class="meta"><span class="n">02</span><span class="rules">one size · one weight · case — two-column Q&amp;A ladder. Horizontal bands.</span></div>
+  </div>
+
+  <!-- 03 — Right-anchored ladder -->
+  <div class="item">
+    <div class="square">
+      <div class="c3">
+        <div class="ln"><span class="lt">the weather for today </span><span class="bk">06/22/2026</span></div>
+        <div class="ln"><span class="lt">for </span><span class="bd">Santa Monica</span></div>
+        <div class="ln"><span class="lt">will be </span><span class="bk">Sunny</span></div>
+        <div class="ln"><span class="lt">tonight expected conditions to be </span><span class="bd">cloudy</span></div>
+        <div class="ln"><span class="lt">today’s temperature rage will be </span><span class="bk">61F – 71F</span></div>
+        <div class="ln"><span class="lt">and tomorrow will range from </span><span class="bk">60F – 73F</span></div>
+      </div>
+    </div>
+    <div class="meta"><span class="n">03</span><span class="rules">one size · light → black · case — right-flush. Black answers form a vertical spine.</span></div>
+  </div>
+
+  <!-- 04 — Centered hero + spaced body + rotated cloudy -->
+  <div class="item">
+    <div class="square">
+      <div class="c4">
+        <div class="hero">Sunny</div>
+        <div class="body">
+          <span class="lt">the weather for today for </span><span class="bd">Santa Monica</span><span class="lt"> will be sunny. today’s temperature rage will be </span><span class="bk">61F – 71F</span><span class="lt"> and tomorrow will range from </span><span class="bk">60F – 73F</span><span class="lt">.</span>
+        </div>
+        <div class="off-wrap"><div class="off">tonight expected conditions to be cloudy</div></div>
+      </div>
+    </div>
+    <div class="meta"><span class="n">04</span><span class="rules">two sizes · many weights · case — centered hero + airy body with wide word-spacing. Cloudy rotates up the right edge.</span></div>
+  </div>
+
+  <!-- 05 — Diagonal opposition: SANTA MONICA top / SUNNY bottom-right -->
+  <div class="item">
+    <div class="square">
+      <div class="c5">
+        <div class="santa">Santa Monica</div>
+        <div class="body">
+          <span class="lt">the weather for today </span><span class="bd">06/22/2026</span><span class="lt">. tonight expected conditions to be </span><span class="bd">cloudy</span><span class="lt">. today’s temperature rage will be </span><span class="bk">61F – 71F</span><span class="lt"> and tomorrow will range from </span><span class="bk">60F – 73F</span><span class="lt">.</span>
+        </div>
+        <div class="sunny">Sunny</div>
+        <div class="date">06.22.26</div>
+      </div>
+    </div>
+    <div class="meta"><span class="n">05</span><span class="rules">two sizes · many weights · case — tracked “SANTA MONICA” banner top, body left, massive “SUNNY” anchored bottom-right.</span></div>
+  </div>
+
+  <!-- 06 — Extreme ordered column + open scatter, no center line -->
+  <div class="item">
+    <div class="square">
+      <div class="c6">
+        <div class="l">
+          <span class="lt">the weather for today</span>
+          <span class="bk">06/22/2026</span>
+          <span class="lt">for</span>
+          <span class="tr">Santa Monica</span>
+          <span class="lt">will be</span>
+          <span class="bk">sunny.</span>
+          <span class="lt">today’s temperature rage will be</span>
+          <span class="bd">61F to 71F</span>
+          <span class="lt">and</span>
+          <span class="tr">tomorrow</span>
+          <span class="lt">will range from</span>
+          <span class="bd">60F to 73F</span>
+        </div>
+        <div class="r">
+          <span class="w1">tonight</span>
+          <span class="w2">expected</span>
+          <span class="w3">conditions</span>
+          <span class="w4">to be</span>
+          <span class="w5">cloudy.</span>
+          <span class="w6">and tomorrow</span>
+          <span class="w7">will range</span>
+          <span class="w8">from</span>
+          <span class="w9">60F – 73F</span>
+        </div>
+      </div>
+    </div>
+    <div class="meta"><span class="n">06</span><span class="rules">one size · many weights — tight ordered column far-left, open scatter right. No divider. “Santa Monica” &amp; “tomorrow” tracked.</span></div>
+  </div>
+
+  <!-- 07 — Arc dome -->
+  <div class="item">
+    <div class="square">
+      <div class="c7">
+        <div class="post pTL">Today</div>
+        <div class="post pTR">06.22.26</div>
+        <svg class="arc" viewBox="0 0 540 300" preserveAspectRatio="none">
+          <defs><path id="arc7" d="M 80 270 Q 270 60 460 270" fill="none"/></defs>
+          <text><textPath href="#arc7" startOffset="50%" text-anchor="middle">SUNNY</textPath></text>
+        </svg>
+        <div class="horizon"></div>
+        <div class="body">
+          <div class="row"><span class="lt">for</span><span class="bd">Santa Monica</span></div>
+          <div class="row"><span class="lt">tonight expected conditions to be</span><span class="bd">cloudy</span></div>
+          <div class="row"><span class="lt">today’s temperature rage will be</span><span class="bk">61F – 71F</span></div>
+          <div class="row"><span class="lt">and tomorrow will range from</span><span class="bk">60F – 73F</span></div>
+        </div>
+        <div class="post pBL">Santa&nbsp;Monica</div>
+        <div class="post pBR">Forecast</div>
+      </div>
+    </div>
+    <div class="meta"><span class="n">07</span><span class="rules">one size · many weights — “SUNNY” arcs over a horizon. Four tracked corner posts.</span></div>
+  </div>
+
+  <!-- 08 — Diagonal SUNNY bisects -->
+  <div class="item">
+    <div class="square">
+      <div class="c8">
+        <div class="triUL">
+          The weather<br>for today<br>06 / 22 / 2026<br>for Santa Monica
+        </div>
+        <svg class="diag" viewBox="0 0 540 540" preserveAspectRatio="none">
+          <defs><path id="diag8" d="M 60 480 L 480 60" fill="none"/></defs>
+          <text><textPath href="#diag8" startOffset="50%" text-anchor="middle">SUNNY</textPath></text>
+        </svg>
+        <div class="triBR">
+          Tonight expected<br>conditions to be cloudy<br>Today’s rage 61F – 71F<br>Tomorrow 60F – 73F
+        </div>
+      </div>
+    </div>
+    <div class="meta"><span class="n">08</span><span class="rules">one size · one weight · wide tracking — diagonal “SUNNY” bisects. Text in upper-left and lower-right triangles.</span></div>
+  </div>
+
+  <!-- 09 — Dominant serif italic + scaffolding -->
+  <div class="item">
+    <div class="square">
+      <div class="c9">
+        <div class="top">
+          <span>The&nbsp;Weather</span>
+          <span style="letter-spacing:.04em;text-align:right">N°&nbsp;06.22.2026<br>Santa&nbsp;Monica</span>
+        </div>
+        <div class="hero">Sunny.</div>
+        <div class="annot">
+          <span class="lt">the weather for today for Santa Monica will be sunny. tonight expected conditions to be </span><span class="bk">cloudy</span><span class="lt">. today’s temperature rage will be </span><span class="bd">61F – 71F</span><span class="lt"> and tomorrow will range from </span><span class="bd">60F – 73F</span><span class="lt">.</span>
+        </div>
+        <div class="badge">Forecast</div>
+      </div>
+    </div>
+    <div class="meta"><span class="n">09</span><span class="rules">many sizes · many weights · Instrument Serif — italic “Sunny.” anchored bottom. Tracked masthead.</span></div>
+  </div>
+
+  <!-- 10 — Cyberpunk HUD -->
+  <div class="item">
+    <div class="square">
+      <div class="c10">
+        <div class="top">
+          <span class="id">06.22.2026</span>
+          <span>Santa Monica</span>
+        </div>
+        <div class="core">
+          <div class="label">forecast — today</div>
+          <div class="serif">Sunny.</div>
+          <div class="body">
+            the weather for today for <span class="bd">Santa Monica</span> will be sunny. tonight expected conditions to be cloudy. today’s temperature rage will be <span class="bd">61F — 71F</span> and tomorrow will range from <span class="bd">60F — 73F</span>.
+          </div>
+        </div>
+        <div class="bot">
+          <span>Forecast</span>
+          <span class="end">end_</span>
+        </div>
+      </div>
+    </div>
+    <div class="meta"><span class="n">10</span><span class="rules">two sizes · two weights · Arial × Instrument Serif — black HUD. “Santa Monica” &amp; “Forecast” tracked.</span></div>
+  </div>
+
+</main>
+
+</body>
+</html>
