@@ -11,11 +11,29 @@ import { Redis } from '@upstash/redis';
 
 export const config = { runtime: 'edge' };
 
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(20, '1 h'),
-  analytics: false,
-});
+/* Rate limiter is optional. If Upstash env vars aren't set (or use different
+   names on this Vercel account), NibbleLM still works, just without a cap. */
+let ratelimit = null;
+try {
+  const url =
+    process.env.KV_REST_API_URL ||
+    process.env.UPSTASH_REDIS_REST_URL ||
+    process.env.REDIS_URL;
+  const token =
+    process.env.KV_REST_API_TOKEN ||
+    process.env.UPSTASH_REDIS_REST_TOKEN ||
+    process.env.REDIS_TOKEN;
+  if (url && token) {
+    ratelimit = new Ratelimit({
+      redis: new Redis({ url, token }),
+      limiter: Ratelimit.slidingWindow(20, '1 h'),
+      analytics: false,
+    });
+  }
+} catch (e) {
+  console.error('NibbleLM: rate limiter init failed, continuing without limits:', e);
+  ratelimit = null;
+}
 
 const MODEL = 'llama-3.3-70b-versatile';
 
@@ -291,17 +309,19 @@ export default async function handler(req) {
     req.headers.get('x-real-ip') ||
     'anonymous';
 
-  try {
-    const { success, remaining } = await ratelimit.limit(ip);
-    if (!success) {
-      return json(
-        { error: "Rate limit reached. NibbleLM needs a coffee. Try again in a bit." },
-        429
-      );
+  if (ratelimit) {
+    try {
+      const { success } = await ratelimit.limit(ip);
+      if (!success) {
+        return json(
+          { error: "Rate limit reached. NibbleLM needs a coffee. Try again in a bit." },
+          429
+        );
+      }
+    } catch (e) {
+      // Fail open if Upstash is unreachable
+      console.error('Rate limit check failed:', e);
     }
-  } catch (e) {
-    // If Upstash is unavailable, fail open (don't block the site) but log
-    console.error('Rate limit check failed:', e);
   }
 
   let body;
