@@ -376,7 +376,9 @@ export default async function handler(req) {
   if (!groqRes.ok) {
     const detail = await groqRes.text();
     console.error('Groq error:', groqRes.status, detail);
-    return json({ error: 'NibbleLM had trouble thinking. Try again in a moment.' }, 502);
+    return json({
+      error: `Groq ${groqRes.status}: ${detail.slice(0, 400)}`,
+    }, 502);
   }
 
   const data = await groqRes.json();
