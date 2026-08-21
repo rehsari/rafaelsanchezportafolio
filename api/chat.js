@@ -35,7 +35,7 @@ try {
   ratelimit = null;
 }
 
-const MODEL = 'openai/gpt-oss-20b';
+const MODEL = 'openai/gpt-oss-120b';
 
 const TOOLS = [
   {
@@ -293,10 +293,31 @@ PAGE CONTEXT (this visitor, right now)
 {{PAGE_CONTEXT_JSON}}
 `;
 
+/* Compact projection of the brain — keeps essentials, drops token-heavy
+   fields that rarely surface in conversation. Full brain stays intact
+   in lib/projects.js for future use. */
+function compactBrain(brain) {
+  return brain.map((p) => ({
+    id: p.id,
+    title: p.title,
+    one_liner: p.one_liner,
+    type: p.type,
+    year: p.year,
+    role: p.role,
+    tools: p.tools,
+    context: p.context,
+    problem: p.problem,
+    approach: p.approach,
+    key_decisions: p.key_decisions,
+    outcomes: p.outcomes,
+    skills_proven: p.skills_proven,
+  }));
+}
+
 function buildSystemMessage(pageContext) {
   return SYSTEM_PROMPT
-    .replace('{{PROJECT_BRAIN_JSON}}', JSON.stringify(PROJECTS_BRAIN, null, 2))
-    .replace('{{PAGE_CONTEXT_JSON}}', JSON.stringify(pageContext || { current_project_id: null, current_page: 'home' }, null, 2));
+    .replace('{{PROJECT_BRAIN_JSON}}', JSON.stringify(compactBrain(PROJECTS_BRAIN)))
+    .replace('{{PAGE_CONTEXT_JSON}}', JSON.stringify(pageContext || { current_project_id: null, current_page: 'home' }));
 }
 
 export default async function handler(req) {
