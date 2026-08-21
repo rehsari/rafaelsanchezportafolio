@@ -35,7 +35,7 @@ try {
   ratelimit = null;
 }
 
-const MODEL = 'openai/gpt-oss-120b';
+const MODEL = 'openai/gpt-oss-20b';
 
 const TOOLS = [
   {
