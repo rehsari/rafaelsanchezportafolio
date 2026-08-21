@@ -346,7 +346,17 @@ export default async function handler(req) {
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return json({ error: 'Server missing GROQ_API_KEY' }, 500);
+    // Diagnostic: reveal only key names and lengths, never values.
+    const seen = Object.keys(process.env)
+      .filter((k) => /GROQ|KV_|UPSTASH|REDIS/i.test(k))
+      .map((k) => `${k}(len=${String(process.env[k] || '').length})`);
+    return json({
+      error: 'Server missing GROQ_API_KEY',
+      diag: {
+        totalEnvKeys: Object.keys(process.env).length,
+        matchedKeys: seen,
+      },
+    }, 500);
   }
 
   const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
