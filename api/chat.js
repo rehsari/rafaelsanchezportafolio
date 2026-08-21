@@ -347,15 +347,13 @@ export default async function handler(req) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     // Diagnostic: reveal only key names and lengths, never values.
+    const total = Object.keys(process.env).length;
     const seen = Object.keys(process.env)
       .filter((k) => /GROQ|KV_|UPSTASH|REDIS/i.test(k))
       .map((k) => `${k}(len=${String(process.env[k] || '').length})`);
+    const summary = seen.length ? seen.join(', ') : 'NONE';
     return json({
-      error: 'Server missing GROQ_API_KEY',
-      diag: {
-        totalEnvKeys: Object.keys(process.env).length,
-        matchedKeys: seen,
-      },
+      error: `Server missing GROQ_API_KEY | envTotal=${total} | matched=${summary}`,
     }, 500);
   }
 
