@@ -376,8 +376,23 @@ export default async function handler(req) {
   if (!groqRes.ok) {
     const detail = await groqRes.text();
     console.error('Groq error:', groqRes.status, detail);
+    // On model_not_found, fetch the list of available models for this key
+    let availableModels = '';
+    if (groqRes.status === 404) {
+      try {
+        const listRes = await fetch('https://api.groq.com/openai/v1/models', {
+          headers: { 'Authorization': `Bearer ${apiKey}` },
+        });
+        if (listRes.ok) {
+          const listData = await listRes.json();
+          availableModels = ' | available=' + (listData.data || [])
+            .map((m) => m.id)
+            .join(', ');
+        }
+      } catch (_) { /* ignore */ }
+    }
     return json({
-      error: `Groq ${groqRes.status}: ${detail.slice(0, 400)}`,
+      error: `Groq ${groqRes.status}: ${detail.slice(0, 300)}${availableModels}`,
     }, 502);
   }
 
