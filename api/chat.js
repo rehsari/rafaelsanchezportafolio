@@ -157,7 +157,7 @@ function compactBrain(brain) {
     year: p.year,
     role: p.role,
     tools: p.tools,
-    context: p.context,
+    // context: p.context,         // [restore]
     problem: p.problem,
     // approach: p.approach,       // [restore]
     key_decisions: p.key_decisions,
@@ -244,7 +244,10 @@ export default async function handler(req) {
       tools: TOOLS,
       tool_choice: 'auto',
       temperature: 0.6,
-      max_tokens: 500,
+      // [NIBBLE_TRIM] Was 500. Groq counts reserved max_tokens toward TPM.
+      // NibbleLM answers should be short anyway (system prompt says so).
+      // To revert: bump back to 500.
+      max_tokens: 260,
     }),
   });
 
