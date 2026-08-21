@@ -26,7 +26,7 @@ try {
   if (url && token) {
     ratelimit = new Ratelimit({
       redis: new Redis({ url, token }),
-      limiter: Ratelimit.slidingWindow(20, '1 h'),
+      limiter: Ratelimit.slidingWindow(200, '1 h'),
       analytics: false,
     });
   }
@@ -35,7 +35,7 @@ try {
   ratelimit = null;
 }
 
-const MODEL = 'llama-3.1-8b-instant';
+const MODEL = 'openai/gpt-oss-120b';
 
 const TOOLS = [
   {
