@@ -962,7 +962,65 @@ footer {
    NIBBLE-LM · portfolio assistant · CRT terminal build
 ═══════════════════════════════════════════════════════════════════════ */
 
-/* Trigger — hard rectangle, mono uppercase, red tick + blinking dot */
+/* ──────────────────────────────────────────────────────────────────────
+   NIBBLE'S BODY — inverted-pyramid dot loader
+   4-3-2-1 = 10 dots. Two states via [data-state]:
+     idle       slow breath, cascade from point (row 4) outward
+     thinking   faster signal cascade, used as typing indicator
+   Size via .is-sm | .is-md | .is-lg | .is-xl (or override --nd/--ng)
+   Reduced-motion: dots hold at half-lit accent.
+────────────────────────────────────────────────────────────────────── */
+.nibble-dots {
+  --nd: 5px;
+  --ng: 2px;
+  --nc-dim: rgba(224,0,0,0.22);
+  --nc-lit: var(--accent);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ng);
+  flex-shrink: 0;
+  line-height: 0;
+}
+.nibble-dots.is-sm { --nd: 3px; --ng: 1px; }
+.nibble-dots.is-md { --nd: 5px; --ng: 2px; }
+.nibble-dots.is-lg { --nd: 8px; --ng: 3px; }
+.nibble-dots.is-xl { --nd: 12px; --ng: 4px; }
+.nibble-dots .ndr { display: flex; gap: var(--ng); line-height: 0; }
+.nibble-dots .ndr i {
+  display: block;
+  width: var(--nd);
+  height: var(--nd);
+  background: var(--nc-dim);
+  transition: background 0.2s ease;
+}
+.nibble-dots[data-state="idle"] .ndr i { animation: nd-idle 2.4s ease-in-out infinite; }
+.nibble-dots[data-state="idle"] .ndr:nth-child(4) i { animation-delay: 0s; }
+.nibble-dots[data-state="idle"] .ndr:nth-child(3) i { animation-delay: 0.18s; }
+.nibble-dots[data-state="idle"] .ndr:nth-child(2) i { animation-delay: 0.36s; }
+.nibble-dots[data-state="idle"] .ndr:nth-child(1) i { animation-delay: 0.54s; }
+@keyframes nd-idle {
+  0%, 100% { background: var(--nc-dim); }
+  45%, 55% { background: var(--nc-lit); }
+}
+.nibble-dots[data-state="thinking"] .ndr i { animation: nd-think 0.9s ease-in-out infinite; }
+.nibble-dots[data-state="thinking"] .ndr:nth-child(4) i { animation-delay: 0s; }
+.nibble-dots[data-state="thinking"] .ndr:nth-child(3) i { animation-delay: 0.08s; }
+.nibble-dots[data-state="thinking"] .ndr:nth-child(2) i { animation-delay: 0.16s; }
+.nibble-dots[data-state="thinking"] .ndr:nth-child(1) i { animation-delay: 0.24s; }
+@keyframes nd-think {
+  0%, 100% { background: var(--nc-dim); }
+  50%      { background: var(--nc-lit); box-shadow: 0 0 6px rgba(224,0,0,0.5); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nibble-dots .ndr i {
+    animation: none !important;
+    background: var(--nc-lit);
+    opacity: 0.5;
+  }
+}
+
+/* Trigger — hard rectangle, mono uppercase, pyramid body */
 #nibble-trigger {
   position: fixed;
   right: 24px;
@@ -984,31 +1042,12 @@ footer {
   transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
   box-shadow: 0 8px 32px rgba(0,0,0,0.55);
 }
-#nibble-trigger::before {
-  content: '';
-  width: 18px;
-  height: 1px;
-  background: var(--accent);
-  flex-shrink: 0;
-}
 #nibble-trigger:hover {
   border-color: var(--accent);
   background: rgba(224,0,0,0.05);
   color: var(--text);
 }
-#nibble-trigger .nibble-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 10px rgba(224,0,0,0.75);
-  animation: nibble-blink 1.4s steps(2, end) infinite;
-  flex-shrink: 0;
-}
-@keyframes nibble-blink {
-  0%, 49%   { opacity: 1; }
-  50%, 100% { opacity: 0.15; }
-}
+#nibble-trigger:hover .nibble-dots { --nc-lit: var(--accent); }
 body.nibble-open #nibble-trigger { opacity: 0; pointer-events: none; }
 
 /* Panel — hard geometry, scanline overlay, red left seam */
@@ -1116,35 +1155,68 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   align-items: center;
   gap: 12px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.35em;
   text-transform: uppercase;
   color: var(--accent);
   margin: 0;
 }
-.nibble-title::before {
-  content: '';
-  width: 20px;
-  height: 1px;
-  background: var(--accent);
-  flex-shrink: 0;
+.nibble-title-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
-.nibble-title .nibble-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px rgba(224,0,0,0.7);
-  animation: nibble-blink 1.4s steps(2, end) infinite;
-}
-.nibble-status {
-  margin-top: 10px;
+
+/* Info tooltip — small (i), hover reveals AI disclaimer */
+.nibble-info {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid rgba(232,228,220,0.32);
+  border-radius: 50%;
+  color: rgba(232,228,220,0.55);
   font-family: var(--font-mono);
   font-size: 9px;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: rgba(232,228,220,0.42);
+  line-height: 1;
+  cursor: help;
+  transition: border-color 0.18s ease, color 0.18s ease;
+  flex-shrink: 0;
 }
-.nibble-status .sep { color: rgba(232,228,220,0.2); margin: 0 8px; }
-.nibble-status .ok  { color: var(--accent2); }
+.nibble-info:hover,
+.nibble-info:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+  outline: none;
+}
+.nibble-info-tip {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: -6px;
+  width: 240px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent);
+  color: rgba(232,228,220,0.75);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  line-height: 1.55;
+  text-transform: none;
+  text-align: left;
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.nibble-info:hover .nibble-info-tip,
+.nibble-info:focus-visible .nibble-info-tip { opacity: 1; transform: translateY(0); }
 
 /* Close — mirrors .modal-close-x behavior */
 .nibble-close {
@@ -1192,6 +1264,19 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   flex-direction: column;
   gap: 24px;
   padding-top: 4px;
+}
+.nibble-presence {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 4px;
+}
+.nibble-presence-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(232,228,220,0.42);
 }
 .nibble-boot {
   font-family: var(--font-mono);
@@ -1400,14 +1485,14 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   color: var(--accent);
 }
 
-/* Typing indicator — sliding scan bars */
+/* Typing indicator — Nibble's pyramid body in "thinking" state */
 .nibble-typing {
   align-self: stretch;
   padding: 4px 0 4px 14px;
   border-left: 2px solid var(--accent);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 .nibble-typing::before {
   content: '> PROCESSING';
@@ -1417,22 +1502,6 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   letter-spacing: 0.32em;
   text-transform: uppercase;
   color: var(--accent);
-}
-.nibble-typing span {
-  display: inline-block;
-  width: 14px;
-  height: 2px;
-  margin-right: 4px;
-  background: rgba(224,0,0,0.55);
-  animation: nibble-bar 1.1s ease-in-out infinite;
-  border-radius: 0;
-  transform-origin: left center;
-}
-.nibble-typing span:nth-child(2) { animation-delay: 0.14s; }
-.nibble-typing span:nth-child(3) { animation-delay: 0.28s; }
-@keyframes nibble-bar {
-  0%, 100% { transform: scaleX(0.3); opacity: 0.35; }
-  50%      { transform: scaleX(1);   opacity: 1; }
 }
 
 /* Input — hard-edged terminal prompt */
@@ -1527,7 +1596,49 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   background: rgba(232,228,220,0.25);
 }
 
-/* Mobile takeover */
+/* Rugged bezel — serial-number label bottom-right of panel */
+.nibble-serial {
+  position: absolute;
+  right: 12px;
+  bottom: 6px;
+  z-index: 4;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(232,228,220,0.22);
+  pointer-events: none;
+  user-select: none;
+}
+/* Corner bracket marks — top-left and top-right of the panel bezel */
+.nibble-bezel {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  z-index: 4;
+  pointer-events: none;
+}
+.nibble-bezel.tl { top: 8px; left: 8px; border-top: 1px solid var(--accent); border-left: 1px solid var(--accent); }
+.nibble-bezel.tr { top: 8px; right: 8px; border-top: 1px solid var(--accent); border-right: 1px solid var(--accent); }
+.nibble-bezel.bl { bottom: 8px; left: 8px; border-bottom: 1px solid rgba(232,228,220,0.15); border-left: 1px solid rgba(232,228,220,0.15); }
+/* Chunkier left bezel — reads as a physical device edge */
+#nibble-panel { border-left-width: 2px; }
+
+/* Push-layout — desktop keeps site interactive; mobile stays overlay
+   Body gets padding-right when panel opens so flow content shifts left.
+   Fixed nav also shifts so it doesn't extend under the panel.        */
+@media (min-width: 641px) {
+  body {
+    transition: padding-right 0.36s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  body.nibble-open { padding-right: 420px; }
+  #mainnav { transition: right 0.36s cubic-bezier(0.22, 0.61, 0.36, 1); }
+  body.nibble-open #mainnav { right: 420px; }
+  /* Site remains visible + interactive — no dim backdrop on desktop */
+  body.nibble-open #nibble-backdrop { opacity: 0 !important; pointer-events: none !important; }
+}
+
+/* Mobile takeover — full overlay, backdrop dim, no push */
 @media (max-width: 640px) {
   #nibble-panel { width: 100vw; border-left: 0; }
   #nibble-trigger {
@@ -1537,8 +1648,8 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
     letter-spacing: 0.28em;
     gap: 10px;
   }
-  #nibble-trigger::before { width: 14px; }
   .nibble-empty-heading { font-size: 34px; }
+  .nibble-info-tip { width: 200px; left: auto; right: -6px; }
 }
 </style>
 </head>
@@ -3490,7 +3601,12 @@ if (heroTitle) {
      NIBBLE-LM · portfolio assistant
 ════════════════════════════════════════════════════════════════════ -->
 <button id="nibble-trigger" type="button" aria-label="Open NibbleLM assistant">
-  <span class="nibble-dot"></span>
+  <span class="nibble-dots is-sm" data-state="idle" aria-hidden="true">
+    <span class="ndr"><i></i><i></i><i></i><i></i></span>
+    <span class="ndr"><i></i><i></i><i></i></span>
+    <span class="ndr"><i></i><i></i></span>
+    <span class="ndr"><i></i></span>
+  </span>
   Ask NibbleLM
 </button>
 
@@ -3498,21 +3614,39 @@ if (heroTitle) {
 
 <aside id="nibble-panel" aria-hidden="true" aria-label="NibbleLM assistant panel">
   <div class="nibble-sweep" aria-hidden="true"></div>
+  <span class="nibble-bezel tl" aria-hidden="true"></span>
+  <span class="nibble-bezel tr" aria-hidden="true"></span>
+  <span class="nibble-bezel bl" aria-hidden="true"></span>
+  <span class="nibble-serial" aria-hidden="true">NBL-LM · UNIT 001 · REV.A</span>
   <div class="nibble-header">
     <div class="nibble-header-row">
-      <span class="nibble-title"><span class="nibble-dot"></span>NIBBLE-LM</span>
+      <span class="nibble-title-group">
+        <span class="nibble-dots is-sm" data-state="idle" aria-hidden="true">
+          <span class="ndr"><i></i><i></i><i></i><i></i></span>
+          <span class="ndr"><i></i><i></i><i></i></span>
+          <span class="ndr"><i></i><i></i></span>
+          <span class="ndr"><i></i></span>
+        </span>
+        <span class="nibble-title">NIBBLE-LM</span>
+        <button type="button" class="nibble-info" aria-label="About NibbleLM">
+          i
+          <span class="nibble-info-tip" role="tooltip">NibbleLM is an AI assistant. It can make mistakes about Rafael's work. Verify anything important.</span>
+        </button>
+      </span>
       <button class="nibble-close" id="nibble-close" type="button" aria-label="Close">✕</button>
-    </div>
-    <div class="nibble-status">
-      <span class="ok">◉ ONLINE</span>
-      <span class="sep">//</span>
-      <span>12 PROJECTS INDEXED</span>
-      <span class="sep">//</span>
-      <span>v1.0</span>
     </div>
   </div>
   <div class="nibble-body" id="nibble-body">
     <div class="nibble-empty" id="nibble-empty">
+      <div class="nibble-presence" aria-hidden="true">
+        <span class="nibble-dots is-xl" data-state="idle">
+          <span class="ndr"><i></i><i></i><i></i><i></i></span>
+          <span class="ndr"><i></i><i></i><i></i></span>
+          <span class="ndr"><i></i><i></i></span>
+          <span class="ndr"><i></i></span>
+        </span>
+        <span class="nibble-presence-label">Nibble // idle</span>
+      </div>
       <div class="nibble-boot" aria-hidden="true">
         <span class="l">&gt; INIT NIBBLE-LM.SYS</span>
         <span class="l">&gt; LOADING RAFAEL.INDEX ......... OK</span>
@@ -3626,7 +3760,13 @@ if (heroTitle) {
     removeEmpty();
     var el = document.createElement('div');
     el.className = 'nibble-typing';
-    el.innerHTML = '<span></span><span></span><span></span>';
+    el.innerHTML =
+      '<span class="nibble-dots is-md" data-state="thinking" aria-hidden="true">' +
+        '<span class="ndr"><i></i><i></i><i></i><i></i></span>' +
+        '<span class="ndr"><i></i><i></i><i></i></span>' +
+        '<span class="ndr"><i></i><i></i></span>' +
+        '<span class="ndr"><i></i></span>' +
+      '</span>';
     bodyEl.appendChild(el);
     bodyEl.scrollTop = bodyEl.scrollHeight;
     return el;
