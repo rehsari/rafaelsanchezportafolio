@@ -187,10 +187,23 @@ export default async function handler(req) {
     }
   }
 
-  return json({
-    content: (message.content || '').trim(),
-    toolCall,
-  });
+  let content = (message.content || '').trim();
+
+  /* Silent-open guard: gpt-oss-120b (and most tool-calling models) will
+     occasionally return a tool_call with an empty content field, even
+     though the system prompt tells Nibble to always give context. When
+     that happens, synthesize a short one-liner from the project brain
+     so the visitor always sees a "why" before the modal opens. */
+  if (!content && toolCall && toolCall.name === 'open_project') {
+    const project = PROJECTS_BRAIN.find((p) => p.id === toolCall.args.project_id);
+    if (project) {
+      content = `Opening ${project.title}. ${project.one_liner}`;
+    } else {
+      content = 'Opening that one now.';
+    }
+  }
+
+  return json({ content, toolCall });
 }
 
 function json(payload, status = 200) {
