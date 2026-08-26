@@ -1007,28 +1007,14 @@ footer {
    still works correctly with visually inverted rows. */
 .nibble-dots.is-flipped { flex-direction: column-reverse; }
 
-/* IDLE — diagonal wave with a "column rake" over peak intensity.
-   All dots share one 2.6s cycle. The DELAYS form a clean diagonal wave
-   sweeping top-left → bottom-right. The PEAK BRIGHTNESS zigzags per dot
-   (some peak full-lit, some peak half-lit) so the same wave never lands
-   with uniform intensity — this is the fake-randomness trick.
-   Zigzag pattern (F = full peak, H = half peak):
-     Row 1:  F H F H
-     Row 2:   H F H
-     Row 3:    F H
-     Row 4:     F                                                     */
+/* IDLE — clean diagonal wave, uniform peak brightness.
+   All dots share one 2.8s cycle and the same keyframe. Only the
+   animation-delay changes per dot, forming a smooth wave sweeping from
+   top-left to bottom-right of the pyramid. Slower cycle + ease-in-out
+   gives it a breathing quality without needing per-dot variation. */
 .nibble-dots[data-state="idle"] .ndr i {
-  animation: nd-wave-f 2.6s ease-in-out infinite;
+  animation: nd-wave 2.8s ease-in-out infinite;
 }
-/* Half-peak dots — same keyframe timing, softer brightness ceiling */
-.nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(2),
-.nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(4),
-.nibble-dots[data-state="idle"] .ndr:nth-child(2) i:nth-child(1),
-.nibble-dots[data-state="idle"] .ndr:nth-child(2) i:nth-child(3),
-.nibble-dots[data-state="idle"] .ndr:nth-child(3) i:nth-child(2) {
-  animation-name: nd-wave-h;
-}
-/* Diagonal wave delays — sweep top-left → bottom-right */
 .nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(1) { animation-delay: 0.00s; }
 .nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(2) { animation-delay: 0.16s; }
 .nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(3) { animation-delay: 0.32s; }
@@ -1039,13 +1025,9 @@ footer {
 .nibble-dots[data-state="idle"] .ndr:nth-child(3) i:nth-child(1) { animation-delay: 0.20s; }
 .nibble-dots[data-state="idle"] .ndr:nth-child(3) i:nth-child(2) { animation-delay: 0.36s; }
 .nibble-dots[data-state="idle"] .ndr:nth-child(4) i:nth-child(1) { animation-delay: 0.30s; }
-@keyframes nd-wave-f {
+@keyframes nd-wave {
   0%, 100% { background: var(--nc-dim); }
   50%      { background: var(--nc-lit); }
-}
-@keyframes nd-wave-h {
-  0%, 100% { background: var(--nc-dim); }
-  50%      { background: rgba(224,0,0,0.48); }
 }
 
 /* THINKING — fast cascade for the in-line typing indicator */
@@ -1079,16 +1061,18 @@ footer {
   10%, 20%  { background: var(--nc-lit); box-shadow: 0 0 5px rgba(224,0,0,0.55); }
 }
 
-/* TYPING — soft synchronized pulse across the whole pyramid.
-   Runs for as long as Nibble's response is being written out.
-   All dots share one 0.85s beat — reads as "the terminal is speaking". */
+/* TYPING — no CSS auto-loop. Dots hold dim; JS pulses them ONCE per
+   word as the response is being written. The rhythm of the pulses is
+   the rhythm of the words, so when the typing pauses (comma, period)
+   the pulse pauses with it. Semantic tie to what's being spoken. */
 .nibble-dots[data-state="typing"] .ndr i {
-  animation: nd-speak 0.85s ease-in-out infinite;
-  animation-delay: 0s !important;
+  animation: none !important;
+  background: var(--nc-dim);
+  transition: background 0.14s ease, box-shadow 0.14s ease;
 }
-@keyframes nd-speak {
-  0%, 100% { background: var(--nc-dim); box-shadow: none; }
-  50%      { background: var(--nc-lit); box-shadow: 0 0 4px rgba(224,0,0,0.4); }
+.nibble-dots[data-state="typing"] .ndr i.spk {
+  background: var(--nc-lit);
+  box-shadow: 0 0 4px rgba(224,0,0,0.42);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3785,15 +3769,29 @@ if (heroTitle) {
     });
   }
 
-  /* Terminal-style typing. Character-by-character with a small jitter so
-     the cadence feels human. Punctuation gets natural micro-pauses.
-     Dots pulse via the [data-state="typing"] CSS animation — no per-word
-     JS logic needed here. */
+  /* Terminal-style typing. On each new word we pulse the header +
+     presence dots together for ~180ms. The pulse fires at the first
+     character of a word so the flash coincides with the word appearing
+     — one blink per word, driven by the text itself. */
+  function speakPulse() {
+    var dots = document.querySelectorAll('.nibble-header .nibble-dots[data-state="typing"] .ndr i, .nibble-presence .nibble-dots[data-state="typing"] .ndr i');
+    dots.forEach(function(d) { d.classList.add('spk'); });
+    setTimeout(function() {
+      dots.forEach(function(d) { d.classList.remove('spk'); });
+    }, 180);
+  }
   function typeAssistantMessage(el, content, onDone) {
     var i = 0;
+    var atWordStart = true; // first character starts a word
     function tick() {
       if (i >= content.length) { if (onDone) onDone(); return; }
       var ch = content.charAt(i++);
+      var isSpace = (ch === ' ' || ch === '\n' || ch === '\t');
+      if (atWordStart && !isSpace) {
+        speakPulse();
+        atWordStart = false;
+      }
+      if (isSpace) atWordStart = true;
       el.textContent += ch;
       bodyEl.scrollTop = bodyEl.scrollHeight;
 
