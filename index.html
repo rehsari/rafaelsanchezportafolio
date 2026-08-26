@@ -1007,42 +1007,45 @@ footer {
    still works correctly with visually inverted rows. */
 .nibble-dots.is-flipped { flex-direction: column-reverse; }
 
-/* IDLE — "alive but resting".
-   Trick for organic randomness: each dot gets a unique coprime duration
-   (2.5s / 2.9s / 3.1s / 3.3s / 3.5s / 3.7s / 3.9s / 4.1s / 4.3s / 4.7s).
-   Because none of these share a common divisor, the 10 dots never sync
-   back to the same frame — the visual pattern is deterministic but
-   effectively non-repeating for minutes at a time. Two alternate
-   keyframes (breath-a = single peak, breath-b = double peak) rotate
-   across dots so the individual rhythms differ, not just their phase. */
+/* IDLE — diagonal wave with a "column rake" over peak intensity.
+   All dots share one 2.6s cycle. The DELAYS form a clean diagonal wave
+   sweeping top-left → bottom-right. The PEAK BRIGHTNESS zigzags per dot
+   (some peak full-lit, some peak half-lit) so the same wave never lands
+   with uniform intensity — this is the fake-randomness trick.
+   Zigzag pattern (F = full peak, H = half peak):
+     Row 1:  F H F H
+     Row 2:   H F H
+     Row 3:    F H
+     Row 4:     F                                                     */
 .nibble-dots[data-state="idle"] .ndr i {
-  animation-name: nd-breath-a;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
+  animation: nd-wave-f 2.6s ease-in-out infinite;
 }
-/* Row 1 (top, 4 dots) */
-.nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(1) { animation-duration: 3.7s; animation-delay: 0.00s; }
-.nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(2) { animation-duration: 4.3s; animation-delay: 0.90s; animation-name: nd-breath-b; }
-.nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(3) { animation-duration: 3.1s; animation-delay: 0.40s; }
-.nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(4) { animation-duration: 3.9s; animation-delay: 1.60s; }
-/* Row 2 (3 dots) */
-.nibble-dots[data-state="idle"] .ndr:nth-child(2) i:nth-child(1) { animation-duration: 4.1s; animation-delay: 1.10s; }
-.nibble-dots[data-state="idle"] .ndr:nth-child(2) i:nth-child(2) { animation-duration: 3.3s; animation-delay: 0.50s; animation-name: nd-breath-b; }
-.nibble-dots[data-state="idle"] .ndr:nth-child(2) i:nth-child(3) { animation-duration: 2.9s; animation-delay: 1.80s; }
-/* Row 3 (2 dots) */
-.nibble-dots[data-state="idle"] .ndr:nth-child(3) i:nth-child(1) { animation-duration: 3.5s; animation-delay: 0.30s; animation-name: nd-breath-b; }
-.nibble-dots[data-state="idle"] .ndr:nth-child(3) i:nth-child(2) { animation-duration: 4.7s; animation-delay: 1.30s; }
-/* Row 4 (point, 1 dot) */
-.nibble-dots[data-state="idle"] .ndr:nth-child(4) i:nth-child(1) { animation-duration: 2.5s; animation-delay: 0.70s; }
-@keyframes nd-breath-a {
+/* Half-peak dots — same keyframe timing, softer brightness ceiling */
+.nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(2),
+.nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(4),
+.nibble-dots[data-state="idle"] .ndr:nth-child(2) i:nth-child(1),
+.nibble-dots[data-state="idle"] .ndr:nth-child(2) i:nth-child(3),
+.nibble-dots[data-state="idle"] .ndr:nth-child(3) i:nth-child(2) {
+  animation-name: nd-wave-h;
+}
+/* Diagonal wave delays — sweep top-left → bottom-right */
+.nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(1) { animation-delay: 0.00s; }
+.nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(2) { animation-delay: 0.16s; }
+.nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(3) { animation-delay: 0.32s; }
+.nibble-dots[data-state="idle"] .ndr:nth-child(1) i:nth-child(4) { animation-delay: 0.48s; }
+.nibble-dots[data-state="idle"] .ndr:nth-child(2) i:nth-child(1) { animation-delay: 0.10s; }
+.nibble-dots[data-state="idle"] .ndr:nth-child(2) i:nth-child(2) { animation-delay: 0.26s; }
+.nibble-dots[data-state="idle"] .ndr:nth-child(2) i:nth-child(3) { animation-delay: 0.42s; }
+.nibble-dots[data-state="idle"] .ndr:nth-child(3) i:nth-child(1) { animation-delay: 0.20s; }
+.nibble-dots[data-state="idle"] .ndr:nth-child(3) i:nth-child(2) { animation-delay: 0.36s; }
+.nibble-dots[data-state="idle"] .ndr:nth-child(4) i:nth-child(1) { animation-delay: 0.30s; }
+@keyframes nd-wave-f {
   0%, 100% { background: var(--nc-dim); }
   50%      { background: var(--nc-lit); }
 }
-@keyframes nd-breath-b {
+@keyframes nd-wave-h {
   0%, 100% { background: var(--nc-dim); }
-  32%      { background: var(--nc-lit); }
-  58%      { background: rgba(224,0,0,0.32); }
-  74%      { background: var(--nc-lit); }
+  50%      { background: rgba(224,0,0,0.48); }
 }
 
 /* THINKING — fast cascade for the in-line typing indicator */
@@ -1076,13 +1079,16 @@ footer {
   10%, 20%  { background: var(--nc-lit); box-shadow: 0 0 5px rgba(224,0,0,0.55); }
 }
 
-/* TYPING — dots hold dim. JS pulses individual dots on word boundaries
-   as the response is typed out, so the rhythm reflects the words being
-   "spoken" instead of a repeating CSS heartbeat. Individual pulses use
-   inline styles that clear themselves after ~200ms. */
+/* TYPING — soft synchronized pulse across the whole pyramid.
+   Runs for as long as Nibble's response is being written out.
+   All dots share one 0.85s beat — reads as "the terminal is speaking". */
 .nibble-dots[data-state="typing"] .ndr i {
-  animation: none !important;
-  background: var(--nc-dim);
+  animation: nd-speak 0.85s ease-in-out infinite;
+  animation-delay: 0s !important;
+}
+@keyframes nd-speak {
+  0%, 100% { background: var(--nc-dim); box-shadow: none; }
+  50%      { background: var(--nc-lit); box-shadow: 0 0 4px rgba(224,0,0,0.4); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3779,56 +3785,10 @@ if (heroTitle) {
     });
   }
 
-  /* Word-rhythm pulse. During assistant typing, individual dots light up
-     on word boundaries and all dots flash on sentence ends. The pulse
-     rhythm is DRIVEN by the words being typed, not a fixed loop. */
-  var lastPulseIdx = -1;
-  function getPulseDots() {
-    var containers = document.querySelectorAll('.nibble-header .nibble-dots, .nibble-presence .nibble-dots');
-    var all = [];
-    containers.forEach(function(c) {
-      c.querySelectorAll('.ndr i').forEach(function(d) { all.push(d); });
-    });
-    return all;
-  }
-  function pulseDot(dot, dur) {
-    dot.style.background = 'var(--nc-lit)';
-    dot.style.boxShadow = '0 0 5px rgba(224,0,0,0.6)';
-    setTimeout(function() {
-      dot.style.background = '';
-      dot.style.boxShadow = '';
-    }, dur || 220);
-  }
-  function pulseRandomDot() {
-    var dots = getPulseDots();
-    if (!dots.length) return;
-    // Split by container so header + presence pulse different dots
-    var perContainer = {};
-    dots.forEach(function(d) {
-      var key = d.closest('.nibble-dots');
-      var idx = Array.prototype.indexOf.call(key.querySelectorAll('.ndr i'), d);
-      perContainer[key.className] = perContainer[key.className] || { c: key, arr: [] };
-      perContainer[key.className].arr.push({ dot: d, idx: idx });
-    });
-    Object.keys(perContainer).forEach(function(k) {
-      var arr = perContainer[k].arr;
-      var pick;
-      var attempts = 0;
-      do {
-        pick = arr[Math.floor(Math.random() * arr.length)];
-        attempts++;
-      } while (pick.idx === lastPulseIdx && arr.length > 1 && attempts < 4);
-      lastPulseIdx = pick.idx;
-      pulseDot(pick.dot, 220);
-    });
-  }
-  function pulseAllDots() {
-    getPulseDots().forEach(function(d) { pulseDot(d, 300); });
-  }
-
-  /* Terminal-style typing. Each character is written with a small jitter
-     so the cadence feels human. Spaces pulse a dot (word rhythm),
-     sentence-ending punctuation pulses all dots + adds a natural beat. */
+  /* Terminal-style typing. Character-by-character with a small jitter so
+     the cadence feels human. Punctuation gets natural micro-pauses.
+     Dots pulse via the [data-state="typing"] CSS animation — no per-word
+     JS logic needed here. */
   function typeAssistantMessage(el, content, onDone) {
     var i = 0;
     function tick() {
@@ -3839,17 +3799,15 @@ if (heroTitle) {
 
       var delay;
       if (ch === ' ') {
-        pulseRandomDot();
-        delay = 26;
+        delay = 16;
       } else if (ch === '.' || ch === '!' || ch === '?') {
-        pulseAllDots();
-        delay = 240;
+        delay = 160;
       } else if (ch === ',' || ch === ';' || ch === ':') {
-        delay = 120;
+        delay = 90;
       } else if (ch === '\n') {
-        delay = 200;
+        delay = 140;
       } else {
-        delay = 14 + Math.random() * 18;
+        delay = 8 + Math.random() * 12;
       }
       setTimeout(tick, delay);
     }
