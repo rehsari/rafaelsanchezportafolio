@@ -1551,14 +1551,65 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   color: var(--accent);
 }
 
-/* Typing indicator — Nibble's pyramid body in "thinking" state */
+/* Typing indicator — text-only "> PROCESSING" with a small blinking
+   ellipsis. The header pyramid handles the visual heartbeat during
+   loading, so the body just needs to show that the request is alive. */
 .nibble-typing {
   align-self: stretch;
   padding: 4px 0 4px 14px;
   border-left: 2px solid var(--accent);
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 10px;
+}
+.nibble-typing::before { flex-shrink: 0; }
+.nibble-ellipsis {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+.nibble-ellipsis i {
+  display: block;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.35;
+  animation: nibble-dot-blink 1.1s ease-in-out infinite;
+}
+.nibble-ellipsis i:nth-child(2) { animation-delay: 0.18s; }
+.nibble-ellipsis i:nth-child(3) { animation-delay: 0.36s; }
+@keyframes nibble-dot-blink {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 1; }
+}
+
+/* Follow-up chips — a lighter suggestion row appended after some
+   assistant replies. Keeps the conversation going without shoving
+   the visitor toward next steps every single turn. */
+.nibble-followup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 0 6px 14px;
+  margin-top: -4px;
+}
+.nibble-followup button {
+  background: transparent;
+  border: 1px solid rgba(232,228,220,0.16);
+  border-radius: 0;
+  color: rgba(232,228,220,0.7);
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.3;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  text-align: left;
+}
+.nibble-followup button:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  background: rgba(224,0,0,0.06);
 }
 .nibble-typing::before {
   content: '> PROCESSING';
@@ -3704,17 +3755,7 @@ if (heroTitle) {
       <button class="nibble-close" id="nibble-close" type="button" aria-label="Close">✕</button>
     </div>
   </div>
-  <div class="nibble-body" id="nibble-body">
-    <div class="nibble-empty" id="nibble-empty">
-      <div class="nibble-msg assistant">Hey, I'm NibbleLM. I only know what's on Rafael's portfolio, but ask about his work and I'll point you to the right project.</div>
-      <div class="nibble-suggested">
-        <div class="nibble-suggested-label">Try</div>
-        <button type="button" data-prompt="What should I look at first as a recruiter?">What should I look at first as a recruiter?</button>
-        <button type="button" data-prompt="Show me his strongest product design work">Show me his strongest product design work</button>
-        <button type="button" data-prompt="How does he approach research and problem framing?">How does he approach research and problem framing?</button>
-      </div>
-    </div>
-  </div>
+  <div class="nibble-body" id="nibble-body"></div>
   <div class="nibble-input-wrap">
     <div class="nibble-input-row">
       <textarea class="nibble-input" id="nibble-input" rows="1" placeholder="ASK ANYTHING..."></textarea>
@@ -3731,7 +3772,6 @@ if (heroTitle) {
   var backdrop = document.getElementById('nibble-backdrop');
   var closeBtn = document.getElementById('nibble-close');
   var bodyEl  = document.getElementById('nibble-body');
-  var emptyEl = document.getElementById('nibble-empty');
   var input   = document.getElementById('nibble-input');
   var sendBtn = document.getElementById('nibble-send');
   var modalEl = document.getElementById('modal');
@@ -3739,6 +3779,44 @@ if (heroTitle) {
   var history = [];
   var currentProjectId = null;
   var inFlight = false;
+  var greeted = false;
+  var initialSuggestionsEl = null;
+  var assistantReplyCount = 0;   // counts real API replies, not the greeting
+  var usedSuggestions = [];
+
+  /* Curated pool of questions a recruiter / hiring manager / peer designer
+     might actually ask when landing on a portfolio. Rotated on each fresh
+     open so the panel doesn't feel scripted. */
+  var SUGGESTION_POOL = [
+    "What should I look at first?",
+    "Show me his strongest product work",
+    "Walk me through his design process",
+    "What role is he looking for next?",
+    "Tell me about a project that didn't go to plan",
+    "How does he collaborate with engineers?",
+    "What is he working on right now?",
+    "How does he approach research?",
+    "Does he write code himself?",
+    "What's his most technical project?",
+    "How does he handle stakeholder feedback?",
+    "Show me a project with measurable impact",
+    "What kind of team does he do his best work on?",
+    "What's a decision he'd defend from one of his projects?"
+  ];
+
+  function pickSuggestions(n) {
+    var avail = SUGGESTION_POOL.filter(function(q) {
+      return usedSuggestions.indexOf(q) === -1;
+    });
+    if (avail.length < n) { usedSuggestions = []; avail = SUGGESTION_POOL.slice(); }
+    var picked = [];
+    while (picked.length < n && avail.length) {
+      var i = Math.floor(Math.random() * avail.length);
+      picked.push(avail.splice(i, 1)[0]);
+    }
+    usedSuggestions = usedSuggestions.concat(picked);
+    return picked;
+  }
 
   /* Nibble presence — smoothly re-light the header + big-body dots to
      a new state instead of hard-switching CSS animations. Fades to a
@@ -3798,12 +3876,74 @@ if (heroTitle) {
     tick();
   }
   function addAssistantMessage(content, onDone) {
-    removeEmpty();
+    clearInitialSuggestions();
     var el = document.createElement('div');
     el.className = 'nibble-msg assistant';
     bodyEl.appendChild(el);
     typeAssistantMessage(el, content, onDone);
     return el;
+  }
+
+  /* Greeting — same terminal-typing effect as a real assistant reply,
+     with header dots in typing state so the pulse matches the words.
+     Fires once per page load, when the panel first opens. */
+  function greet() {
+    if (greeted) return;
+    greeted = true;
+    var greeting = "Hey. NibbleLM here. I only know what's on this portfolio, but that turns out to be a lot: Rafael's projects, how he thinks, what he's after next. Where do you want to start?";
+    setPresenceState('typing');
+    addAssistantMessage(greeting, function() {
+      setPresenceState('idle');
+      renderInitialSuggestions();
+    });
+  }
+
+  function renderInitialSuggestions() {
+    var picks = pickSuggestions(3);
+    var wrap = document.createElement('div');
+    wrap.className = 'nibble-suggested';
+    var label = document.createElement('div');
+    label.className = 'nibble-suggested-label';
+    label.textContent = 'Try';
+    wrap.appendChild(label);
+    picks.forEach(function(q) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = q;
+      b.addEventListener('click', function() { sendMessage(q); });
+      wrap.appendChild(b);
+    });
+    bodyEl.appendChild(wrap);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+    initialSuggestionsEl = wrap;
+  }
+
+  function clearInitialSuggestions() {
+    if (initialSuggestionsEl && initialSuggestionsEl.parentNode) {
+      initialSuggestionsEl.parentNode.removeChild(initialSuggestionsEl);
+    }
+    initialSuggestionsEl = null;
+  }
+
+  /* Follow-up chips — render after every other real assistant reply,
+     so the visitor gets fresh ideas without being funneled every turn. */
+  function renderFollowup() {
+    var picks = pickSuggestions(2);
+    if (!picks.length) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'nibble-followup';
+    picks.forEach(function(q) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = q;
+      b.addEventListener('click', function() {
+        wrap.parentNode && wrap.parentNode.removeChild(wrap);
+        sendMessage(q);
+      });
+      wrap.appendChild(b);
+    });
+    bodyEl.appendChild(wrap);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
   }
 
   /* Track which project is currently open (for pageContext) */
@@ -3825,6 +3965,7 @@ if (heroTitle) {
     document.body.classList.add('nibble-open');
     panel.setAttribute('aria-hidden', 'false');
     setTimeout(function() { input.focus(); }, 220);
+    if (!greeted) setTimeout(greet, 260);
   }
   function closePanel() {
     document.body.classList.remove('nibble-open');
@@ -3835,13 +3976,6 @@ if (heroTitle) {
   backdrop.addEventListener('click', closePanel);
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && document.body.classList.contains('nibble-open')) closePanel();
-  });
-
-  /* Suggested prompts */
-  document.querySelectorAll('.nibble-suggested button').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      sendMessage(btn.getAttribute('data-prompt'));
-    });
   });
 
   /* Input handling */
@@ -3862,11 +3996,8 @@ if (heroTitle) {
   });
 
   /* Rendering */
-  function removeEmpty() {
-    if (emptyEl && emptyEl.parentNode) emptyEl.parentNode.removeChild(emptyEl);
-  }
   function addMessage(role, content) {
-    removeEmpty();
+    clearInitialSuggestions();
     var el = document.createElement('div');
     el.className = 'nibble-msg ' + role;
     el.textContent = content;
@@ -3875,16 +4006,9 @@ if (heroTitle) {
     return el;
   }
   function addTyping() {
-    removeEmpty();
     var el = document.createElement('div');
     el.className = 'nibble-typing';
-    el.innerHTML =
-      '<span class="nibble-dots is-md is-flipped" data-state="thinking" aria-hidden="true">' +
-        '<span class="ndr"><i></i><i></i><i></i><i></i></span>' +
-        '<span class="ndr"><i></i><i></i><i></i></span>' +
-        '<span class="ndr"><i></i><i></i></span>' +
-        '<span class="ndr"><i></i></span>' +
-      '</span>';
+    el.innerHTML = '<span class="nibble-ellipsis" aria-hidden="true"><i></i><i></i><i></i></span>';
     bodyEl.appendChild(el);
     bodyEl.scrollTop = bodyEl.scrollHeight;
     return el;
@@ -3942,6 +4066,10 @@ if (heroTitle) {
             setTimeout(function() { openProjectById(toolCall.args.project_id); }, 700);
           }
           setPresenceState('idle');
+          assistantReplyCount++;
+          /* Show follow-up chips after every other reply, and never when
+             we just opened a project (visitor's attention is elsewhere). */
+          if (!toolCall && assistantReplyCount % 2 === 1) renderFollowup();
         });
       } else if (toolCall && toolCall.name === 'open_project') {
         openProjectById(toolCall.args.project_id);
