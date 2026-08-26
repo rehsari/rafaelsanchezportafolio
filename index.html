@@ -1706,6 +1706,94 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
 /* Chunkier left bezel — reads as a physical device edge */
 #nibble-panel { border-left-width: 2px; }
 
+/* ─── EASTER EGG · SHINY MODE ──────────────────────────────────────
+   Remaps --accent from red to cyan. Everything downstream (Nibble
+   dots, panel seams, CRT bg canvas, buttons, borders) inherits it. */
+body.shiny {
+  --accent: #00d4d4;
+  --accent2: #00d4d4;
+}
+body.shiny .nibble-dots {
+  --nc-lit: #00d4d4;
+  --nc-dim: rgba(0,212,212,0.36);
+}
+
+/* ─── EASTER EGG · NIBBLE SNAKE ────────────────────────────────────
+   Fullscreen overlay. Canvas is min(80vmin, 480px) so it fits on
+   mobile portrait without cropping. Escape or the X button returns. */
+#nibble-snake {
+  position: fixed; inset: 0;
+  z-index: 10000;
+  background: var(--bg);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+}
+body.snake-open { overflow: hidden; }
+body.snake-open #nibble-snake { display: flex; }
+.ns-header {
+  position: absolute;
+  top: 20px; left: 20px; right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ns-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: var(--text);
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.ns-title::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: nibble-dot-blink 1.1s ease-in-out infinite;
+}
+.ns-score {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: var(--accent);
+}
+.ns-close {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease;
+  line-height: 1;
+}
+.ns-close:hover { border-color: var(--accent); background: rgba(224,0,0,0.06); }
+body.shiny .ns-close:hover { background: rgba(0,212,212,0.08); }
+#ns-canvas {
+  width: min(80vmin, 480px);
+  height: min(80vmin, 480px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  touch-action: none;
+  display: block;
+}
+.ns-hint {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(232,228,220,0.4);
+  text-align: center;
+}
+@media (max-width: 600px) {
+  .ns-header { top: 12px; left: 12px; right: 12px; }
+}
+
 /* Push-layout — desktop keeps site interactive; mobile stays overlay
    Body gets padding-right when panel opens so flow content shifts left.
    Fixed nav also shifts so it doesn't extend under the panel.        */
@@ -3727,6 +3815,19 @@ if (heroTitle) {
   </div>
 </aside>
 
+<!-- ═══════════════════════════════════════════════════════════════════
+     NIBBLE SNAKE · easter egg minigame
+════════════════════════════════════════════════════════════════════ -->
+<div id="nibble-snake" aria-hidden="true">
+  <div class="ns-header">
+    <span class="ns-title">NIBBLE // SNAKE</span>
+    <span class="ns-score" id="ns-score">000</span>
+    <button class="ns-close" id="ns-close" type="button" aria-label="Close">✕ EXIT</button>
+  </div>
+  <canvas id="ns-canvas" width="400" height="400"></canvas>
+  <div class="ns-hint">ARROWS · WASD · SWIPE &nbsp;·&nbsp; ESC TO EXIT</div>
+</div>
+
 <script>
 (function() {
   var trigger = document.getElementById('nibble-trigger');
@@ -3977,9 +4078,92 @@ if (heroTitle) {
     return el;
   }
 
+  /* ─── EASTER EGGS ────────────────────────────────────────────────
+     Intercepted entirely on the client. Two hidden things:
+       1. Shiny mode — flips the accent from red to cyan
+       2. Nibble Snake — opens a canvas minigame overlay
+     Trigger phrases pattern-match on user input; if hit, we skip the
+     API call, add a user message + Nibble reply, and render special
+     chip buttons that run local actions instead of sending messages. */
+  var EGG_TRIGGER = /(easter[\s-]?eggs?|any secrets?|secret|hidden|surprise me|show me something (cool|hidden|weird)|anything (cool|hidden|secret))/i;
+  var SHINY_OFF   = /(go back|revert|turn (it|shiny) off|make it red|undo shiny|normal (mode|colou?r)|red again)/i;
+
+  function maybeEasterEgg(text) {
+    // Shiny revert takes priority if it's currently on
+    if (document.body.classList.contains('shiny') && SHINY_OFF.test(text)) {
+      input.value = ''; input.style.height = 'auto';
+      addMessage('user', text);
+      history.push({ role: 'user', content: text });
+      setPresenceState('typing');
+      addAssistantMessage("Back to red. Nothing to see here.", function() {
+        disableShinyMode();
+        setPresenceState('idle');
+      });
+      return true;
+    }
+    if (!EGG_TRIGGER.test(text)) return false;
+    input.value = ''; input.style.height = 'auto';
+    addMessage('user', text);
+    history.push({ role: 'user', content: text });
+    setPresenceState('typing');
+    addAssistantMessage(
+      "OK, I'm not really supposed to show these, but there are two hidden things around here. Pick one?",
+      function() {
+        setPresenceState('idle');
+        renderEggChips();
+      }
+    );
+    return true;
+  }
+
+  function renderEggChips() {
+    var wrap = document.createElement('div');
+    wrap.className = 'nibble-followup';
+    [
+      { label: 'Try shiny mode',     run: enableShinyMode },
+      { label: 'Play Nibble Snake',  run: openSnake }
+    ].forEach(function(egg) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = egg.label;
+      b.addEventListener('click', function() {
+        wrap.parentNode && wrap.parentNode.removeChild(wrap);
+        egg.run();
+      });
+      wrap.appendChild(b);
+    });
+    bodyEl.appendChild(wrap);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+  }
+
+  function enableShinyMode() {
+    document.body.classList.add('shiny');
+    setPresenceState('typing');
+    addAssistantMessage(
+      "Done. Everything red is now cyan. Say 'go back' when you want the red back, or just refresh the page.",
+      function() { setPresenceState('idle'); }
+    );
+  }
+
+  function disableShinyMode() {
+    document.body.classList.remove('shiny');
+  }
+
+  function openSnake() {
+    setPresenceState('typing');
+    addAssistantMessage(
+      "Loading Nibble Snake. Try not to eat yourself.",
+      function() {
+        setPresenceState('idle');
+        if (window.NibbleSnake) window.NibbleSnake.open();
+      }
+    );
+  }
+
   /* Send */
   function sendMessage(text) {
     if (inFlight) return;
+    if (maybeEasterEgg(text)) return;
     inFlight = true;
     sendBtn.disabled = true;
 
@@ -4059,6 +4243,214 @@ if (heroTitle) {
     card.click();
   }
 
+})();
+
+/* ═══════════════════════════════════════════════════════════════════
+   NIBBLE SNAKE · easter egg minigame
+   Self-contained. Exposes window.NibbleSnake.open() / .close().
+   Grid: 20x20 cells. Snake segments render as nibble dots (circles)
+   using the current --accent so shiny mode carries into the game.
+   Controls: arrow keys, WASD, and swipe on touch devices.
+═══════════════════════════════════════════════════════════════════ */
+(function() {
+  var COLS = 20, ROWS = 20;
+  var overlay = document.getElementById('nibble-snake');
+  var canvas  = document.getElementById('ns-canvas');
+  var scoreEl = document.getElementById('ns-score');
+  var closeBtn = document.getElementById('ns-close');
+  if (!overlay || !canvas) return;
+  var ctx = canvas.getContext('2d');
+
+  var snake, dir, nextDir, food, timer, score, cell, gameOver;
+  var TICK_MS = 130;
+
+  function resize() {
+    // Match backing store to CSS size for crisp rendering
+    var rect = canvas.getBoundingClientRect();
+    var size = Math.floor(Math.min(rect.width, rect.height));
+    canvas.width = size;
+    canvas.height = size;
+    cell = size / COLS;
+    draw();
+  }
+
+  function reset() {
+    snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+    dir = {x:1, y:0};
+    nextDir = dir;
+    score = 0;
+    gameOver = false;
+    spawnFood();
+    updateScore();
+  }
+
+  function spawnFood() {
+    while (true) {
+      var f = {x: Math.floor(Math.random()*COLS), y: Math.floor(Math.random()*ROWS)};
+      var hit = false;
+      for (var i = 0; i < snake.length; i++) {
+        if (snake[i].x === f.x && snake[i].y === f.y) { hit = true; break; }
+      }
+      if (!hit) { food = f; return; }
+    }
+  }
+
+  function tick() {
+    if (gameOver) return;
+    dir = nextDir;
+    var head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
+    // wall collision
+    if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) return end();
+    // self collision
+    for (var i = 0; i < snake.length; i++) {
+      if (snake[i].x === head.x && snake[i].y === head.y) return end();
+    }
+    snake.unshift(head);
+    if (head.x === food.x && head.y === food.y) {
+      score++;
+      updateScore();
+      spawnFood();
+    } else {
+      snake.pop();
+    }
+    draw();
+  }
+
+  function accent() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#e00000';
+  }
+
+  function draw() {
+    var a = accent();
+    // background
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#111';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // faint grid dots
+    ctx.fillStyle = 'rgba(232,228,220,0.05)';
+    for (var i = 0; i < COLS; i++) {
+      for (var j = 0; j < ROWS; j++) {
+        ctx.fillRect(i*cell + cell/2 - 1, j*cell + cell/2 - 1, 1.5, 1.5);
+      }
+    }
+    // food (pulsing halo)
+    ctx.fillStyle = a;
+    dot(food.x, food.y, cell * 0.32);
+    ctx.globalAlpha = 0.25;
+    dot(food.x, food.y, cell * 0.5);
+    ctx.globalAlpha = 1;
+    // snake — head brighter, tail fades
+    for (var k = 0; k < snake.length; k++) {
+      var alpha = k === 0 ? 1 : Math.max(0.35, 1 - k * 0.045);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = a;
+      dot(snake[k].x, snake[k].y, k === 0 ? cell * 0.38 : cell * 0.32);
+    }
+    ctx.globalAlpha = 1;
+    // game-over overlay
+    if (gameOver) {
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = a;
+      ctx.textAlign = 'center';
+      ctx.font = '600 22px "JetBrains Mono", monospace';
+      ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2 - 14);
+      ctx.fillStyle = '#e8e4dc';
+      ctx.font = '12px "JetBrains Mono", monospace';
+      ctx.fillText('SCORE ' + String(score).padStart(3, '0'), canvas.width/2, canvas.height/2 + 14);
+      ctx.fillStyle = 'rgba(232,228,220,0.55)';
+      ctx.fillText('TAP OR PRESS ANY KEY TO REPLAY', canvas.width/2, canvas.height/2 + 40);
+    }
+  }
+
+  function dot(cx, cy, r) {
+    ctx.beginPath();
+    ctx.arc(cx*cell + cell/2, cy*cell + cell/2, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function updateScore() {
+    scoreEl.textContent = String(score).padStart(3, '0');
+  }
+
+  function end() {
+    gameOver = true;
+    draw();
+  }
+
+  function start() {
+    stop();
+    timer = setInterval(tick, TICK_MS);
+  }
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+  }
+
+  function open() {
+    document.body.classList.add('snake-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    // Wait a frame so layout is applied before we measure the canvas
+    requestAnimationFrame(function() {
+      resize();
+      reset();
+      draw();
+      start();
+    });
+  }
+  function close() {
+    stop();
+    document.body.classList.remove('snake-open');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+
+  function setDir(d) {
+    // block reversing into yourself
+    if (d.x === -dir.x && d.y === -dir.y) return;
+    nextDir = d;
+  }
+
+  // Keyboard
+  document.addEventListener('keydown', function(e) {
+    if (!document.body.classList.contains('snake-open')) return;
+    if (e.key === 'Escape') { close(); return; }
+    if (gameOver) { reset(); start(); e.preventDefault(); return; }
+    var k = e.key;
+    if (k === 'ArrowUp'    || k === 'w' || k === 'W') { setDir({x:0,y:-1}); e.preventDefault(); }
+    else if (k === 'ArrowDown'  || k === 's' || k === 'S') { setDir({x:0,y:1});  e.preventDefault(); }
+    else if (k === 'ArrowLeft'  || k === 'a' || k === 'A') { setDir({x:-1,y:0}); e.preventDefault(); }
+    else if (k === 'ArrowRight' || k === 'd' || k === 'D') { setDir({x:1,y:0});  e.preventDefault(); }
+  });
+
+  // Touch / swipe
+  var touchStart = null;
+  canvas.addEventListener('touchstart', function(e) {
+    if (gameOver) { reset(); start(); return; }
+    var t = e.touches[0];
+    touchStart = {x: t.clientX, y: t.clientY};
+  }, {passive: true});
+  canvas.addEventListener('touchmove', function(e) {
+    if (!touchStart) return;
+    e.preventDefault(); // stop page scroll while playing
+  }, {passive: false});
+  canvas.addEventListener('touchend', function(e) {
+    if (!touchStart) return;
+    var t = e.changedTouches[0];
+    var dx = t.clientX - touchStart.x;
+    var dy = t.clientY - touchStart.y;
+    touchStart = null;
+    if (Math.abs(dx) < 18 && Math.abs(dy) < 18) return; // tap, not swipe
+    if (Math.abs(dx) > Math.abs(dy)) setDir({x: dx > 0 ? 1 : -1, y: 0});
+    else                             setDir({x: 0, y: dy > 0 ? 1 : -1});
+  });
+
+  // Close button
+  closeBtn.addEventListener('click', close);
+
+  // Handle viewport changes
+  window.addEventListener('resize', function() {
+    if (document.body.classList.contains('snake-open')) resize();
+  });
+
+  window.NibbleSnake = { open: open, close: close };
 })();
 </script>
 
