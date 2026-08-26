@@ -1499,44 +1499,6 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   content: '> NIBBLE-LM';
   color: var(--accent);
 }
-.nibble-msg.assistant a.nibble-open-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 12px;
-  padding: 9px 14px;
-  background: transparent;
-  color: var(--text);
-  border: 1px solid var(--accent);
-  border-radius: 0;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease;
-}
-.nibble-msg.assistant a.nibble-open-btn::before {
-  content: '';
-  width: 14px;
-  height: 1px;
-  background: var(--accent);
-  transition: background 0.18s ease;
-}
-.nibble-msg.assistant a.nibble-open-btn::after {
-  content: '↗\FE0E';
-  font-size: 11px;
-  color: var(--accent);
-  transition: color 0.18s ease;
-}
-.nibble-msg.assistant a.nibble-open-btn:hover {
-  background: var(--accent);
-  color: #fff;
-}
-.nibble-msg.assistant a.nibble-open-btn:hover::before { background: #fff; }
-.nibble-msg.assistant a.nibble-open-btn:hover::after  { color: #fff; }
-
 .nibble-msg.error {
   align-self: stretch;
   padding: 4px 0 4px 14px;
@@ -3784,24 +3746,25 @@ if (heroTitle) {
   var assistantReplyCount = 0;   // counts real API replies, not the greeting
   var usedSuggestions = [];
 
-  /* Curated pool of questions a recruiter / hiring manager / peer designer
-     might actually ask when landing on a portfolio. Rotated on each fresh
-     open so the panel doesn't feel scripted. */
+  /* Curated pool grounded in what Nibble's brain actually contains
+     (title, one_liner, role, tools, context, problem, approach,
+     key_decisions, outcomes, skills_proven). Questions that would
+     force Nibble to guess (team fit, stakeholder stories, projects
+     that failed) are deliberately excluded — the pool only surfaces
+     things the portfolio can back up. Rotated per session. */
   var SUGGESTION_POOL = [
     "What should I look at first?",
     "Show me his strongest product work",
-    "Walk me through his design process",
-    "What role is he looking for next?",
-    "Tell me about a project that didn't go to plan",
-    "How does he collaborate with engineers?",
-    "What is he working on right now?",
-    "How does he approach research?",
-    "Does he write code himself?",
     "What's his most technical project?",
-    "How does he handle stakeholder feedback?",
+    "Walk me through his design process",
     "Show me a project with measurable impact",
-    "What kind of team does he do his best work on?",
-    "What's a decision he'd defend from one of his projects?"
+    "What tools does he work in?",
+    "Does he write code himself?",
+    "What kinds of problems does he like to solve?",
+    "Which project best shows his research?",
+    "Tell me about a tough call he made on a project",
+    "What's his most ambitious project?",
+    "Which project would you show a hiring manager?"
   ];
 
   function pickSuggestions(n) {
@@ -4059,17 +4022,17 @@ if (heroTitle) {
         /* Terminal-typing state: dots hold dim, JS pulses them per word. */
         setPresenceState('typing');
         var el = addAssistantMessage(content, function() {
-          if (toolCall && toolCall.name === 'open_project') {
-            el.insertAdjacentHTML('beforeend',
-              '<br><a class="nibble-open-btn" data-open-project="' + toolCall.args.project_id + '">Open project</a>'
-            );
-            setTimeout(function() { openProjectById(toolCall.args.project_id); }, 700);
-          }
           setPresenceState('idle');
           assistantReplyCount++;
-          /* Show follow-up chips after every other reply, and never when
-             we just opened a project (visitor's attention is elsewhere). */
-          if (!toolCall && assistantReplyCount % 2 === 1) renderFollowup();
+          if (toolCall && toolCall.name === 'open_project') {
+            /* Context has finished typing. Give the visitor a short beat
+               to register the "why", then auto-open the modal. No button —
+               context + auto-open reads as one confident gesture. */
+            setTimeout(function() { openProjectById(toolCall.args.project_id); }, 550);
+          } else if (assistantReplyCount % 2 === 1) {
+            /* Follow-up chips only on non-project replies, every other turn. */
+            renderFollowup();
+          }
         });
       } else if (toolCall && toolCall.name === 'open_project') {
         openProjectById(toolCall.args.project_id);
@@ -4096,13 +4059,6 @@ if (heroTitle) {
     card.click();
   }
 
-  /* Delegate clicks on the inline "Open project" button */
-  bodyEl.addEventListener('click', function(e) {
-    var btn = e.target.closest('[data-open-project]');
-    if (!btn) return;
-    e.preventDefault();
-    openProjectById(btn.getAttribute('data-open-project'));
-  });
 })();
 </script>
 

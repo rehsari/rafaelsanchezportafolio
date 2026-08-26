@@ -189,11 +189,22 @@ export default async function handler(req) {
 
   let content = (message.content || '').trim();
 
-  /* Silent-open guard: gpt-oss-120b (and most tool-calling models) will
-     occasionally return a tool_call with an empty content field, even
-     though the system prompt tells Nibble to always give context. When
-     that happens, synthesize a short one-liner from the project brain
-     so the visitor always sees a "why" before the modal opens. */
+  /* JSON-leak guard: gpt-oss-120b occasionally emits its intended tool
+     call as a raw JSON blob inside content (e.g. `{ "project_id": "..." }`)
+     instead of using the tool_calls array. Detect that, promote it to
+     a real toolCall, and strip it from the visible text. */
+  if (!toolCall && content) {
+    const leak = content.match(/\{\s*["']?project_id["']?\s*:\s*["']([^"']+)["']\s*\}/);
+    if (leak && PROJECT_IDS.includes(leak[1])) {
+      toolCall = { name: 'open_project', args: { project_id: leak[1] } };
+      content = content.replace(leak[0], '').trim();
+    }
+  }
+
+  /* Silent-open guard: even with a valid tool call, the model often
+     returns an empty content field. Synthesize a short one-liner from
+     the project brain so the visitor always sees a "why" before the
+     modal opens. */
   if (!content && toolCall && toolCall.name === 'open_project') {
     const project = PROJECTS_BRAIN.find((p) => p.id === toolCall.args.project_id);
     if (project) {
