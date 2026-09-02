@@ -312,6 +312,71 @@ video::-webkit-media-controls-panel { display: none !important; }
 .pcard[data-id="green"]   .card-ov { background: linear-gradient(to top, rgba(10,120,30,0.65) 0%, transparent 50%); }
 .pcard[data-id="lblue"]   .card-ov { background: linear-gradient(to top, rgba(30,110,210,0.65) 0%, transparent 50%); }
 
+/* Snapchat yellow — solid brand color, black type inside.
+   Hover behavior (zoom + brightness bump) is inherited from the base
+   .pcard rules so the interaction stays consistent with every other
+   card in the grid. */
+.pcard[data-id="snapyellow"] { background: #fffc00; }
+.pcard[data-id="snapyellow"] .card-bg { background-color: #fffc00; }
+.pcard[data-id="snapyellow"] .card-ov { background: linear-gradient(to top, rgba(0,0,0,0.08) 0%, transparent 50%); }
+.pcard[data-id="snapyellow"] .card-cat { color: rgba(0,0,0,0.55); }
+.pcard[data-id="snapyellow"] .card-name { color: #0a0a0a; }
+.pcard[data-id="snapyellow"] .card-arr { color: #0a0a0a; border-color: rgba(0,0,0,0.25); }
+
+/* Coming-soon state — non-clickable card with a mono status pill */
+.pcard.coming-soon { cursor: default; }
+.pcard.coming-soon:hover .card-name { transform: translateY(6px); }
+.pcard .card-badge {
+  position: absolute;
+  top: 18px; left: 18px;
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  padding: 7px 11px 6px;
+  background: #0a0a0a;
+  color: #ffffff;
+  border: 1px solid var(--accent);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.45);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.pcard .card-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: nibble-dot-blink 1.4s ease-in-out infinite;
+}
+
+/* Small legal / attribution line — mono, matches .card-cat rhythm.
+   Used top-left on the Snapchat card for the copyright notice.
+   The © glyph is scaled and nudged so it visually aligns with the
+   other caps instead of towering above them like it does at baseline. */
+.pcard .card-legal {
+  position: absolute;
+  top: 20px; left: 22px;
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.55);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.pcard .card-legal .cr {
+  font-size: 9px;
+  letter-spacing: 0;
+  transform: translateY(-0.5px);
+  display: inline-block;
+}
+
 .card-info { position: relative; z-index: 2; padding: 20px 22px; }
 .card-cat {
   font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.3em;
@@ -352,13 +417,14 @@ video::-webkit-media-controls-panel { display: none !important; }
   100% { top: 85%; opacity: 0; }
 }
 
-/* MODAL */
+/* MODAL — slides in from the right so the enter direction is consistent with the sidebar back button (`<` points left → panel retreats right on close). */
 #modal {
   position: fixed; inset: 0; z-index: 5000; background: var(--bg);
-  overflow-y: auto; transform: translateY(100%);
-  transition: transform 0.55s cubic-bezier(0.16,1,0.3,1);
+  overflow-y: auto; transform: translateX(100%);
+  transition: transform 0.65s cubic-bezier(0.22,1,0.36,1);
+  will-change: transform;
 }
-#modal.open { transform: translateY(0); }
+#modal.open { transform: translateX(0); }
 
 .modal-close {
   position: fixed; top: 26px; right: 48px; z-index: 5100;
@@ -745,6 +811,736 @@ video::-webkit-media-controls-panel { display: none !important; }
 .decision-body + .decision-body { padding-top: 0; margin-top: 14px; }
 @media(max-width:640px) { .decision-body { padding-left: 0; font-size: 13px; } }
 
+/* ═══════════════════════════════
+   CASE STUDY TEMPLATE 2.0
+   Data-driven blocks, opt-in via section keys:
+     context: true    → Why the project exists + why it matters
+     artifacts: true  → Curated showcase of the final outputs
+     moments: true    → Editorialized "key design moments" (with stance)
+     impact: true     → Metrics + prose about what shifted
+     reflection: true → Existing block, now supports prompts[]
+   Also uses top-level d.cover.subtitle, d.team, d.status.
+   Every renderer respects --project-accent from d.accent.
+═══════════════════════════════ */
+
+/* Cover subtitle — one editorial line under the huge title */
+.modal-subtitle {
+  font-family: var(--font-body); font-size: clamp(18px, 1.7vw, 22px);
+  font-weight: 300; line-height: 1.5;
+  color: rgba(232,228,220,0.55);
+  max-width: 720px; margin-top: 24px;
+  letter-spacing: 0.005em;
+}
+.modal-subtitle:empty { display: none; }
+.modal-subtitle::before {
+  content: ''; display: block; width: 40px; height: 1px;
+  background: var(--project-accent, var(--accent));
+  margin-bottom: 20px; opacity: 0.7;
+}
+
+/* ── CONTEXT block ── */
+.case-context .ctx-lead {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.4vw, 42px);
+  line-height: 1.08; letter-spacing: -0.005em;
+  color: var(--text); margin: 0 0 28px;
+  max-width: 780px;
+}
+.case-context .ctx-body {
+  font-family: var(--font-body); font-size: 17px; font-weight: 300;
+  line-height: 1.8; color: rgba(232,228,220,0.7);
+  max-width: 680px; margin: 0;
+}
+.case-context .ctx-why {
+  margin-top: 40px; padding-left: 22px;
+  border-left: 2px solid var(--project-accent, var(--accent));
+  max-width: 640px;
+}
+.case-context .ctx-why-lbl {
+  display: block; font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--project-accent, var(--accent));
+  margin-bottom: 10px;
+}
+.case-context .ctx-why-body {
+  font-family: var(--font-body); font-size: 15px; font-weight: 300;
+  line-height: 1.75; color: rgba(232,228,220,0.72);
+  font-style: italic; margin: 0;
+}
+.case-context .ctx-img {
+  width: 100%; max-height: 480px; object-fit: cover;
+  margin-top: 40px; display: block; border-radius: 2px;
+}
+
+/* ── ARTIFACTS block ── */
+.case-artifacts .art-lead {
+  font-family: var(--font-body); font-size: 17px; font-weight: 300;
+  line-height: 1.7; color: rgba(232,228,220,0.7);
+  max-width: 680px; margin: 0 0 40px;
+}
+.artifact-item {
+  padding-top: 40px; margin-top: 40px;
+  border-top: 1px solid rgba(232,228,220,0.08);
+}
+.artifact-item:first-child { border-top: none; margin-top: 0; padding-top: 8px; }
+.artifact-head {
+  display: flex; align-items: baseline; gap: 20px;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.artifact-n {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--project-accent, var(--accent));
+  padding: 4px 10px; border: 1px solid var(--project-accent, var(--accent));
+}
+.artifact-label {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.4vw, 32px);
+  line-height: 1; letter-spacing: -0.005em;
+  color: var(--text);
+}
+.artifact-media { display: block; width: 100%; }
+.artifact-media img,
+.artifact-media video {
+  width: 100%; height: auto; display: block; border-radius: 2px;
+}
+.artifact-media.contain img {
+  object-fit: contain; max-height: 520px;
+  background: rgba(255,255,255,0.02); padding: 24px;
+}
+.artifact-caption {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.14em; color: rgba(232,228,220,0.4);
+  text-transform: uppercase; line-height: 1.65;
+  margin-top: 14px; max-width: 560px;
+}
+
+/* ── MOMENTS block (editorial replacement for the decisions accordion) ── */
+.case-moments .mom-lead {
+  font-family: var(--font-body); font-size: 17px; font-weight: 300;
+  line-height: 1.7; color: rgba(232,228,220,0.7);
+  max-width: 680px; margin: 0 0 40px;
+}
+.moment-item {
+  display: grid; grid-template-columns: 88px 1fr;
+  gap: 32px; padding: 40px 0;
+  border-top: 1px solid rgba(232,228,220,0.08);
+  position: relative;
+}
+.moment-item:last-child { border-bottom: 1px solid rgba(232,228,220,0.08); }
+.moment-n {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--project-accent, var(--accent));
+  padding-top: 6px;
+}
+.moment-body-col { min-width: 0; }
+.moment-title {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.8vw, 36px);
+  line-height: 1.05; letter-spacing: -0.005em;
+  color: var(--text); margin: 0 0 14px;
+  text-transform: uppercase;
+}
+.moment-stance {
+  font-family: var(--font-body); font-size: 16px;
+  font-weight: 400; font-style: italic;
+  line-height: 1.55; color: var(--project-accent, var(--accent));
+  margin: 0 0 18px; max-width: 620px;
+}
+.moment-body {
+  font-family: var(--font-body); font-size: 15px; font-weight: 300;
+  line-height: 1.85; color: rgba(232,228,220,0.65);
+  margin: 0; max-width: 680px;
+}
+.moment-body + .moment-body { margin-top: 14px; }
+.moment-img {
+  width: 100%; max-height: 380px; object-fit: cover;
+  margin-top: 24px; display: block; border-radius: 2px;
+}
+@media(max-width:640px){
+  .moment-item { grid-template-columns: 1fr; gap: 14px; padding: 32px 0; }
+  .moment-n { padding-top: 0; }
+}
+
+/* ── IMPACT block ── */
+.case-impact .imp-lead {
+  font-family: var(--font-body); font-size: 17px; font-weight: 300;
+  line-height: 1.7; color: rgba(232,228,220,0.75);
+  max-width: 680px; margin: 0 0 40px;
+}
+.impact-metrics {
+  display: grid; gap: 3px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 40px;
+}
+.impact-metric {
+  padding: 28px 24px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(232,228,220,0.06);
+  display: flex; flex-direction: column; gap: 10px;
+  position: relative; overflow: hidden;
+}
+.impact-metric::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 100%; height: 2px;
+  background: var(--project-accent, var(--accent));
+  opacity: 0.9;
+}
+.impact-metric-v {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 6vw, 72px);
+  line-height: 0.9; letter-spacing: -0.02em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.impact-metric-lbl {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: rgba(232,228,220,0.45);
+  line-height: 1.5;
+}
+.impact-statement {
+  font-family: var(--font-body); font-size: 16px; font-weight: 300;
+  line-height: 1.85; color: rgba(232,228,220,0.7);
+  max-width: 680px; padding-left: 22px;
+  border-left: 2px solid var(--project-accent, var(--accent));
+}
+.impact-statement p { margin: 0 0 14px; }
+.impact-statement p:last-child { margin-bottom: 0; }
+
+/* ── REFLECTION prompts (v2 enhancement of existing reflection block) ── */
+.reflection-prompts {
+  margin-top: 32px; display: grid; gap: 28px;
+}
+.reflection-prompt {
+  padding-top: 22px;
+  border-top: 1px solid rgba(232,228,220,0.08);
+}
+.reflection-prompt:first-child { border-top: none; padding-top: 0; }
+.reflection-prompt-q {
+  display: block; font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--project-accent, var(--accent));
+  margin-bottom: 12px;
+}
+.reflection-prompt-a {
+  font-family: var(--font-body); font-size: 15px; font-weight: 300;
+  line-height: 1.85; color: rgba(232,228,220,0.62);
+  font-style: italic; margin: 0; max-width: 680px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CASE STUDY TEMPLATE 2.5
+   ───────────────────────────────────────────────────────────
+   Sidebar TOC · scroll-progress dot · hero cover slot
+   New block types: triad · showcase · diagram · photostrip
+                    insights · placeholder slots
+   ═══════════════════════════════════════════════════════════ */
+
+/* Two-column shell: sticky TOC on left, main content on right */
+.modal-shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 72px;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 110px 56px 0;
+  align-items: start;
+}
+.modal-main { min-width: 0; }
+/* Reset original modal-head / modal-body horizontal + top padding — the shell handles it */
+.modal-shell .modal-head { padding: 0 0 56px; }
+.modal-shell .modal-body { padding: 72px 0; max-width: 1000px; }
+
+/* Template 2.5: hero cover already carries tag + title + subtitle.
+   ─ With a hero: hide the whole head so the hero lands right at the sidebar's back-button line (JS relocates #mmeta under the hero).
+   ─ Without a hero: hide only the redundant text-intro children so #mmeta (which lives inside .modal-head) still renders. */
+.modal-shell:has(.modal-hero) .modal-head { display: none; }
+.modal-shell:not(:has(.modal-hero)) .modal-head > .modal-tag,
+.modal-shell:not(:has(.modal-hero)) .modal-head > .modal-title,
+.modal-shell:not(:has(.modal-hero)) .modal-head > .modal-subtitle { display: none !important; }
+.modal-shell:not(:has(.modal-hero)) .modal-head { padding: 0 0 40px; }
+.modal-shell .modal-pdf { display: none; }
+/* Sidebar's "Back to Projects" already handles closing — hide the redundant X (top-right) and end-of-page back button */
+.modal-close { display: none !important; }
+.modal-shell .cs-back-btn,
+.modal-shell #photo-back-btn { display: none; }
+/* Meta strip is repositioned below the hero via JS — make sure it stays visible */
+.modal-shell .modal-meta--below-hero { display: flex; }
+/* Remove the body's top padding since there's no intro block above it anymore */
+.modal-shell .modal-body { padding-top: 0; }
+
+/* ── Section rhythm inside the case-study shell ──
+   The global `section { padding: 100px 48px }` + `.case-block` bottom-border/margin was
+   designed for a flat, borderless-list layout. With the sidebar TOC now handling
+   categorisation, that stacking added ~300px of dead space between categories and
+   made consecutive sections feel disconnected. Tighten to ~80px total between contents. */
+.modal-shell section.tocsec { padding: 40px 0; }
+.modal-shell section.tocsec:first-of-type { padding-top: 8px; }
+.modal-shell section.tocsec > .case-block {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+/* Sidebar TOC — STICKY inside the modal's own scroll context */
+.modal-toc {
+  position: sticky;
+  top: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  /* leave room for the back-arrow's -2px hover translate (overflow-y:auto also clips overflow-x) */
+  padding-left: 4px;
+  margin-left: -4px;
+}
+.toc-label {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--muted);
+}
+.toc-list { display: flex; flex-direction: column; gap: 2px; }
+.toc-item {
+  display: grid; grid-template-columns: 28px 1fr;
+  align-items: baseline; gap: 10px;
+  padding: 9px 0;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(232,228,220,0.42);
+  background: none; border: none; text-align: left;
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.toc-item:hover { color: var(--text); }
+.toc-item-n {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(232,228,220,0.3);
+  transition: color 0.2s;
+}
+.toc-item-t {
+  line-height: 1.35;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.toc-item.active {
+  color: var(--text);
+  border-bottom-color: var(--project-accent, var(--accent));
+}
+.toc-item.active .toc-item-n { color: var(--project-accent, var(--accent)); }
+.toc-head {
+  padding-bottom: 22px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid rgba(232,228,220,0.08);
+}
+.toc-back-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 0;
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+.toc-back-btn:hover { color: var(--text); }
+.toc-back-arr {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px;
+  border: 1px solid rgba(232,228,220,0.22);
+  font-size: 11px; line-height: 1;
+  transition: border-color 0.2s, transform 0.3s;
+}
+.toc-back-btn:hover .toc-back-arr {
+  border-color: var(--project-accent, var(--accent));
+  transform: translateX(-2px);
+}
+
+/* Meta strip when moved out of modal-head and placed under the hero cover */
+.modal-meta--below-hero {
+  margin-top: -32px;       /* pull up under the hero's own bottom margin (64px) */
+  padding: 24px 0 44px;
+  border-top: 1px solid rgba(232,228,220,0.10);
+  border-bottom: 1px solid rgba(232,228,220,0.10);
+  margin-bottom: 72px;
+}
+
+/* ─────────────────────────────────────────────
+   Case-study entry choreography
+   Subtle "settle in" after the panel slides in.
+   Generic — works for any case study using this template.
+   Longer durations tuned for website (not app) pacing.
+   ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  /* Hero cover lands + settles once the panel is in place */
+  #modal.open .modal-hero {
+    animation: csHeroSettle 0.9s cubic-bezier(0.22,1,0.36,1) 0.25s both;
+  }
+  /* Meta strip fades up after the hero has landed */
+  .modal-meta--below-hero {
+    animation: csMetaEnter 0.75s cubic-bezier(0.22,1,0.36,1) 0.15s both;
+  }
+}
+@keyframes csHeroSettle {
+  from { opacity: 0; transform: scale(1.03); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes csMetaEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero cover slot — big image right under the modal head, before sections */
+.modal-hero {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  margin-bottom: 64px;
+  background: var(--surface);
+  overflow: hidden;
+  border: 1px solid rgba(232,228,220,0.06);
+}
+.modal-hero img,
+.modal-hero video {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.modal-hero-caption {
+  position: absolute; left: 22px; bottom: 18px;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: rgba(232,228,220,0.65);
+  padding: 6px 10px;
+  background: rgba(8,8,8,0.6); backdrop-filter: blur(6px);
+}
+
+/* Concept hero — designed cover (no photo yet) that uses the project accent */
+.modal-hero--concept {
+  background: var(--bg);
+}
+.hero-concept-frame {
+  position: relative;
+  width: 100%; height: 100%;
+  background: var(--project-accent-fill, var(--project-accent, var(--accent)));
+  overflow: hidden;
+}
+.hero-concept-frame > .hero-concept-glow {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(120% 90% at 20% 20%, rgba(255,255,255,0.16), transparent 55%),
+    radial-gradient(120% 90% at 80% 100%, rgba(0,0,0,0.55), transparent 60%);
+  pointer-events: none;
+}
+.hero-concept-frame::before {
+  /* subtle noise/grain overlay, matches site texture */
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+.hero-concept-frame::after {
+  /* soft vignette to keep type legible */
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(80% 60% at 50% 50%, transparent 30%, rgba(0,0,0,0.28) 100%);
+  pointer-events: none;
+}
+.hero-concept-badge {
+  position: absolute; top: 22px; left: 22px;
+  z-index: 2;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  padding: 6px 10px;
+  border: 1px solid rgba(255,255,255,0.32);
+  backdrop-filter: blur(4px);
+}
+.hero-concept-center {
+  position: absolute; inset: 0;
+  z-index: 2;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  padding: 40px;
+}
+.hero-concept-eyebrow {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.42em; text-transform: uppercase;
+  color: rgba(255,255,255,0.72);
+  margin-bottom: 22px;
+}
+.hero-concept-title {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 10vw, 168px);
+  line-height: 0.88; letter-spacing: -0.005em;
+  color: #ffffff;
+  text-shadow: 0 2px 40px rgba(0,0,0,0.28);
+}
+.hero-concept-tagline {
+  margin-top: 26px;
+  font-family: var(--font-body); font-weight: 300;
+  font-size: clamp(13px, 1.1vw, 16px);
+  line-height: 1.55;
+  color: rgba(255,255,255,0.86);
+  max-width: 46ch;
+}
+
+/* Placeholder slot — visible box the user can fill later */
+.slot {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 220px;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(232,228,220,0.03) 0 12px,
+      rgba(232,228,220,0.055) 12px 24px
+    );
+  border: 1px dashed rgba(232,228,220,0.18);
+  color: rgba(232,228,220,0.55);
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  text-align: center; padding: 24px 20px;
+}
+.slot.tall { min-height: 380px; }
+.slot.hero { aspect-ratio: 16 / 9; min-height: 0; margin-bottom: 64px; }
+.slot::before {
+  content: "";
+  position: absolute; left: 12px; top: 12px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--project-accent, var(--accent));
+  opacity: 0.55;
+}
+.slot-label { display: block; }
+.slot-hint {
+  display: block; margin-top: 8px;
+  font-size: 9px; letter-spacing: 0.2em;
+  color: rgba(232,228,220,0.32); text-transform: none;
+  font-family: var(--font-body); font-style: italic;
+}
+
+/* ── TRIAD: three-column pillar row (e.g. "how we approached this") */
+.case-triad .triad-lead { max-width: 620px; }
+.triad-grid {
+  margin-top: 40px;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: rgba(232,228,220,0.08);
+  border-top: 1px solid rgba(232,228,220,0.08);
+  border-bottom: 1px solid rgba(232,228,220,0.08);
+}
+.triad-cell {
+  background: var(--bg);
+  padding: 32px 28px 36px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.triad-n {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--project-accent, var(--accent));
+}
+.triad-title {
+  font-family: var(--font-display); font-size: 26px;
+  letter-spacing: 0.02em; line-height: 1;
+}
+.triad-body {
+  font-family: var(--font-body); font-size: 14px; font-weight: 300;
+  line-height: 1.75; color: rgba(232,228,220,0.6);
+  margin: 0;
+}
+
+/* ── SHOWCASE: alternating big image + short caption */
+.case-showcase .sc-lead { max-width: 620px; }
+.showcase-list {
+  margin-top: 56px;
+  display: flex; flex-direction: column; gap: 96px;
+}
+.sc-item {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 48px;
+  align-items: center;
+}
+.sc-item.reverse { grid-template-columns: 2fr 3fr; }
+.sc-item.reverse .sc-media { order: 2; }
+.sc-item.reverse .sc-text { order: 1; }
+.sc-media {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid rgba(232,228,220,0.06);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+.sc-media img,
+.sc-media video {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.sc-media.slot { border-style: dashed; }
+.sc-text { display: flex; flex-direction: column; gap: 14px; }
+.sc-label {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--project-accent, var(--accent));
+}
+.sc-title {
+  font-family: var(--font-display); font-size: 32px;
+  letter-spacing: 0.01em; line-height: 1.02;
+}
+.sc-caption {
+  font-family: var(--font-body); font-size: 15px; font-weight: 300;
+  line-height: 1.8; color: rgba(232,228,220,0.62);
+  margin: 0;
+}
+
+/* ── DIAGRAM: labeled framework container (stacked layers) */
+.case-diagram .dia-lead { max-width: 620px; }
+.diagram-wrap {
+  margin-top: 44px;
+  border: 1px solid rgba(232,228,220,0.12);
+  padding: 22px;
+  background: rgba(232,228,220,0.02);
+}
+.diagram-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding-bottom: 16px; margin-bottom: 18px;
+  border-bottom: 1px solid rgba(232,228,220,0.08);
+}
+.diagram-title-lbl {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted);
+}
+.diagram-title-val {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--project-accent, var(--accent));
+}
+.diagram-layers { display: flex; flex-direction: column; gap: 10px; }
+.diagram-layer {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 24px;
+  align-items: center;
+  padding: 20px 16px;
+  background: rgba(232,228,220,0.03);
+  border-left: 2px solid var(--project-accent, var(--accent));
+}
+.diagram-layer-lbl {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(232,228,220,0.85);
+}
+.diagram-layer-items {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.diagram-chip {
+  display: inline-flex; align-items: center;
+  padding: 7px 12px;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: rgba(232,228,220,0.7);
+  border: 1px solid rgba(232,228,220,0.16);
+  background: var(--bg);
+}
+.diagram-caption {
+  margin-top: 16px;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── PHOTOSTRIP: 4-col horizontal photo row (testing shots, etc.) */
+.case-photostrip .ps-lead { max-width: 620px; }
+.photostrip-grid {
+  margin-top: 44px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.ps-cell {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background: var(--surface);
+  border: 1px solid rgba(232,228,220,0.06);
+  overflow: hidden;
+}
+.ps-cell img,
+.ps-cell video {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.ps-cell.slot { border-style: dashed; aspect-ratio: 3 / 4; min-height: 0; }
+.ps-caption {
+  position: absolute; left: 8px; bottom: 8px; right: 8px;
+  font-family: var(--font-mono); font-size: 8px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(232,228,220,0.85);
+  padding: 5px 8px;
+  background: rgba(8,8,8,0.55); backdrop-filter: blur(4px);
+}
+
+/* ── INSIGHTS: two-column key/value grid */
+.case-insights .in-lead { max-width: 620px; }
+.insights-grid {
+  margin-top: 44px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: rgba(232,228,220,0.08);
+  border-top: 1px solid rgba(232,228,220,0.08);
+  border-bottom: 1px solid rgba(232,228,220,0.08);
+}
+.insight-cell {
+  background: var(--bg);
+  padding: 26px 24px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.insight-k {
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--project-accent, var(--accent));
+}
+.insight-v {
+  font-family: var(--font-body); font-size: 15px; font-weight: 300;
+  line-height: 1.75; color: rgba(232,228,220,0.72);
+  margin: 0;
+}
+
+/* Give existing case-blocks scroll-spy anchor room */
+.case-block[id],
+.case-hero[id] {
+  scroll-margin-top: 32px;
+}
+
+/* Responsive collapse */
+@media (max-width: 1100px) {
+  .modal-shell {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 90px 32px 0;
+  }
+  .modal-toc { display: none; }
+  .triad-grid { grid-template-columns: 1fr; }
+  .sc-item, .sc-item.reverse { grid-template-columns: 1fr; gap: 24px; }
+  .sc-item.reverse .sc-media { order: 0; }
+  .sc-item.reverse .sc-text { order: 0; }
+  .diagram-layer { grid-template-columns: 1fr; gap: 12px; }
+  .photostrip-grid { grid-template-columns: repeat(2, 1fr); }
+  .insights-grid { grid-template-columns: 1fr; }
+  .showcase-list { gap: 64px; }
+}
+@media (max-width: 640px) {
+  .modal-hero { margin-bottom: 40px; }
+  .slot.hero { margin-bottom: 40px; }
+  .photostrip-grid { grid-template-columns: 1fr 1fr; }
+  .triad-cell { padding: 26px 22px 28px; }
+  .sc-title { font-size: 24px; }
+  .triad-title { font-size: 22px; }
+}
+
 .journey-map { width: 100%; margin-top: 32px; }
 .journey-curve-wrap { width: 100%; height: 70px; margin-bottom: 0; }
 .journey-svg { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -940,8 +1736,9 @@ footer {
   .about-right { display: none; }
   .divider { margin: 0 24px; }
   footer { flex-direction: column; gap: 10px; text-align: center; padding: 20px; }
-  .modal-head { padding: 90px 24px 40px; }
-  .modal-body { padding: 48px 24px; }
+  .modal-shell { padding: 90px 24px 0; }
+  .modal-shell .modal-head { padding: 0 0 40px; }
+  .modal-shell .modal-body { padding: 48px 0; }
 }
 
 /* ── Mobile only (≤640px) ── */
@@ -2032,14 +2829,17 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
   <div class="projects-grid">
 
     <!-- ROW 1–2: feature left + two stacked right -->
-    <div class="pcard feature reveal" data-project="herway" data-id="ux" data-f="ux" data-mobile-bg="images/herway-mobile.jpg"
+    <!-- Snapchat Resources — biggest project to date. Case study is
+         intentionally minimal (under wraps); see PROJECTS.resources below. -->
+    <div class="pcard feature reveal" data-project="resources" data-id="snapyellow" data-f="ux product"
          style="grid-column:span 8; grid-row:span 2;">
-      <div class="card-bg" style="background-image:url(images/herway-thumb.jpg); background-position: left center;"></div>
+      <div class="card-bg" style="background-image:url(images/SnapR_Thumbnail.png); background-size:contain; background-position:center; background-repeat:no-repeat;"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
+      <div class="card-legal"><span class="cr">©</span>2026 Snap Inc.</div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
-        <div class="card-cat">UX / Interaction</div>
-        <div class="card-name">HER—WAY</div>
+        <div class="card-cat">Product / UX</div>
+        <div class="card-name">RESOURCES ON SNAPCHAT</div>
       </div>
     </div>
 
@@ -2063,10 +2863,11 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
         </video>
       </div>
       <div class="card-ov"></div><div class="card-glitch"></div>
+      <div class="card-badge">Coming Soon</div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
         <div class="card-cat">UX / Interaction</div>
-        <div class="card-name">CALLISTO'S ASCENT</div>
+        <div class="card-name">CALLISTO'S RETRIBUTION</div>
       </div>
     </div>
 
@@ -2088,14 +2889,14 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       </div>
     </div>
 
-    <div class="pcard reveal d1" data-project="quickqueue" data-id="product" data-f="ux visual"
+    <div class="pcard reveal d1" data-project="herway" data-id="ux" data-f="ux" data-mobile-bg="images/herway-mobile.jpg"
          style="grid-column:span 4;">
-      <div class="card-bg" style="background-image:url(images/img_03.jpg);"></div>
+      <div class="card-bg" style="background-image:url(images/herway-thumb.jpg); background-position: left center;"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
         <div class="card-cat">UX / Interaction</div>
-        <div class="card-name">QUICK QUEUE</div>
+        <div class="card-name">HER—WAY</div>
       </div>
     </div>
 
@@ -2287,15 +3088,34 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
     </div><span class="modal-close-label">CLOSE</span>
   </button>
   <div class="modal-bar" id="mbar"></div>
-  <div class="modal-head">
-    <div class="modal-tag" id="mtag"></div>
-    <h2 class="modal-title" id="mtitle"></h2>
-    <div class="modal-meta" id="mmeta"></div>
-  </div>
-  <div class="modal-body">
-    <div class="modal-pdf" id="mpdf"></div>
-    <div id="msections"></div>
-    <div class="modal-gallery" id="mgallery" style="display:none;"></div>
+  <div class="modal-shell">
+    <aside class="modal-toc" id="mtoc" aria-label="Case study contents">
+      <div class="toc-head">
+        <button type="button" class="toc-back-btn" id="mtoc-back">
+          <span class="toc-back-arr" aria-hidden="true">
+            <svg width="8" height="10" viewBox="0 0 8 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 1L2 5L6 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="toc-back-lbl">Back to Projects</span>
+        </button>
+      </div>
+      <div class="toc-label">Contents</div>
+      <div class="toc-list" id="mtoc-list"></div>
+    </aside>
+    <div class="modal-main">
+      <div class="modal-head">
+        <div class="modal-tag" id="mtag"></div>
+        <h2 class="modal-title" id="mtitle"></h2>
+        <div class="modal-subtitle" id="msubtitle"></div>
+        <div class="modal-meta" id="mmeta"></div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-pdf" id="mpdf"></div>
+        <div id="msections"></div>
+        <div class="modal-gallery" id="mgallery" style="display:none;"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2307,29 +3127,205 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
    2. Add a matching .pcard in the HTML
 ═══════════════════════════════ */
 const PROJECTS = {
+  /* ═══════════════════════════════════════════════════════════
+     CASE STUDY TEMPLATE 2.5 — reference implementation (Herway)
+     ───────────────────────────────────────────────────────────
+     Top-level fields:
+       tag, title, role, tools, accent, caseStudy, proto, thumb   (existing)
+       duration OR year                                            (either)
+       context     — the "school context / client context" line
+       team        — optional  ("Solo", "Team of 3", etc.)
+       status      — optional  ("Prototype", "Shipped", "Concept")
+       cover: { subtitle }  — editorial subtitle line under the title
+       hero:  { img?, vid?, alt?, caption?, hint? }
+              — big 16:9 cover asset. If img/vid is "[...]" or missing,
+                a labeled placeholder box renders instead.
+
+     Section types (each opt-in, mix and match):
+       { context:    true, n, t, tocLabel?, lead, body, why, img }
+       { artifacts:  true, n, t, tocLabel?, lead, items:[{img|vid,label,caption,contain?}] }
+       { moments:    true, n, t, tocLabel?, lead, items:[{title,stance,body,img?}] }
+       { impact:     true, n, t, tocLabel?, lead, metrics:[{v,label}], statement }
+       { triad:      true, n, t, tocLabel?, lead, items:[{n?,title,body}] }
+       { showcase:   true, n, t, tocLabel?, lead, items:[{img|vid,label,title,caption}] }
+       { diagram:    true, n, t, tocLabel?, lead, diagramLabel?, diagramSub?, layers:[{title,items:[]}], caption? }
+       { photostrip: true, n, t, tocLabel?, lead, items:[{img|vid,caption?}] }
+       { insights:   true, n, t, tocLabel?, lead, items:[{k,v}] }
+       { reflection: true, n, tocLabel?, body, prompts:[{q,a}] }
+       ...plus any legacy sections (n/t/b/img/imgs/chart/decisions/etc.)
+
+     PLACEHOLDER SLOTS
+       Anywhere an img/vid string is expected, wrap the description in
+       square brackets to render a visible placeholder box:
+         img: "[HERO — 16:9 product shot of the app in a hand]"
+         vid: "[LOOP — 8s screen recording of the nav flow]"
+       Drop in a real path later; no code change needed.
+  ═══════════════════════════════════════════════════════════ */
   herway: {
-    tag: "UX / Interaction Design Case Study",
+    tag: "UX / Interaction Design",
     title: "HER—WAY",
-    duration: "16 Weeks", role: "UX / UI Designer",
+    duration: "16 Weeks",
+    role: "UX / UI Designer",
+    team: "Solo",
     tools: "Figma, Adobe CC",
     context: "Academic Mobility Project · Fall 2025",
+    status: "Prototype",
     accent: "linear-gradient(90deg,#5500bb,#9933ff)",
     caseStudy: "https://drive.google.com/file/d/1nIHutsvigg8HqGb3iOhPbZQ8nuD1SALs/preview",
     proto: "https://www.figma.com/embed?embed_host=share&url=https://www.figma.com/proto/DxMew8YhX3WAtXESoshI5R/Herway?node-id=191-452&t=zeKj0o8s9zVh0mao-1",
     thumb: "images/herway-thumb.jpg",
+    cover: {
+      subtitle: "A community-first transit app for women. Safety by presence, not surveillance."
+    },
+    hero: {
+      img: "images/HerThumb.jpeg",
+      alt: "HER—WAY cover",
+      badge: "Concept · 2025",
+      caption: "HerWay · 16:9 cover"
+    },
     images: [],
     sections: [
-      { n:"01", t:"THE PROBLEM", b:"Generic transit apps don't account for gender. For low-income women, public transportation isn't just inconvenient, it's unsafe. HerWay was designed to close that gap.", img:"images/herway-transit.jpg" },
-      { n:"02", t:"WHAT WE BUILT", b:"A mobile app where safety is built into the system, not bolted on. Entry uses on-device verification: your document is checked locally and never stored. The real safety model is community-based: strength in numbers. Riders share real-time safety alerts, connect with others on the same route, and report incidents directly in-app. Route planning and live tracking are the baseline. The community is the feature.", imgs:["images/herway-context1.jpg","images/herway-context2.jpg"] },
-      { n:"03", t:"HOW WE GOT THERE", b:"Field research: site observations, interviews with transit riders, competitive analysis. 40+ wireframes and mockups iterated through usability testing with the actual target demographic.", img:"images/herway-figma.png", imgLight:true },
-      { n:"04", t:"KEY DECISIONS", b:"Four choices that defined what HerWay became and what it refused to be.", decisions: [
-        { title: "Community as the safety layer", body: "The project started as a way to increase safety in public transportation without relying on police or external systems. Early ideas leaned toward typical safety features, but those depend on institutions we don't control and that many users don't fully trust. At the same time, the data showed something important. Public transportation isn't as unsafe as people think, but perception — especially for women — is heavily shaped by what they hear and experience indirectly. The direction shifted toward safety by numbers. Being surrounded by people who understand the same concerns creates a different kind of safety, one that feels immediate and shared. Instead of adding a community as a feature, the app was built around it." },
-        { title: "Safety-weighted routing over shortest path", body: "Most navigation tools prioritize speed. That wasn't the goal here. Even though the system is generally safe, users — especially women — often feel unsafe because of uncertainty, not just actual risk. The idea was to reflect that reality in the product. Routes are not just about getting somewhere quickly, but about feeling comfortable along the way. The experience prioritizes environments that feel more active, familiar, or socially present rather than simply the shortest option." },
-        { title: "Structure without overwhelm", body: "The app required multiple screens and interactions to support different functions. The challenge wasn't reducing complexity, but organizing it in a way that doesn't overwhelm the user. Each section was designed to feel distinct while still connected. Users can move through the app in different ways depending on what they need, without being forced into a single flow. At the same time, the system avoids giving too many redundant options for the same action. The goal was to keep the experience flexible, but still clear." },
-        { title: "Trust through local verification", body: "For the idea of community-based safety to work, there needed to be a level of trust between users. That required a barrier to entry. The approach was local verification using ID and face scanning. The key decision was that this data never leaves the device and is not stored externally. This keeps the system private while still ensuring that the community remains gated and secure." }
-      ]},
-      { n:"05", t:"THE RESULT", b:"A functional prototype that reframes the commute from a source of stress to something community-supported and reliable." },
-      { reflection: true, body: "This has been one of my favorite projects to work on because it pushed me to engage with issues I don't personally experience. It forced me to step outside of my own assumptions and pay attention to how others move through the world. Listening became a key part of the process. Instead of jumping straight into solutions, I had to slow down and understand where concerns were coming from, especially when they weren't obvious to me. Many of the insights came from small, repeated moments of discomfort that shape how safe someone feels over time. Taking on this role meant being more intentional with decisions. It wasn't just about making something functional, but about making sure the direction respected the people it was designed for. Empathy became a tool for deciding what to prioritize and what to avoid. This project also changed how I think about safety. It's not only about reducing risk, but about how an experience feels in the moment. That shift influenced the entire design." }
+
+      { context: true, n:"01", t:"WHY THIS EXISTS", tocLabel:"Why this exists",
+        lead: "Public transit apps treat every commute as if it were the same. It isn't.",
+        body: "For low-income women, the ride itself is where the risk lives. Waiting on a dark corner. Skipping a route because it feels empty. Taking the long way home because it feels seen. Most transit apps optimize for the fastest path. None of them optimize for who is actually on the bus.",
+        why: "Ignoring who moves through a system means ignoring who can't. Safety is not a feature you bolt onto a map. It is the map, for anyone who was never the default rider.",
+        img: "images/herway-transit.jpg"
+      },
+
+      { triad: true, n:"02", t:"HOW I APPROACHED THIS", tocLabel:"Approach",
+        lead: "Three lenses ran in parallel through the whole project. Every decision was tested against all three.",
+        items: [
+          { n:"P / 01", title:"Listen first",
+            body:"Ten rider interviews before a single frame. The brief was never the brief — the commute was." },
+          { n:"P / 02", title:"Prototype fast",
+            body:"Low-fidelity flows in week two. Testing them in week three. Rebuilding what didn't survive contact." },
+          { n:"P / 03", title:"Refuse the default",
+            body:"Every category convention got a second look. Most were kept. A few were the whole reason the app exists." }
+        ]
+      },
+
+      { insights: true, n:"03", t:"WHAT RIDERS ACTUALLY SAID", tocLabel:"Research",
+        lead: "Field interviews with ten women across three transit lines. What follows is what showed up more than twice.",
+        items: [
+          { k:"On absence",
+            v:"Empty carriages read as more dangerous than crowded ones, regardless of the actual incident data on either." },
+          { k:"On authority",
+            v:"Panic buttons that call police were the first feature riders asked to be able to turn off." },
+          { k:"On speed",
+            v:"Nobody optimized their commute for the fastest route. Every rider had a slower route they took by default." },
+          { k:"On community",
+            v:"Riders on the same line already recognized each other. The app just had to make that visible." }
+        ]
+      },
+
+      { showcase: true, n:"04", t:"THE CORE FLOWS", tocLabel:"Core flows",
+        lead: "Three surfaces that carry the entire product. Everything else is one tap away from one of these.",
+        items: [
+          { img: "images/herway-context1.jpg",
+            label:"Flow 01 · Home + live route",
+            title:"Presence over search",
+            caption:"The default view surfaces riders on your line before it surfaces a search bar. Search still exists — it just is not the front door." },
+          { img: "images/herway-context2.jpg",
+            label:"Flow 02 · Community layer",
+            title:"One tap to the community",
+            caption:"Alerts, route buddies, and incident reports live one tap from the map, always. No secondary nav to remember." },
+          { img: "[FLOW 03 — 4:3 screen: comfort-routing panel showing 3 route options ranked by environment]",
+            label:"Flow 03 · Comfort routing",
+            title:"Slower on paper, safer in feel",
+            caption:"Routes are ranked by social presence and street activity, not raw minutes. The fastest option is still visible — it just is not the recommended one." }
+        ]
+      },
+
+      { diagram: true, n:"05", t:"THE FORM WE DESIGNED FOR", tocLabel:"Form system",
+        lead: "The app is built in three layers. Each layer answers a different rider question, and each layer can be removed without breaking the one below it.",
+        diagramLabel: "The Stack",
+        diagramSub: "3 layers · 1 rider",
+        layers: [
+          { title:"Surface",   items:["Map","Live route","Route ranking","Search"] },
+          { title:"Community", items:["Route buddies","Incident feed","Nearby riders","Reactions"] },
+          { title:"Trust",     items:["Local ID verify","On-device face match","No upstream data","Reversible auth"] }
+        ],
+        caption: "Every screen in the app sits in exactly one layer. Cross-layer traffic runs on tap, not on hidden state."
+      },
+
+      { moments: true, n:"06", t:"KEY DESIGN MOMENTS", tocLabel:"Design moments",
+        lead: "Four choices that defined what HerWay became, and four things it refused to be.",
+        items: [
+          { title: "Community over surveillance",
+            stance: "Chose social presence instead of police integration.",
+            body: "The obvious safety features (panic buttons, direct police alerts) depend on institutions many riders already distrust. The research was quieter but clearer: fear on transit is shaped less by incidents and more by absence. Being surrounded by people who share the same concern turned out to matter more than a button that summons an authority. The community stopped being a feature and became the entire surface." },
+          { title: "Comfort routing, not shortest path",
+            stance: "Broke the category default that faster equals better.",
+            body: "Every navigation product optimizes for time. Time is not what makes a route unsafe. The route panel deprioritizes minutes-shaved and surfaces environment instead: how active a street is, how socially present, whether other HerWay users are already on the same line. The result feels slower on paper. It reads differently to the rider." },
+          { title: "Structure without a single path",
+            stance: "Refused the linear flow the category defaults to.",
+            body: "Transit apps usually funnel riders through one path: search, select, ride. HerWay has plenty of screens, so the reflex was to add hierarchy. The call was to keep every core function reachable in one tap and let the rider decide which one is the front door. Redundancy was cut. Choice was preserved." },
+          { title: "Local-only ID verification",
+            stance: "Gated the community without becoming another data hoard.",
+            body: "For community trust to hold, entry needed a real barrier. The instinct was to hand verification off to a vendor. The call was to run document and face matching on-device, drop the result, and never send anything upstream. The community stays gated. The user stays uncatalogued." }
+        ]
+      },
+
+      { photostrip: true, n:"07", t:"TESTING IN THE WILD", tocLabel:"Testing",
+        lead: "Weeks 10 through 14. Riders were handed the prototype on the platform and asked to plan a trip home.",
+        items: [
+          { img:"[TEST 01 — 3:4 photo: rider holding phone at a lit bus stop]",  caption:"Line 24 · 8:14pm" },
+          { img:"[TEST 02 — 3:4 photo: hands tapping the route ranking panel]", caption:"Route ranking" },
+          { img:"[TEST 03 — 3:4 photo: incident-report sheet halfway up]",       caption:"Report sheet" },
+          { img:"[TEST 04 — 3:4 photo: rider seated, phone in lap, night ride]", caption:"Line 09 · 9:41pm" }
+        ]
+      },
+
+      { impact: true, n:"08", t:"WHAT THIS SHIFTED", tocLabel:"Impact",
+        lead: "The prototype did not ship. Here is what it changed anyway.",
+        metrics: [
+          { v: "40+", label: "Wireframes and mockups iterated" },
+          { v: "16",  label: "Weeks of field research and testing" },
+          { v: "10",  label: "Rider interviews across three lines" }
+        ],
+        statement: "The point was not a launch. It was proving that safety-first navigation is a category, not a feature bolted on top of a map. Every product I take on next starts with the question this project started with: who is this actually for, and who does the default already fail?"
+      },
+
+      { reflection: true, n:"09", tocLabel:"Reflection",
+        body: "This project pushed me to design for a reality I do not personally live. Most of the work was slowing down enough to hear what riders were already saying, and being intentional about which parts of that made it into the product and which parts got left out. Empathy stopped being a soft word and started functioning as a prioritization tool.",
+        prompts: [
+          { q: "What I underestimated",
+            a: "How much of the actual insight lives in what riders skip past instead of what they describe. The signal was in small, repeated moments of discomfort that shape a commute over time, not the incidents anyone would report." },
+          { q: "What I would do differently",
+            a: "Bring riders into the process before the design, not just after. I used testing to validate a direction that the target demographic could have set from the start." },
+          { q: "What this taught me about design",
+            a: "Safety is not a screen. It is an entire posture. You cannot retrofit it with a panic button and call it inclusive design." }
+        ]
+      }
+    ]
+  },
+  resources: {
+    tag: "UX / Product Design · Prototyping",
+    title: "RESOURCES ON SNAPCHAT",
+    year: "August 2026",
+    role: "UX Designer",
+    team: "Alex Nguyen, Daniel Lee, Lezette Flores, Vita Medina",
+    tools: "Figma, Adobe CC",
+    context: "Design Contract · Snap Inc.",
+    status: "Under Wraps",
+    accent: "linear-gradient(90deg,#ffcc00,#fffc00)",
+    thumb: "images/SnapR_Thumbnail.png",
+    cover: {
+      subtitle: "A new product opportunity for Snapchat, explored end to end with a cross-functional team."
+    },
+    hero: {
+      img: "images/SnapResources.jpg",
+      alt: "Resources on Snapchat cover",
+      caption: "Resources on Snapchat · 16:9 cover"
+    },
+    images: [],
+    sections: [
+
+      { context: true, n:"01", t:"OVERVIEW", tocLabel:"Overview",
+        body: "As a design contractor at Snap, I worked on a cross-functional team to explore a new product opportunity for Snapchat. I collaborated closely with design, marketing, and engineering throughout the process, from research and early concept development to product strategy, prototyping, and refinement. The project pushed me to think beyond the interface and consider how a feature could make sense for both Snapchat's users and the product as a whole. Our final concept was presented live on stage at Snap.</p><p class=\"ctx-lead\" style=\"margin-top:40px;margin-bottom:0;\">This project is currently under wraps. More to come sooner than you think."
+      }
+
     ]
   },
   pixelgame: {
@@ -3157,9 +4153,20 @@ var mmeta = document.getElementById('mmeta');
 var mpdf = document.getElementById('mpdf');
 var mgallery = document.getElementById('mgallery');
 var msections = document.getElementById('msections');
+var msubtitle = document.getElementById('msubtitle');
 
 document.querySelectorAll('.pcard').forEach(function(card) {
   card.addEventListener('click', function() {
+    // Coming-soon cards are placeholders — no modal yet
+    if (card.getAttribute('data-coming-soon')) return;
+    // Placeholder cards without a real modal yet — fall through to the
+    // next sibling card so the click doesn't feel dead.
+    if (card.getAttribute('data-next-project')) {
+      var next = card.nextElementSibling;
+      while (next && !next.classList.contains('pcard')) next = next.nextElementSibling;
+      if (next) next.click();
+      return;
+    }
     var id = card.getAttribute('data-project');
     var d = PROJECTS[id];
     if (!d) return;
@@ -3172,16 +4179,30 @@ document.querySelectorAll('.pcard').forEach(function(card) {
     var accentColors = d.accent.match(/#[0-9a-fA-F]{3,6}/g) || ['#e00000'];
     var accentColor = accentColors[accentColors.length - 1];
     modal.style.setProperty('--project-accent', accentColor);
+    modal.style.setProperty('--project-accent-fill', d.accent);
     mtag.textContent = d.tag;
     mtitle.textContent = d.title;
 
     var timeLabel = d.duration ? 'Duration' : 'Year';
     var timeVal   = d.duration || d.year || '';
-    mmeta.innerHTML =
-      '<div class="mmeta-item"><span class="mmeta-label">' + timeLabel + '</span><span class="mmeta-val">' + timeVal + '</span></div>' +
-      '<div class="mmeta-item"><span class="mmeta-label">Role</span><span class="mmeta-val">' + d.role + '</span></div>' +
-      '<div class="mmeta-item"><span class="mmeta-label">Tools</span><span class="mmeta-val">' + d.tools + '</span></div>' +
-      '<div class="mmeta-item"><span class="mmeta-label">Context</span><span class="mmeta-val">' + d.context + '</span></div>';
+    var metaBits = '';
+    function metaBit(label, val) {
+      return '<div class="mmeta-item"><span class="mmeta-label">' + label + '</span><span class="mmeta-val">' + val + '</span></div>';
+    }
+    if (timeVal) metaBits += metaBit(timeLabel, timeVal);
+    if (d.role)  metaBits += metaBit('Role', d.role);
+    if (d.team)  metaBits += metaBit('Team', d.team);
+    if (d.tools) metaBits += metaBit('Tools', d.tools);
+    if (d.context) metaBits += metaBit('Context', d.context);
+    if (d.status) metaBits += metaBit('Status', d.status);
+    mmeta.innerHTML = metaBits;
+
+    /* Cover subtitle — one editorial line under the huge title */
+    if (msubtitle) {
+      var subtitle = (d.cover && d.cover.subtitle) ? d.cover.subtitle : '';
+      msubtitle.textContent = subtitle;
+      msubtitle.style.display = subtitle ? 'block' : 'none';
+    }
 
     /* Sketch embed or PDF */
     if (d.sketch) {
@@ -3290,6 +4311,286 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       html += '<div class="chart-caption" style="margin-top:16px;">Click any item to expand</div>';
       html += '</div>';
       return html;
+    }
+
+    /* ── Template 2.0 renderers ────────────────────────────
+       Each returns a full <div class="case-block ..."> so it
+       plugs into the existing section list cleanly. */
+    function escHtml(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function buildContextHTML(s, extra) {
+      var lead = s.lead ? '<p class="ctx-lead">' + s.lead + '</p>' : '';
+      var body = s.body ? '<p class="ctx-body">' + s.body + '</p>' : '';
+      var why = '';
+      if (s.why) {
+        why = '<div class="ctx-why">' +
+                '<span class="ctx-why-lbl">Why it matters</span>' +
+                '<p class="ctx-why-body">' + s.why + '</p>' +
+              '</div>';
+      }
+      var img = s.img ? '<img class="ctx-img" src="' + s.img + '" alt="' + escHtml(s.t || 'context') + '" loading="lazy">' : '';
+      return '<div class="case-block case-context">' +
+        (s.n ? '<div class="case-num">' + s.n + '</div>' : '') +
+        (s.t ? '<h3 class="case-title">' + s.t + '</h3>' : '') +
+        lead + body + why + img + (extra || '') +
+      '</div>';
+    }
+
+    function buildArtifactsHTML(s, extra) {
+      var lead = s.lead ? '<p class="art-lead">' + s.lead + '</p>' : '';
+      var items = (s.items || []).map(function(item, i) {
+        var num = (i + 1) < 10 ? '0' + (i + 1) : '' + (i + 1);
+        var media = '';
+        if (item.vid) {
+          media = '<div class="artifact-media"><video autoplay muted loop playsinline><source src="' + item.vid + '" type="video/mp4"></video></div>';
+        } else if (item.img) {
+          var containCls = item.contain ? ' contain' : '';
+          media = '<div class="artifact-media' + containCls + '"><img src="' + item.img + '" alt="' + escHtml(item.label || 'artifact') + '" loading="lazy"></div>';
+        }
+        return '<div class="artifact-item">' +
+          '<div class="artifact-head">' +
+            '<span class="artifact-n">A / ' + num + '</span>' +
+            (item.label ? '<span class="artifact-label">' + item.label + '</span>' : '') +
+          '</div>' +
+          media +
+          (item.caption ? '<p class="artifact-caption">' + item.caption + '</p>' : '') +
+        '</div>';
+      }).join('');
+      return '<div class="case-block case-artifacts">' +
+        (s.n ? '<div class="case-num">' + s.n + '</div>' : '') +
+        (s.t ? '<h3 class="case-title">' + s.t + '</h3>' : '') +
+        lead + items + (extra || '') +
+      '</div>';
+    }
+
+    function buildMomentsHTML(s, extra) {
+      var lead = s.lead ? '<p class="mom-lead">' + s.lead + '</p>' : '';
+      var items = (s.items || []).map(function(item, i) {
+        var num = (i + 1) < 10 ? '0' + (i + 1) : '' + (i + 1);
+        var bodyHtml = (item.body || '').split('\n\n').map(function(p) {
+          return '<p class="moment-body">' + p + '</p>';
+        }).join('');
+        var img = item.img ? '<img class="moment-img" src="' + item.img + '" alt="' + escHtml(item.title || 'moment') + '" loading="lazy">' : '';
+        return '<div class="moment-item">' +
+          '<div class="moment-n">M / ' + num + '</div>' +
+          '<div class="moment-body-col">' +
+            (item.title ? '<h4 class="moment-title">' + item.title + '</h4>' : '') +
+            (item.stance ? '<p class="moment-stance">' + item.stance + '</p>' : '') +
+            bodyHtml + img +
+          '</div>' +
+        '</div>';
+      }).join('');
+      return '<div class="case-block case-moments">' +
+        (s.n ? '<div class="case-num">' + s.n + '</div>' : '') +
+        (s.t ? '<h3 class="case-title">' + s.t + '</h3>' : '') +
+        lead + items + (extra || '') +
+      '</div>';
+    }
+
+    function buildImpactHTML(s, extra) {
+      var lead = s.lead ? '<p class="imp-lead">' + s.lead + '</p>' : '';
+      var metricsHtml = '';
+      if (s.metrics && s.metrics.length) {
+        metricsHtml = '<div class="impact-metrics">' +
+          s.metrics.map(function(m) {
+            return '<div class="impact-metric">' +
+              '<span class="impact-metric-v">' + m.v + '</span>' +
+              '<span class="impact-metric-lbl">' + m.label + '</span>' +
+            '</div>';
+          }).join('') +
+        '</div>';
+      }
+      var stmtHtml = '';
+      if (s.statement) {
+        var paras = s.statement.split('\n\n').map(function(p) { return '<p>' + p + '</p>'; }).join('');
+        stmtHtml = '<div class="impact-statement">' + paras + '</div>';
+      }
+      return '<div class="case-block case-impact">' +
+        (s.n ? '<div class="case-num">' + s.n + '</div>' : '') +
+        (s.t ? '<h3 class="case-title">' + s.t + '</h3>' : '') +
+        lead + metricsHtml + stmtHtml + (extra || '') +
+      '</div>';
+    }
+
+    function buildReflectionPromptsHTML(prompts) {
+      if (!prompts || !prompts.length) return '';
+      return '<div class="reflection-prompts">' +
+        prompts.map(function(p) {
+          return '<div class="reflection-prompt">' +
+            '<span class="reflection-prompt-q">' + p.q + '</span>' +
+            '<p class="reflection-prompt-a">' + p.a + '</p>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
+
+    /* ── Template 2.5 helpers ──────────────────────────────
+       A "slot" is a visible placeholder box the user fills later.
+       Any string wrapped in [square brackets] becomes a slot.
+       e.g.  img: "[HERO — 16:9 product shot]"
+             vid: "[LOOP — 8s screen recording of nav]"
+    */
+    function isSlot(str) {
+      if (typeof str !== 'string') return false;
+      return /^\s*\[.+\]\s*$/.test(str);
+    }
+    function slotLabel(str) {
+      return String(str || '').replace(/^\s*\[/, '').replace(/\]\s*$/, '');
+    }
+    function buildSlot(str, cls, hint) {
+      var label = slotLabel(str);
+      var hintHtml = hint ? '<span class="slot-hint">' + hint + '</span>' : '';
+      return '<div class="slot ' + (cls || '') + '"><span class="slot-inner"><span class="slot-label">' + escHtml(label) + '</span>' + hintHtml + '</span></div>';
+    }
+    function buildMedia(item, wrapCls, aspectHint) {
+      // item may have { img, vid, alt } — string values in [] become slots
+      if (item.vid && isSlot(item.vid)) return buildSlot(item.vid, wrapCls, aspectHint);
+      if (item.img && isSlot(item.img)) return buildSlot(item.img, wrapCls, aspectHint);
+      if (item.vid) return '<div class="' + wrapCls + '"><video autoplay muted loop playsinline><source src="' + item.vid + '" type="video/mp4"></video></div>';
+      if (item.img) return '<div class="' + wrapCls + '"><img src="' + item.img + '" alt="' + escHtml(item.alt || item.label || '') + '" loading="lazy"></div>';
+      return '';
+    }
+
+    function buildHeroHTML(hero) {
+      if (!hero) return '';
+      var caption = hero.caption ? '<div class="modal-hero-caption">' + hero.caption + '</div>' : '';
+      if (hero.vid && !isSlot(hero.vid)) {
+        return '<div class="modal-hero"><video autoplay muted loop playsinline><source src="' + hero.vid + '" type="video/mp4"></video>' + caption + '</div>';
+      }
+      if (hero.img && !isSlot(hero.img)) {
+        var imgBadge = hero.badge ? '<div class="hero-concept-badge">' + escHtml(hero.badge) + '</div>' : '';
+        return '<div class="modal-hero"><img src="' + hero.img + '" alt="' + escHtml(hero.alt || '') + '" loading="eager">' + imgBadge + caption + '</div>';
+      }
+      if (hero.concept) {
+        var eyebrow = hero.eyebrow ? '<div class="hero-concept-eyebrow">' + escHtml(hero.eyebrow) + '</div>' : '';
+        var title   = hero.title   ? '<div class="hero-concept-title">'   + escHtml(hero.title)   + '</div>' : '';
+        var tagline = hero.tagline ? '<div class="hero-concept-tagline">' + escHtml(hero.tagline) + '</div>' : '';
+        var badge   = hero.badge   ? '<div class="hero-concept-badge">'   + escHtml(hero.badge)   + '</div>' : '';
+        return '<div class="modal-hero modal-hero--concept">' +
+          '<div class="hero-concept-frame">' +
+            '<div class="hero-concept-glow"></div>' +
+            badge +
+            '<div class="hero-concept-center">' + eyebrow + title + tagline + '</div>' +
+          '</div>' +
+          caption +
+        '</div>';
+      }
+      // Slot fallback — hero string in [] OR nothing provided
+      var raw = hero.img || hero.vid || '[HERO — 16:9 cover asset]';
+      var lbl = isSlot(raw) ? raw : '[' + raw + ']';
+      return buildSlot(lbl, 'hero', hero.hint || '');
+    }
+
+    function buildTriadHTML(s, extra) {
+      var lead = s.lead ? '<p class="triad-lead ctx-lead">' + s.lead + '</p>' : '';
+      var cells = (s.items || []).map(function(item, i) {
+        var num = item.n || 'P / 0' + (i + 1);
+        return '<div class="triad-cell">' +
+          '<span class="triad-n">' + num + '</span>' +
+          (item.title ? '<h4 class="triad-title">' + item.title + '</h4>' : '') +
+          (item.body  ? '<p class="triad-body">' + item.body + '</p>' : '') +
+        '</div>';
+      }).join('');
+      return '<div class="case-block case-triad">' +
+        (s.n ? '<div class="case-num">' + s.n + '</div>' : '') +
+        (s.t ? '<h3 class="case-title">' + s.t + '</h3>' : '') +
+        lead +
+        '<div class="triad-grid">' + cells + '</div>' +
+        (extra || '') +
+      '</div>';
+    }
+
+    function buildShowcaseHTML(s, extra) {
+      var lead = s.lead ? '<p class="sc-lead ctx-lead">' + s.lead + '</p>' : '';
+      var items = (s.items || []).map(function(item, i) {
+        var reverse = (i % 2 === 1) ? ' reverse' : '';
+        var media = buildMedia(item, 'sc-media', item.hint || '4:3 image or short loop');
+        return '<div class="sc-item' + reverse + '">' +
+          media +
+          '<div class="sc-text">' +
+            (item.label   ? '<span class="sc-label">' + item.label + '</span>' : '') +
+            (item.title   ? '<h4 class="sc-title">' + item.title + '</h4>' : '') +
+            (item.caption ? '<p class="sc-caption">' + item.caption + '</p>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+      return '<div class="case-block case-showcase">' +
+        (s.n ? '<div class="case-num">' + s.n + '</div>' : '') +
+        (s.t ? '<h3 class="case-title">' + s.t + '</h3>' : '') +
+        lead +
+        '<div class="showcase-list">' + items + '</div>' +
+        (extra || '') +
+      '</div>';
+    }
+
+    function buildDiagramHTML(s, extra) {
+      var lead = s.lead ? '<p class="dia-lead ctx-lead">' + s.lead + '</p>' : '';
+      var layers = (s.layers || []).map(function(layer) {
+        var chips = (layer.items || []).map(function(it) {
+          return '<span class="diagram-chip">' + it + '</span>';
+        }).join('');
+        return '<div class="diagram-layer">' +
+          '<span class="diagram-layer-lbl">' + (layer.title || '') + '</span>' +
+          '<div class="diagram-layer-items">' + chips + '</div>' +
+        '</div>';
+      }).join('');
+      var header = '<div class="diagram-header">' +
+        '<span class="diagram-title-lbl">' + (s.diagramLabel || 'Framework') + '</span>' +
+        (s.diagramSub ? '<span class="diagram-title-val">' + s.diagramSub + '</span>' : '') +
+      '</div>';
+      var cap = s.caption ? '<div class="diagram-caption">' + s.caption + '</div>' : '';
+      return '<div class="case-block case-diagram">' +
+        (s.n ? '<div class="case-num">' + s.n + '</div>' : '') +
+        (s.t ? '<h3 class="case-title">' + s.t + '</h3>' : '') +
+        lead +
+        '<div class="diagram-wrap">' + header +
+          '<div class="diagram-layers">' + layers + '</div>' +
+        '</div>' + cap +
+        (extra || '') +
+      '</div>';
+    }
+
+    function buildPhotostripHTML(s, extra) {
+      var lead = s.lead ? '<p class="ps-lead ctx-lead">' + s.lead + '</p>' : '';
+      var cells = (s.items || []).map(function(item) {
+        var media = '';
+        var caption = item.caption ? '<div class="ps-caption">' + item.caption + '</div>' : '';
+        if (item.vid && isSlot(item.vid)) return '<div class="ps-cell slot">' + slotInner(item.vid) + caption + '</div>';
+        if (item.img && isSlot(item.img)) return '<div class="ps-cell slot">' + slotInner(item.img) + caption + '</div>';
+        if (item.vid) media = '<video autoplay muted loop playsinline><source src="' + item.vid + '" type="video/mp4"></video>';
+        else if (item.img) media = '<img src="' + item.img + '" alt="' + escHtml(item.caption || '') + '" loading="lazy">';
+        return '<div class="ps-cell">' + media + caption + '</div>';
+      }).join('');
+      return '<div class="case-block case-photostrip">' +
+        (s.n ? '<div class="case-num">' + s.n + '</div>' : '') +
+        (s.t ? '<h3 class="case-title">' + s.t + '</h3>' : '') +
+        lead +
+        '<div class="photostrip-grid">' + cells + '</div>' +
+        (extra || '') +
+      '</div>';
+    }
+    function slotInner(raw) {
+      return '<span class="slot-inner"><span class="slot-label">' + escHtml(slotLabel(raw)) + '</span></span>';
+    }
+
+    function buildInsightsHTML(s, extra) {
+      var lead = s.lead ? '<p class="in-lead ctx-lead">' + s.lead + '</p>' : '';
+      var cells = (s.items || []).map(function(item) {
+        return '<div class="insight-cell">' +
+          '<span class="insight-k">' + (item.k || '') + '</span>' +
+          '<p class="insight-v">' + (item.v || '') + '</p>' +
+        '</div>';
+      }).join('');
+      return '<div class="case-block case-insights">' +
+        (s.n ? '<div class="case-num">' + s.n + '</div>' : '') +
+        (s.t ? '<h3 class="case-title">' + s.t + '</h3>' : '') +
+        lead +
+        '<div class="insights-grid">' + cells + '</div>' +
+        (extra || '') +
+      '</div>';
     }
 
     function buildDeployHTML(deploy, accent) {
@@ -3417,15 +4718,25 @@ document.querySelectorAll('.pcard').forEach(function(card) {
     // Find last non-reflection index so prototype attaches correctly
     var lastRealIdx = sections.reduce(function(acc, s, idx) { return s.reflection ? acc : idx; }, 0);
 
-    var sectionsHtml = sections.map(function(s, i) {
-      // Reflection — renders as a numbered section with italic body
-      if (s.reflection) {
-        var num = i < 9 ? '0' + (i + 1) : '' + (i + 1);
-        var paras = s.body.split('\n\n').map(function(p) {
-          return '<p class="case-body" style="margin-bottom:20px;">' + p + '</p>';
-        }).join('');
-        return '<div class="case-block"><div class="case-num">' + num + '</div><h3 class="case-title">REFLECTION</h3>' + paras + '</div>';
+    /* Build a compact TOC label from the section's title.
+       Uses s.tocLabel override if present, otherwise s.t (or a fallback). */
+    function tocLabelFor(s, i) {
+      if (s.tocLabel) return s.tocLabel;
+      if (s.t) {
+        // Keep it short — first 3 words max
+        var words = String(s.t).trim().split(/\s+/);
+        return words.slice(0, 4).join(' ');
       }
+      if (s.reflection) return 'Reflection';
+      return 'Section ' + (i + 1);
+    }
+    function tocNumFor(s, i) {
+      if (s.n) return s.n;
+      return (i + 1) < 10 ? '0' + (i + 1) : '' + (i + 1);
+    }
+
+    var buildSectionHtml = function(s, i) {
+      // Compute proto embed once — attaches to the last non-reflection section
       var isLast = i === lastRealIdx;
       var protoHtml = '';
       if (isLast && d.proto) {
@@ -3442,6 +4753,31 @@ document.querySelectorAll('.pcard').forEach(function(card) {
               '<a class="proto-fullscreen" href="' + protoFullUrl + '" target="_blank" rel="noopener">Open fullscreen ↗&#xFE0E;</a>' +
             '</div>';
         }
+      }
+
+      // ── Template 2.0 + 2.5 section types (early-return, each self-contained) ──
+      if (s.context)    return buildContextHTML(s, isLast ? protoHtml : '');
+      if (s.artifacts)  return buildArtifactsHTML(s, isLast ? protoHtml : '');
+      if (s.moments)    return buildMomentsHTML(s, isLast ? protoHtml : '');
+      if (s.impact)     return buildImpactHTML(s, isLast ? protoHtml : '');
+      if (s.triad)      return buildTriadHTML(s, isLast ? protoHtml : '');
+      if (s.showcase)   return buildShowcaseHTML(s, isLast ? protoHtml : '');
+      if (s.diagram)    return buildDiagramHTML(s, isLast ? protoHtml : '');
+      if (s.photostrip) return buildPhotostripHTML(s, isLast ? protoHtml : '');
+      if (s.insights)   return buildInsightsHTML(s, isLast ? protoHtml : '');
+
+      // Reflection — renders as a numbered section with italic body + optional prompts
+      if (s.reflection) {
+        var num = s.n || (i < 9 ? '0' + (i + 1) : '' + (i + 1));
+        var paras = (s.body || '').split('\n\n').map(function(p) {
+          return '<p class="case-body" style="margin-bottom:20px;font-style:italic;">' + p + '</p>';
+        }).join('');
+        return '<div class="case-block">' +
+          '<div class="case-num">' + num + '</div>' +
+          '<h3 class="case-title">REFLECTION</h3>' +
+          paras +
+          buildReflectionPromptsHTML(s.prompts) +
+        '</div>';
       }
       if (s.imgHero && s.img) {
         return '<div class="case-block-hero">' +
@@ -3482,7 +4818,22 @@ document.querySelectorAll('.pcard').forEach(function(card) {
         (i === (typeof d.sketchOn === 'number' ? d.sketchOn : 0) ? sketchHtml : '') +
         protoHtml +
         '</div>';
+    };
+
+    // Hero cover slot — rendered once, above all sections
+    var heroHtml = d.hero ? buildHeroHTML(d.hero) : '';
+
+    // Wrap each section in a <section> with data-toc-* attrs for the sidebar scroll-spy
+    var sectionsHtml = sections.map(function(s, i) {
+      var inner = buildSectionHtml(s, i);
+      var label = tocLabelFor(s, i);
+      var num = tocNumFor(s, i);
+      return '<section class="tocsec" id="tocsec-' + i + '" ' +
+        'data-toc-label="' + escHtml(label) + '" data-toc-n="' + escHtml(num) + '">' +
+        inner + '</section>';
     }).join('');
+
+    sectionsHtml = heroHtml + sectionsHtml;
 
     // Close button at end of case study
     var accentEnd = (d.accent || '').match(/#[0-9a-fA-F]{3,6}/g) || ['#e8e4dc'];
@@ -3494,7 +4845,70 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       sectionsHtml += backBtnHtml;
     }
 
+    /* If a previous case study relocated #mmeta under its hero (inside msections),
+       return it to its original home in .modal-head before we wipe msections — otherwise
+       innerHTML would delete #mmeta and hero-less case studies would lose their meta strip. */
+    var mmetaEl = document.getElementById('mmeta');
+    var modalHead = document.querySelector('#modal .modal-head');
+    if (mmetaEl && modalHead && mmetaEl.parentElement !== modalHead) {
+      modalHead.appendChild(mmetaEl);
+      mmetaEl.classList.remove('modal-meta--below-hero');
+    }
+
     msections.innerHTML = sectionsHtml;
+
+    /* Move the meta strip to sit right under the hero cover (Template 2.5) */
+    var heroEl = msections.querySelector('.modal-hero, .slot.hero');
+    if (mmetaEl && heroEl) {
+      mmetaEl.classList.add('modal-meta--below-hero');
+      heroEl.insertAdjacentElement('afterend', mmetaEl);
+    } else if (mmetaEl) {
+      mmetaEl.classList.remove('modal-meta--below-hero');
+    }
+
+    /* ── Template 2.5: sidebar TOC + scroll-spy ── */
+    var tocList = document.getElementById('mtoc-list');
+    var tocBackBtn = document.getElementById('mtoc-back');
+    var tocSecs = msections.querySelectorAll('section.tocsec[data-toc-label]');
+    if (tocList) {
+      tocList.innerHTML = Array.prototype.map.call(tocSecs, function(sec) {
+        return '<button type="button" class="toc-item" data-target="' + sec.id + '">' +
+          '<span class="toc-item-n">' + (sec.getAttribute('data-toc-n') || '') + '</span>' +
+          '<span class="toc-item-t">' + sec.getAttribute('data-toc-label') + '</span>' +
+        '</button>';
+      }).join('');
+      tocList.querySelectorAll('.toc-item').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var el = document.getElementById(btn.getAttribute('data-target'));
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+      // Mark the first item active by default
+      var first = tocList.querySelector('.toc-item');
+      if (first) first.classList.add('active');
+    }
+    if (tocBackBtn) {
+      // Rebind (safe against duplicate listeners since the node is stable in DOM)
+      tocBackBtn.onclick = closeModal;
+    }
+
+    // Scroll-spy — highlight the TOC entry matching the section currently in view
+    if (modal._tocObs) { modal._tocObs.disconnect(); modal._tocObs = null; }
+    setTimeout(function() {
+      if (!tocSecs.length || !tocList) return;
+      var tocItems = tocList.querySelectorAll('.toc-item');
+      modal._tocObs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            var id = entry.target.id;
+            tocItems.forEach(function(b) {
+              b.classList.toggle('active', b.getAttribute('data-target') === id);
+            });
+          }
+        });
+      }, { root: modal, threshold: 0, rootMargin: '-30% 0px -60% 0px' });
+      tocSecs.forEach(function(sec) { modal._tocObs.observe(sec); });
+    }, 60);
 
     // Attach back button (in sections for normal, after gallery for photoGrid)
     if (d.photoGrid) {
@@ -3580,6 +4994,11 @@ document.querySelectorAll('.pcard').forEach(function(card) {
     modal.scrollTop = 0;
     cdot.style.background = accentColor;
     cring.style.borderColor = accentColor.replace(')', ',0.4)').replace('rgb', 'rgba');
+
+    /* ── Case-study entry polish ──
+       Hero + meta strip animate via CSS keyframes (see .modal-hero / .modal-meta--below-hero).
+       Section-level scroll reveals were removed — they interfered with content loading and
+       felt too "app-like" for a website. The panel slide + hero settle are enough. */
 
     /* Animate charts — trigger when chart scrolls into view inside modal */
     function runChartAnim(chartEl) {
@@ -3681,6 +5100,7 @@ function closeModal() {
     modal._flowCleanups.forEach(function(fn) { fn(); });
     modal._flowCleanups = [];
   }
+  if (modal._tocObs) { modal._tocObs.disconnect(); modal._tocObs = null; }
   modal.style.removeProperty('--project-accent');
   var sketchIframe = mpdf.querySelector('.sketch-frame iframe');
   if (sketchIframe) sketchIframe.src = '';
