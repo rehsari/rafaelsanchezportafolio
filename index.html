@@ -148,10 +148,20 @@ nav {
 
 /* HERO */
 #hero {
-  height: 100vh; position: relative; overflow: hidden;
+  min-height: 100dvh; position: relative; overflow: hidden;
   display: flex; flex-direction: column;
-  justify-content: flex-end; padding: 0 48px 110px;
+  justify-content: flex-end;
+  padding: 0 clamp(24px, 4vw, 64px) clamp(72px, 9vh, 120px);
   isolation: isolate;
+}
+
+/* Inner content container — keeps things readable on ultrawide */
+.hero-inner {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 /* Interactive canvas */
@@ -168,12 +178,15 @@ nav {
 @keyframes scan { 0% { top: -2px; } 100% { top: 100%; } }
 
 .hero-eyebrow {
-  font-family: var(--font-mono); font-size: 10px;
+  font-family: var(--font-mono);
+  font-size: clamp(10px, 0.78vw, 13px);
   letter-spacing: 0.4em; color: var(--accent); text-transform: uppercase;
-  display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+  display: inline-flex; align-items: center; gap: 12px;
+  margin-bottom: clamp(18px, 1.6vw, 26px);
 }
 .hero-eyebrow::before {
-  content: ''; display: block; width: 6px; height: 6px;
+  content: ''; display: block;
+  width: 6px; height: 6px;
   background: var(--accent); border-radius: 50%;
   animation: blink 2s infinite;
 }
@@ -181,45 +194,30 @@ nav {
 
 .hero-name {
   font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.35em;
+  font-size: clamp(11px, 0.85vw, 14px);
+  letter-spacing: 0.42em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 14px;
+  margin-bottom: clamp(14px, 1.2vw, 22px);
 }
 .hero-title {
   font-family: var(--font-display);
-  font-size: clamp(72px, 11vw, 160px);
+  font-size: clamp(64px, 10.5vw, 168px);
   line-height: 0.88; letter-spacing: -0.01em;
   position: relative; z-index: 2;
 }
 .hero-title .outline { color: #080808; -webkit-text-stroke: clamp(1.5px, 0.13vw, 3px) var(--text); paint-order: stroke fill; }
 
-.hero-bottom {
-  display: flex; align-items: flex-end;
-  justify-content: space-between; margin-top: 36px;
-}
 .hero-tagline {
-  font-family: var(--font-body); font-size: 16px; font-weight: 300;
-  color: var(--muted); max-width: 420px; line-height: 1.7;
+  font-family: var(--font-body);
+  font-size: clamp(15px, 1.15vw, 21px);
+  font-weight: 300;
+  color: var(--muted);
+  max-width: 56ch;
+  line-height: 1.65;
+  margin-top: clamp(28px, 3.2vh, 44px);
 }
 .hero-tagline strong { color: var(--text); font-weight: 400; }
-.hero-scroll {
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.35em;
-  text-transform: uppercase; color: var(--muted);
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-}
-.hero-scroll-line {
-  width: 1px; height: 50px;
-  background: linear-gradient(to bottom, var(--muted), transparent);
-  animation: scrollAnim 2s ease-in-out infinite;
-}
-@keyframes scrollAnim {
-  0% { transform: scaleY(0); transform-origin: top; }
-  49% { transform: scaleY(1); transform-origin: top; }
-  50% { transform: scaleY(1); transform-origin: bottom; }
-  100% { transform: scaleY(0); transform-origin: bottom; }
-}
 
 /* DIVIDER */
 .divider { height: 1px; background: var(--border); margin: 0 48px; }
@@ -265,7 +263,12 @@ section { padding: 100px 48px; position: relative; z-index: 2; }
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  grid-auto-rows: 300px;
+  /* Row height tracks viewport width so cards keep their ~3:2 proportion on
+     large monitors instead of flattening. Floor of 300px means anything at or
+     below ~1430px (laptops, tablets, mobile) renders exactly as before.
+     The 46vh term stops a 2-row feature card from outgrowing a short or
+     ultrawide screen. */
+  grid-auto-rows: clamp(300px, min(21vw, 46vh), 560px);
   gap: 3px;
 }
 .pcard {
@@ -377,9 +380,9 @@ video::-webkit-media-controls-panel { display: none !important; }
   display: inline-block;
 }
 
-.card-info { position: relative; z-index: 2; padding: 20px 22px; }
+.card-info { position: relative; z-index: 2; padding: clamp(20px, 1.45vw, 30px) clamp(22px, 1.6vw, 34px); }
 .card-cat {
-  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.3em;
+  font-family: var(--font-mono); font-size: clamp(8px, 0.58vw, 11px); letter-spacing: 0.3em;
   text-transform: uppercase; color: rgba(255,255,255,0.45);
   display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
 }
@@ -1728,7 +1731,6 @@ footer {
   .hamburger { display: flex; }
   section { padding: 72px 24px; }
   #hero { padding: 0 24px 56px; }
-  .hero-bottom { flex-direction: column; gap: 20px; align-items: flex-start; }
   .projects-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 260px; }
   .pcard { grid-column: span 1!important; grid-row: span 1!important; }
   .pcard .card-name { font-size: clamp(18px, 3.5vw, 32px); }
@@ -1888,20 +1890,21 @@ footer {
   z-index: 9500;
   display: inline-flex;
   align-items: center;
-  gap: 14px;
-  padding: 15px 20px;
+  gap: 10px;
+  padding: 10px 14px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 0;
   color: var(--text);
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.32em;
+  font-size: 10px;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
   box-shadow: 0 8px 32px rgba(0,0,0,0.55);
 }
+#nibble-trigger .nibble-dots.is-md { --nd: 4px; --ng: 1.5px; }
 #nibble-trigger:hover {
   border-color: var(--accent);
   background: rgba(224,0,0,0.05);
@@ -2668,12 +2671,13 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
 @media (max-width: 640px) {
   #nibble-panel { width: 100vw; border-left: 0; }
   #nibble-trigger {
-    right: 16px; bottom: 16px;
-    padding: 12px 16px;
-    font-size: 10px;
-    letter-spacing: 0.28em;
-    gap: 12px;
+    right: 14px; bottom: 14px;
+    padding: 7px 11px;
+    font-size: 9px;
+    letter-spacing: 0.26em;
+    gap: 8px;
   }
+  #nibble-trigger .nibble-dots.is-md { --nd: 3px; --ng: 1px; }
   .nibble-info-tip { width: 200px; left: auto; right: -6px; }
 }
 </style>
@@ -2784,23 +2788,19 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
   <canvas id="hero-canvas"></canvas>
   <div class="scanline"></div>
 
-  <div class="hero-eyebrow">Available for collaboration — 2026</div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Open for collaboration · 2026</div>
 
-  <div class="hero-name">Rafael C. Sanchez</div>
+    <div class="hero-name">Rafael C. Sanchez</div>
 
-  <h1 class="hero-title">
-    <span class="glitch" data-t="UX / INTERACTION">UX / INTERACTION</span><br>
-    <span class="outline">DESIGNER &amp; ARTIST</span>
-  </h1>
+    <h1 class="hero-title">
+      <span class="glitch" data-t="UX / PRODUCT">UX / PRODUCT</span><br>
+      <span class="outline">DESIGNER &amp; ARTIST</span>
+    </h1>
 
-  <div class="hero-bottom">
     <p class="hero-tagline">
       UX designer exploring <strong>digital experiences</strong> through design, technology, and creative experimentation.
     </p>
-    <div class="hero-scroll">
-      <div class="hero-scroll-line"></div>
-      Scroll
-    </div>
   </div>
 </section>
 
