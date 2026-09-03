@@ -20,6 +20,9 @@
   --font-display: 'Bebas Neue', sans-serif;
   --font-body: 'Barlow Condensed', sans-serif;
   --font-mono: 'Space Mono', monospace;
+  /* Total nav height incl. 1px bottom border (20px pad + 86px logo + 20px pad + 1px).
+     Shared so the NIBBLE-LM panel header lines up with the site nav. */
+  --nav-h: 127px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -279,6 +282,14 @@ section { padding: 100px 48px; position: relative; z-index: 2; }
 /* Larger title on feature-sized cards */
 .pcard.feature .card-name { font-size: clamp(36px, 4.2vw, 68px); }
 .pcard[data-project="shiroiblock"] .card-bg { background-position: center center; }
+/* Glitterbomb's character sits on the right of the frame, so anchor the crop
+   (and the hover zoom) to the right edge instead of the center. Otherwise the
+   character gets sliced off as the card narrows on wider viewports. */
+.pcard[data-project="glitterbomb"] .card-bg {
+  object-position: right center;
+  background-position: right center;
+  transform-origin: right center;
+}
 
 .pcard[data-id="ux"]      { background: #130820; }
 .pcard[data-id="game"]    { background: #160404; }
@@ -1726,6 +1737,7 @@ footer {
   .modal-close-label { display: none; }
   .modal-close { right: 20px; }
   nav { padding: 18px 24px; }
+  :root { --nav-h: 123px; }
   .nav-links { display: none; }
   .nav-social { display: none; }
   .hamburger { display: flex; }
@@ -2002,7 +2014,12 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
 .nibble-header {
   position: relative;
   z-index: 4;
-  padding: 22px 22px 16px;
+  box-sizing: border-box;
+  min-height: var(--nav-h);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px 22px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   background: var(--surface);
@@ -2013,28 +2030,17 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   justify-content: space-between;
   gap: 12px;
 }
-.nibble-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin: 0;
-}
 .nibble-title-group {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
 }
 
 /* Info tooltip — small (i), hover reveals AI disclaimer */
 .nibble-info {
   position: relative;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   padding: 0;
   display: inline-flex;
   align-items: center;
@@ -2044,7 +2050,7 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   border-radius: 50%;
   color: rgba(232,228,220,0.55);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1;
   cursor: help;
   transition: border-color 0.18s ease, color 0.18s ease;
@@ -2083,8 +2089,8 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
 
 /* Close — mirrors .modal-close-x behavior */
 .nibble-close {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2093,7 +2099,7 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   border-radius: 0;
   color: rgba(232,228,220,0.65);
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1;
   cursor: pointer;
   transition: color 0.2s ease, border-color 0.2s ease, transform 0.28s ease;
@@ -2238,7 +2244,7 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   transition: color 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 .nibble-suggested button::before {
-  content: '→';
+  content: '>';
   font-family: var(--font-mono);
   color: rgba(232,228,220,0.35);
   font-size: 12px;
@@ -2403,18 +2409,10 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   transition: border-color 0.18s ease;
   position: relative;
 }
-.nibble-input-row::before {
-  content: '>';
-  font-family: var(--font-mono);
-  color: var(--accent);
-  font-size: 12px;
-  line-height: 1;
-  flex-shrink: 0;
-  align-self: center;
-}
 .nibble-input-row:focus-within { border-color: var(--accent); }
 .nibble-input {
   flex: 1;
+  display: block;
   background: transparent;
   border: 0;
   outline: 0;
@@ -2422,10 +2420,14 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   color: var(--text);
   font-family: var(--font-body);
   font-size: 14px;
-  line-height: 1.5;
+  /* Fixed 22px line box == min-height, so a single line of text (and the
+     placeholder, which is a smaller font) sits dead-center in the bar
+     instead of riding 1px high off the unitless 1.5 line-height. */
+  line-height: 22px;
   max-height: 120px;
   min-height: 22px;
   padding: 0;
+  vertical-align: middle;
 }
 .nibble-input::placeholder {
   color: rgba(232,228,220,0.28);
@@ -2872,20 +2874,14 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
     </div>
 
     <!-- ROW 3: (5+4+3=12) ordered by impressiveness -->
-    <div class="pcard reveal" data-project="velisar" data-id="visual" data-f="visual creative"
-         data-mobile-bg="images/VelisarAlt.png"
+    <div class="pcard reveal" data-project="signify" data-id="teal" data-f="ux"
          style="grid-column:span 5;">
-      <div class="card-bg">
-        <video autoplay muted loop playsinline preload="none" poster="images/velisar-poster.jpg"
-               style="width:100%;height:100%;object-fit:cover;display:block;">
-          <source src="images/velisar-thumb.mp4" type="video/mp4">
-        </video>
-      </div>
+      <div class="card-bg" style="background-image:url(images/signify-thumb.jpg);"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
-        <div class="card-cat">Creative Coding</div>
-        <div class="card-name">VELISAR</div>
+        <div class="card-cat">UX / Interaction</div>
+        <div class="card-name">SIGNIFY AR</div>
       </div>
     </div>
 
@@ -2900,14 +2896,14 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       </div>
     </div>
 
-    <div class="pcard reveal d2" data-project="junomerced" data-id="illus" data-f="game"
+    <div class="pcard reveal d2" data-project="glitterbomb" data-id="green" data-f="product illustration game" data-mobile-bg="images/AltThumbGBY2K.jpg"
          style="grid-column:span 3;">
-      <div class="card-bg" style="background-image:url(images/img_05.jpg); background-position: center 15%;"></div>
+      <video class="card-bg" autoplay muted loop playsinline preload="none" src="images/glitterbomb-thumb.mp4" poster="images/glitterbomb-model.png"></video>
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
-        <div class="card-cat">Concept Art</div>
-        <div class="card-name">JUNO MERCED</div>
+        <div class="card-cat">Product &amp; 3D</div>
+        <div class="card-name">GLITTERBOMB Y2K</div>
       </div>
     </div>
 
@@ -2935,7 +2931,7 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       </div>
     </div>
 
-    <!-- ROW 5–6: CloudCup feature + Signify & GlitterbombY2K stacked -->
+    <!-- ROW 5-6: CloudCup feature + Velisar & Juno Merced stacked -->
     <div class="pcard feature reveal" data-project="cloudcup" data-id="yellow" data-f="ux visual"
          style="grid-column:span 8; grid-row:span 2;">
       <div class="card-bg" style="background-image:url(images/cloudcup-thumb.jpg); background-size:cover; background-position:center;"></div>
@@ -2947,25 +2943,31 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       </div>
     </div>
 
-    <div class="pcard reveal d1" data-project="signify" data-id="teal" data-f="ux"
+    <div class="pcard reveal d1" data-project="velisar" data-id="visual" data-f="visual creative"
+         data-mobile-bg="images/VelisarAlt.png"
          style="grid-column:span 4;">
-      <div class="card-bg" style="background-image:url(images/signify-thumb.jpg);"></div>
+      <div class="card-bg">
+        <video autoplay muted loop playsinline preload="none" poster="images/velisar-poster.jpg"
+               style="width:100%;height:100%;object-fit:cover;display:block;">
+          <source src="images/velisar-thumb.mp4" type="video/mp4">
+        </video>
+      </div>
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
-        <div class="card-cat">UX / Interaction</div>
-        <div class="card-name">SIGNIFY AR</div>
+        <div class="card-cat">Creative Coding</div>
+        <div class="card-name">VELISAR</div>
       </div>
     </div>
 
-    <div class="pcard reveal d2" data-project="glitterbomb" data-id="green" data-f="product illustration game" data-mobile-bg="images/AltThumbGBY2K.jpg"
+    <div class="pcard reveal d2" data-project="junomerced" data-id="illus" data-f="game"
          style="grid-column:span 4;">
-      <video class="card-bg" autoplay muted loop playsinline preload="none" src="images/glitterbomb-thumb.mp4" poster="images/glitterbomb-model.png"></video>
+      <div class="card-bg" style="background-image:url(images/img_05.jpg); background-position: center 15%;"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
-        <div class="card-cat">Product & 3D</div>
-        <div class="card-name">GLITTERBOMB Y2K</div>
+        <div class="card-cat">Concept Art</div>
+        <div class="card-name">JUNO MERCED</div>
       </div>
     </div>
 
@@ -5267,13 +5269,12 @@ if (heroTitle) {
   <div class="nibble-header">
     <div class="nibble-header-row">
       <span class="nibble-title-group">
-        <span class="nibble-dots is-sm" data-state="idle" aria-hidden="true">
+        <span class="nibble-dots is-lg" data-state="idle" role="img" aria-label="NibbleLM">
           <span class="ndr"><i></i><i></i><i></i><i></i></span>
           <span class="ndr"><i></i><i></i><i></i></span>
           <span class="ndr"><i></i><i></i></span>
           <span class="ndr"><i></i></span>
         </span>
-        <span class="nibble-title">NIBBLE-LM</span>
         <button type="button" class="nibble-info" aria-label="About NibbleLM">
           i
           <span class="nibble-info-tip" role="tooltip">NibbleLM is an AI assistant. It can make mistakes about Rafael's work. Verify anything important.</span>
