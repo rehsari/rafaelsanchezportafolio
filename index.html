@@ -177,12 +177,19 @@ nav {
   pointer-events: none;
 }
 
+/* Driven by transform, not `top`: the sweep runs forever, and animating an
+   offset would relayout and repaint the whole hero on every one of those
+   frames. The travel is expressed in dvh because #hero is min-height:100dvh. */
 .scanline {
-  position: absolute; left: 0; right: 0; height: 1px;
+  position: absolute; left: 0; right: 0; top: 0; height: 1px;
   background: linear-gradient(to right, transparent, rgba(224,0,0,0.2), transparent);
   animation: scan 7s linear infinite; pointer-events: none;
+  will-change: transform;
 }
-@keyframes scan { 0% { top: -2px; } 100% { top: 100%; } }
+@keyframes scan {
+  from { transform: translate3d(0, -2px, 0); }
+  to   { transform: translate3d(0, 100dvh, 0); }
+}
 
 /* Signature lockup — RafaelHeader2, inlined.
    The art is fully outlined (no font dependency), so the internal spacing,
@@ -208,7 +215,7 @@ nav {
   aspect-ratio: 927.27 / 382.99; /* reserves space up front, keeps CLS at 0 */
   overflow: visible;             /* glitch layers shift outside the viewBox */
 }
-.lk-name-wrap { fill: var(--accent); }
+.lk-name-wrap { fill: var(--muted); }
 
 /* Liquid metal. The shader paints the headline and tagline; the flat white
    artwork underneath is the fallback and only gets hidden once the canvas is
@@ -226,33 +233,55 @@ nav {
   opacity: 0;
   transition: opacity .5s ease;
 }
+/* Paper Shaders injects its own sheet for this canvas, but that sheet is one
+   @layer block written with CSS nesting — a Safari old enough to drop it leaves
+   the canvas at its intrinsic 300x150 in the flow instead of over the lockup.
+   Stating the geometry here means the shader never depends on that sheet
+   parsing. Unlayered, so it wins over the library's rule either way. */
+.lk-metal > canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 .hero-lockup.is-metal .lk-metal { opacity: 1; }
 .hero-lockup.is-metal .lk-art   { visibility: hidden; }
 
 /* Name glitch — two clones of the name, each clipped to a horizontal band and
-   nudged sideways on the same 4s cadence as the rest of the site's glitches. */
+   torn sideways on the same 4s cadence as the rest of the site's glitches.
+   Stepped rather than tweened: a glitch that eases is just a wipe, so every
+   keyframe snaps and holds for its slice (2% of 4s = 80ms). Two bursts per
+   loop, the second harder than the first, and the two bands fire ~40ms apart
+   so the name shears rather than sliding as one block. */
 .lk-glitch { opacity: 0; }
 .lk-glitch-a {
   fill: var(--accent3);
-  clip-path: polygon(0 0, 100% 0, 100% 38%, 0 38%);
-  animation: lkg1 4s infinite;
+  clip-path: polygon(0 0, 100% 0, 100% 47%, 0 47%);
+  animation: lkg1 4s steps(1, end) infinite;
 }
 .lk-glitch-b {
   fill: var(--accent);
-  clip-path: polygon(0 62%, 100% 62%, 100% 100%, 0 100%);
-  animation: lkg2 4s infinite;
+  clip-path: polygon(0 53%, 100% 53%, 100% 100%, 0 100%);
+  animation: lkg2 4s steps(1, end) infinite;
 }
 @keyframes lkg1 {
-  0%, 88%, 100% { transform: none;              opacity: 0; }
-  89%           { transform: translateX(-7px);  opacity: .9; }
-  91%           { transform: translateX(5px);   opacity: .7; }
-  93%           {                               opacity: 0; }
+  0%, 32%, 87%, 100% { transform: none;                    opacity: 0; }
+  27%                { transform: translate(-18px, -1px);  opacity: 1; }
+  29%                { transform: translate(11px, 1px);    opacity: .85; }
+  31%                { transform: translate(-5px, 0);      opacity: .5; }
+  81%                { transform: translate(-26px, -2px);  opacity: 1; }
+  83%                { transform: translate(16px, 1px);    opacity: .9; }
+  85%                { transform: translate(-7px, 0);      opacity: .6; }
 }
 @keyframes lkg2 {
-  0%, 91%, 100% { transform: none;              opacity: 0; }
-  92%           { transform: translateX(7px);   opacity: .9; }
-  94%           { transform: translateX(-5px);  opacity: .7; }
-  96%           {                               opacity: 0; }
+  0%, 34%, 89%, 100% { transform: none;                    opacity: 0; }
+  28%                { transform: translate(20px, 1px);    opacity: 1; }
+  30%                { transform: translate(-12px, -1px);  opacity: .85; }
+  33%                { transform: translate(6px, 0);       opacity: .5; }
+  82%                { transform: translate(28px, 2px);    opacity: 1; }
+  84%                { transform: translate(-17px, -1px);  opacity: .9; }
+  87%                { transform: translate(8px, 0);       opacity: .6; }
 }
 @media (prefers-reduced-motion: reduce) {
   .lk-glitch { animation: none; opacity: 0; }
@@ -4701,154 +4730,228 @@ function addTrail(x, y) {
 ═══════════════════════════════ */
 (function() {
   var canvas = document.getElementById('hero-canvas');
+  var hero   = document.getElementById('hero');
   var ctx = canvas.getContext('2d');
-  var W, H;
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var TAU = Math.PI * 2;
+  var W = 0, H = 0;
   var mouseX = -9999, mouseY = -9999;
   var particles = [];
   var NPARTICLES = 90;
-
-  function resize() {
-    W = canvas.width = canvas.offsetWidth;
-    H = canvas.height = canvas.offsetHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  document.getElementById('hero').addEventListener('mousemove', function(e) {
-    var rect = canvas.getBoundingClientRect();
-    mouseX = e.clientX - rect.left;
-    mouseY = e.clientY - rect.top;
-  });
-  document.getElementById('hero').addEventListener('mouseleave', function() {
-    mouseX = -9999; mouseY = -9999;
-  });
-  document.getElementById('hero').addEventListener('touchmove', function(e) {
-    var rect = canvas.getBoundingClientRect();
-    var t = e.touches[0];
-    mouseX = t.clientX - rect.left;
-    mouseY = t.clientY - rect.top;
-  }, { passive: true });
-  document.getElementById('hero').addEventListener('touchend', function() {
-    mouseX = -9999; mouseY = -9999;
-  });
-  document.getElementById('hero').addEventListener('touchcancel', function() {
-    mouseX = -9999; mouseY = -9999;
-  });
+  var GLOW_R = 160, INFLUENCE = 130;
 
   function rand(a, b) { return a + Math.random() * (b - a); }
 
   for (var i = 0; i < NPARTICLES; i++) {
+    var o = rand(0.08, 0.35);
     particles.push({
       x: rand(0, 1), y: rand(0, 1),
       vx: rand(-0.0003, 0.0003),
       vy: rand(-0.0003, 0.0003),
       size: rand(1, 2.5),
-      opacity: rand(0.08, 0.35),
-      baseOpacity: rand(0.08, 0.35)
+      opacity: o,
+      baseOpacity: o
     });
   }
 
-  /* Grid lines — the structural lines that warp near the cursor */
-  var COLS = 14, ROWS = 9;
+  /* Pointer events arrive in client coordinates. The canvas box only moves when
+     the page resizes or scrolls, so the rect is cached — measuring it inside the
+     handler forces a layout on every single mousemove. */
+  var boxLeft = 0, boxTop = 0;
+  function measure() {
+    var r = canvas.getBoundingClientRect();
+    boxLeft = r.left; boxTop = r.top;
+  }
 
-  function getGridPoint(col, row) {
-    var bx = (col / COLS) * W;
-    var by = (row / ROWS) * H;
-    var dx = bx - mouseX;
-    var dy = by - mouseY;
-    var dist = Math.sqrt(dx * dx + dy * dy);
+  /* Grid lines — the structural lines that warp near the cursor.
+     Points are solved into one flat buffer per frame. Walking rows and then
+     columns over a shared buffer is what stops every intersection being solved
+     twice, once for each direction. */
+  var COLS = 14, ROWS = 9;
+  var pts = new Float32Array((COLS + 1) * (ROWS + 1) * 2);
+
+  function solvePoints(warp) {
     var radius = Math.min(W, H) * 0.22;
-    if (dist < radius && mouseX > 0) {
-      var force = (1 - dist / radius);
-      force = force * force;
-      var repel = force * 55;
-      bx += (dx / dist) * repel;
-      by += (dy / dist) * repel;
+    var k = 0;
+    for (var r = 0; r <= ROWS; r++) {
+      var rowY = (r / ROWS) * H;
+      for (var c = 0; c <= COLS; c++) {
+        var bx = (c / COLS) * W, by = rowY;
+        if (warp) {
+          var dx = bx - mouseX, dy = by - mouseY;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > 0 && dist < radius) {
+            var force = 1 - dist / radius;
+            var repel = force * force * 55;
+            bx += (dx / dist) * repel;
+            by += (dy / dist) * repel;
+          }
+        }
+        pts[k++] = bx; pts[k++] = by;
+      }
     }
-    return { x: bx, y: by };
+  }
+
+  function strokeGrid(c2d) {
+    c2d.strokeStyle = 'rgba(255,255,255,0.035)';
+    c2d.lineWidth = 0.8;
+    var r, c, o;
+    for (r = 0; r <= ROWS; r++) {
+      c2d.beginPath();
+      for (c = 0; c <= COLS; c++) {
+        o = (r * (COLS + 1) + c) * 2;
+        if (c === 0) c2d.moveTo(pts[o], pts[o + 1]);
+        else         c2d.lineTo(pts[o], pts[o + 1]);
+      }
+      c2d.stroke();
+    }
+    for (c = 0; c <= COLS; c++) {
+      c2d.beginPath();
+      for (r = 0; r <= ROWS; r++) {
+        o = (r * (COLS + 1) + c) * 2;
+        if (r === 0) c2d.moveTo(pts[o], pts[o + 1]);
+        else         c2d.lineTo(pts[o], pts[o + 1]);
+      }
+      c2d.stroke();
+    }
+  }
+
+  /* The undisturbed grid is identical on every frame the cursor is away from
+     the hero — which is most of them — so it is stroked once into an offscreen
+     canvas and blitted. Only a hovered hero pays for the 25 warped polylines. */
+  var gridCache = document.createElement('canvas');
+  var gridCtx = gridCache.getContext('2d');
+
+  /* Built once and reused: the gradient is drawn at the origin and moved into
+     place with a translate, rather than reallocating one per frame. */
+  var glow = ctx.createRadialGradient(0, 0, 0, 0, 0, GLOW_R);
+  glow.addColorStop(0, 'rgba(224,0,0,0.07)');
+  glow.addColorStop(1, 'rgba(224,0,0,0)');
+
+  function resize() {
+    W = canvas.width  = gridCache.width  = canvas.offsetWidth;
+    H = canvas.height = gridCache.height = canvas.offsetHeight;
+    measure();
+    solvePoints(false);
+    strokeGrid(gridCtx);
+  }
+  resize();
+
+  var resizeQueued = false;
+  window.addEventListener('resize', function() {
+    if (resizeQueued) return;
+    resizeQueued = true;
+    requestAnimationFrame(function() { resizeQueued = false; resize(); });
+  });
+  window.addEventListener('scroll', measure, { passive: true });
+
+  function drawParticles(animate) {
+    ctx.fillStyle = '#ffffff';
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      var px = p.x * W, py = p.y * H;
+
+      if (animate) {
+        var pulled = false;
+        if (mouseX > 0) {
+          var dx = px - mouseX, dy = py - mouseY;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > 0 && dist < INFLUENCE) {
+            var f = 1 - dist / INFLUENCE;
+            px += (dx / dist) * f * 30;
+            py += (dy / dist) * f * 30;
+            p.opacity = Math.min(0.7, p.baseOpacity + f * 0.5);
+            pulled = true;
+          }
+        }
+        if (!pulled) p.opacity += (p.baseOpacity - p.opacity) * 0.05;
+
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = 1; else if (p.x > 1) p.x = 0;
+        if (p.y < 0) p.y = 1; else if (p.y > 1) p.y = 0;
+      }
+
+      /* globalAlpha instead of a per-particle rgba() string: same result
+         without building 90 throwaway strings every frame. */
+      ctx.globalAlpha = p.opacity;
+      ctx.beginPath();
+      ctx.arc(px, py, p.size, 0, TAU);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /* Reduced motion gets the composition, painted once, with no loop at all. */
+  if (reduce) {
+    var paintStill = function() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(gridCache, 0, 0);
+      drawParticles(false);
+    };
+    window.addEventListener('resize', paintStill);
+    paintStill();
+    return;
   }
 
   var rafId = null;
   var canvasActive = true;
 
+  function schedule() {
+    if (rafId === null && canvasActive && !document.hidden) {
+      rafId = requestAnimationFrame(draw);
+    }
+  }
+
   new IntersectionObserver(function(entries) {
     canvasActive = entries[0].isIntersecting;
-    if (canvasActive && !rafId) { rafId = requestAnimationFrame(draw); }
+    schedule();
   }, { threshold: 0 }).observe(canvas);
+
+  /* A background tab still services rAF in some setups, and the field is
+     invisible there either way. */
+  document.addEventListener('visibilitychange', schedule);
 
   function draw() {
     rafId = null;
-    if (!canvasActive) return;
+    if (!canvasActive || document.hidden) return;
+
+    var hovering = mouseX > 0;
     ctx.clearRect(0, 0, W, H);
 
-    /* Grid */
-    ctx.strokeStyle = 'rgba(255,255,255,0.035)';
-    ctx.lineWidth = 0.8;
+    if (hovering) {
+      solvePoints(true);
+      strokeGrid(ctx);
 
-    for (var r = 0; r <= ROWS; r++) {
+      ctx.save();
+      ctx.translate(mouseX, mouseY);
+      ctx.fillStyle = glow;
       ctx.beginPath();
-      for (var c = 0; c <= COLS; c++) {
-        var pt = getGridPoint(c, r);
-        if (c === 0) ctx.moveTo(pt.x, pt.y);
-        else ctx.lineTo(pt.x, pt.y);
-      }
-      ctx.stroke();
-    }
-    for (var c2 = 0; c2 <= COLS; c2++) {
-      ctx.beginPath();
-      for (var r2 = 0; r2 <= ROWS; r2++) {
-        var pt2 = getGridPoint(c2, r2);
-        if (r2 === 0) ctx.moveTo(pt2.x, pt2.y);
-        else ctx.lineTo(pt2.x, pt2.y);
-      }
-      ctx.stroke();
-    }
-
-    /* Cursor glow */
-    if (mouseX > 0) {
-      var gr = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 160);
-      gr.addColorStop(0, 'rgba(224,0,0,0.07)');
-      gr.addColorStop(1, 'rgba(224,0,0,0)');
-      ctx.fillStyle = gr;
-      ctx.beginPath();
-      ctx.arc(mouseX, mouseY, 160, 0, Math.PI * 2);
+      ctx.arc(0, 0, GLOW_R, 0, TAU);
       ctx.fill();
+      ctx.restore();
+    } else {
+      ctx.drawImage(gridCache, 0, 0);
     }
 
-    /* Particles */
-    particles.forEach(function(p) {
-      var px = p.x * W;
-      var py = p.y * H;
-      var dx = px - mouseX;
-      var dy = py - mouseY;
-      var dist = Math.sqrt(dx * dx + dy * dy);
-      var influenceR = 130;
-
-      if (dist < influenceR && mouseX > 0) {
-        var f = (1 - dist / influenceR);
-        px += (dx / dist) * f * 30;
-        py += (dy / dist) * f * 30;
-        p.opacity = Math.min(0.7, p.baseOpacity + f * 0.5);
-      } else {
-        p.opacity += (p.baseOpacity - p.opacity) * 0.05;
-      }
-
-      p.x += p.vx;
-      p.y += p.vy;
-      if (p.x < 0) p.x = 1;
-      if (p.x > 1) p.x = 0;
-      if (p.y < 0) p.y = 1;
-      if (p.y > 1) p.y = 0;
-
-      ctx.fillStyle = 'rgba(255,255,255,' + p.opacity + ')';
-      ctx.beginPath();
-      ctx.arc(px, py, p.size, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
+    drawParticles(true);
     rafId = requestAnimationFrame(draw);
   }
-  rafId = requestAnimationFrame(draw);
+  schedule();
+
+  function setPointer(x, y) { mouseX = x - boxLeft; mouseY = y - boxTop; }
+  function clearPointer()   { mouseX = -9999; mouseY = -9999; }
+
+  hero.addEventListener('mousemove', function(e) {
+    setPointer(e.clientX, e.clientY);
+  }, { passive: true });
+  hero.addEventListener('mouseleave', clearPointer);
+  hero.addEventListener('touchmove', function(e) {
+    setPointer(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  hero.addEventListener('touchend', clearPointer);
+  hero.addEventListener('touchcancel', clearPointer);
 })();
 
 /* ═══════════════════════════════
@@ -7297,7 +7400,10 @@ if (heroTitle) {
       // letter's bevel runs. Expensive enough to matter, so it happens once,
       // here, and never again per frame.
       return paper.toProcessedLiquidMetal('images/lockup-shape.svg')
-        .then(function (out) { return load(URL.createObjectURL(out.pngBlob)); })
+        .then(function (out) {
+          var url = URL.createObjectURL(out.pngBlob);
+          return load(url).finally(function () { URL.revokeObjectURL(url); });
+        })
         .then(function (img) {
           new paper.ShaderMount(
             host,
@@ -7344,7 +7450,23 @@ if (heroTitle) {
             1600 * 900,
             ['u_image']
           );
-          lockup.classList.add('is-metal');
+
+          // The flat lockup is only retired once the shader canvas has actually
+          // been given a size. Mounting can succeed while the canvas never gets
+          // measured — Safari is where that happens — and hiding the artwork on
+          // mount alone would leave the hero blank rather than merely un-metal.
+          // ResizeObserver delivers that size asynchronously, hence the poll.
+          var tries = 0;
+          (function confirmPainted() {
+            var c = host.querySelector('canvas');
+            if (c && c.width > 0 && c.height > 0) {
+              lockup.classList.add('is-metal');
+            } else if (++tries < 30) {
+              requestAnimationFrame(confirmPainted);
+            } else {
+              console.warn('Liquid metal canvas never got a size, keeping the flat lockup.');
+            }
+          })();
         });
     }).catch(function (err) {
       console.warn('Liquid metal unavailable, keeping the flat lockup.', err);
