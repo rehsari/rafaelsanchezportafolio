@@ -1287,6 +1287,12 @@ video::-webkit-media-controls-panel { display: none !important; }
 .case-moments--side .moment-n { padding-top: 0; margin-bottom: 16px; }
 .case-moments--side .moment-body,
 .case-moments--side .moment-stance { max-width: none; }
+/* A moment without an asset loses the column that was setting its measure, so
+   the text would run the full grid width. Hold it at the same width the media
+   rows give the argument, and the section reads as one rhythm either way. */
+.case-moments--side .moment-item:not(.has-side) .moment-body,
+.case-moments--side .moment-item:not(.has-side) .moment-stance { max-width: 552px; }
+
 .moment-media-col { min-width: 0; }
 .moment-media-col .moment-media { margin-top: 0; max-width: none; }
 .moment-media-col .slot {
@@ -3893,34 +3899,32 @@ const PROJECTS = {
         ]
       },
 
-      { moments: true, n:"04", t:"KEY DESIGN MOMENTS", tocLabel:"Design moments",
+      { moments: true, sideMedia: true, n:"04", t:"KEY DESIGN MOMENTS", tocLabel:"Design moments",
         lead: "Four calls that shaped what Resources became, and one that defined where it stops.",
         items: [
           { title: "Fit the behaviors that already existed",
             stance: "Distributed the feature across Snapchat instead of building a destination.",
-            body: "Resources could not depend on people going to a completely separate part of the app to find help. Understanding how people already use Snapchat became essential.\n\nThat led to multiple entry points designed around existing behaviors: resources appearing in Search when someone looked for help, relevant content surfacing through Spotlight, nearby organizations through Map, or simply receiving a resource from a friend.\n\nInstead of asking people to learn a new behavior, Resources had to fit into the ones already there.",
-            img: "[ENTRY POINTS - 16:9 exploration board: the single-hub concept next to the distributed Search, Spotlight, Map and send-to-friend entry points]",
-            hint: "16:9 - exploration board" },
+            body: "Resources could not depend on people going to a separate part of the app to find help. Understanding how people already use Snapchat became essential.\n\nThat led to multiple entry points built around existing behaviors: Search for intentional discovery, Spotlight for relevant content, Map for nearby organizations, and sharing between friends.\n\nInstead of introducing a new behavior, Resources had to fit naturally into the ones already there.",
+            vid: "videos/snap-entry-points.mp4",
+            poster: "videos/snap-entry-points-poster.jpg",
+            aspect: "1 / 1",
+            caption: "Resources meeting people where they already were",
+            alt: "Resources surfacing through Snapchat's existing Search, Spotlight and Map behaviors" },
 
           { title: "Three weeks meant being clear about what mattered",
             stance: "Scoped the MVP before scoping the screens.",
-            body: "With less than three weeks to take the project from an open prompt to a working prototype, defining the minimum viable product became one of the most important decisions. The goal was not to skip steps, but to understand what actually needed to be built and how to get there effectively.\n\nThat meant being open about strengths and weaknesses across design, engineering and marketing, dividing work around them, and constantly adjusting the pipeline as a team.\n\nMoving fast became less about doing more and more about knowing what mattered most.",
-            img: "[SPRINT - 16:9 photo: the three-week pipeline board with MVP scope split across design, engineering and marketing]",
-            hint: "16:9 - process photo" },
+            body: "With less than three weeks to move from an open prompt to a working prototype, defining the MVP became essential. The goal was not to skip steps, but to identify what actually needed to be built and how to get there efficiently.\n\nThat meant dividing work around the strengths of design, engineering, and marketing, then adjusting the pipeline together as the project evolved.\n\nMoving fast became less about doing more and more about knowing what mattered most.",
+          },
 
           { title: "Information alone was not enough to create trust",
             stance: "Added testimonials as proof, not as ratings.",
-            body: "Early organization pages had everything someone needed to understand a resource: services, eligibility, location and a way to contact the organization. That still did not answer a more human question. Would someone actually feel comfortable asking them for help?\n\nTestimonials became a way for people to share short experiences about receiving support there. Not as ratings, but as proof that someone else had asked for help before.\n\nAnonymous contributions and Snapchat-native camera tools were explored to make those stories feel human without forcing someone to publicly attach their identity to them. The open tension became how much identity trust actually requires.",
-            img: "[TESTIMONIALS - 16:9 exploration: anonymous and camera-native testimonial variants side by side]",
-            hint: "16:9 - design exploration" },
+            body: "Organization pages covered the essentials: services, eligibility, location, and contact. But they still left a more human question unanswered: would someone actually feel comfortable asking for help?\n\nTestimonials showed short experiences from people who had received support there, not as ratings, but as proof that someone else had asked before.\n\nAnonymous contributions and Snapchat-native camera tools helped make those stories feel human while protecting privacy, raising a key tension: how much identity does trust require?",
+          },
 
           { title: "Connect people to help, do not become the help",
             stance: "Drew the boundary at the handoff.",
-            body: "As Resources grew, it was easy to imagine more happening directly inside Snapchat: applications, eligibility checks, appointments or conversations with providers. Conversations with S.P.Y. and St. Joseph Center made an important boundary clear.\n\nThese organizations already had the expertise and the systems to actually provide support. Rebuilding those systems inside Snapchat would add complexity without necessarily helping the person using them. Resources focused instead on the part Snapchat could improve: discover, understand, trust, connect.\n\nThe handoff to the official organization was not something the experience failed to solve. It was the intended end of the experience. Snapchat's job was to make the connection easier. The organization's job was to take it from there.",
-            vid: "videos/snap-scope.mp4",
-            poster: "videos/snap-scope-poster.jpg",
-            aspect: "1280 / 506",
-            alt: "Four screens from the Resources prototype playing in sequence" }
+            body: "As Resources grew, it was easy to imagine more happening inside Snapchat: applications, eligibility checks, appointments, or conversations with providers. Conversations with S.P.Y. and St. Joseph Center made the boundary clearer.\n\nThese organizations already had the expertise and systems to provide support. Resources instead focused on what Snapchat could improve: helping people discover, understand, trust, and connect.\n\nThe handoff was not a gap in the experience. It was the intended end of it. Snapchat made the connection easier, then the organization took it from there.",
+          }
         ]
       },
 
@@ -5438,6 +5442,8 @@ document.querySelectorAll('.pcard').forEach(function(card) {
           : ((item.img || item.vid)
               ? buildMedia({ img: item.img, vid: item.vid, alt: item.alt || item.title }, 'moment-media', item.hint)
               : '');
+        var isVid = item.vid && !isSlot(item.vid);
+        var cap = (item.caption && !isVid) ? '<p class="moment-cap">' + item.caption + '</p>' : '';
         if (!side) {
           return '<div class="moment-item">' + numTag +
             '<div class="moment-body-col">' +
@@ -5447,8 +5453,6 @@ document.querySelectorAll('.pcard').forEach(function(card) {
             '</div>' +
           '</div>';
         }
-        var isVid = item.vid && !isSlot(item.vid);
-        var cap = (item.caption && !isVid) ? '<p class="moment-cap">' + item.caption + '</p>' : '';
         var col = media
           ? '<div class="moment-media-col" style="--m-ar:' + (item.aspect || '4 / 3') + ';">' + media + cap + '</div>'
           : '';
