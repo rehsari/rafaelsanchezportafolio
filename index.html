@@ -156,7 +156,10 @@ nav {
   min-height: 100dvh; position: relative; overflow: hidden;
   display: flex; flex-direction: column;
   /* Centred in the band below the fixed nav, which is why the top padding
-     carries --nav-h: the nav overlays the hero rather than displacing it. */
+     carries --nav-h: the nav overlays the hero rather than displacing it.
+     The title's position is driven only by this rule — the scroll cue is
+     taken out of flow (position:absolute below) so it can move on its own
+     without dragging the title with it. */
   justify-content: center;
   padding: calc(var(--nav-h) + clamp(16px, 3vh, 40px)) clamp(24px, 4vw, 64px) clamp(72px, 9vh, 120px);
   isolation: isolate;
@@ -287,6 +290,87 @@ nav {
   .lk-glitch { animation: none; opacity: 0; }
 }
 
+/* SCROLL CUE — plain label with the arrow stacked directly beneath it, no
+   bordered container. Positioned out of flow (absolute) so it can sit low
+   in the hero without dragging the title's own centred position with it.
+   Starts hidden and settles in once the loader clears (class .in, added in
+   hideLoader()). Once settled, the arrow bobs gently on a slow loop as an
+   invitation to scroll — small amplitude, slow cycle, so it reads as an
+   ambient cue rather than a flashing "click me". Paused on hover/focus/
+   active so the existing press feedback isn't fighting a running loop. */
+.hero-scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(20px, 4vh, 36px);
+  transform: translateX(-50%) translateY(10px);
+  opacity: 0;
+  filter: blur(4px);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 0.25s ease,
+    opacity 0.6s cubic-bezier(0.22,1,0.36,1) 0.2s,
+    transform 0.6s cubic-bezier(0.22,1,0.36,1) 0.2s,
+    filter 0.6s cubic-bezier(0.22,1,0.36,1) 0.2s;
+}
+.hero-scroll-cue.in {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  filter: blur(0);
+}
+.hero-scroll-cue-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+.hero-scroll-cue.in .hero-scroll-cue-arrow {
+  animation: heroCueBob 2.2s cubic-bezier(0.45,0,0.55,1) 0.85s infinite alternate;
+}
+@keyframes heroCueBob {
+  from { transform: translateY(0); }
+  to   { transform: translateY(4px); }
+}
+.hero-scroll-cue-arrow svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  display: block;
+}
+.hero-scroll-cue:hover,
+.hero-scroll-cue:focus-visible { color: var(--text); }
+.hero-scroll-cue:hover .hero-scroll-cue-arrow,
+.hero-scroll-cue:focus-visible .hero-scroll-cue-arrow { transform: translateY(3px); animation-play-state: paused; }
+.hero-scroll-cue:active .hero-scroll-cue-arrow { transform: translateY(1px); animation-play-state: paused; }
+.hero-scroll-cue:focus-visible { outline: none; }
+.hero-scroll-cue:focus-visible span:first-child { outline: 1px solid var(--accent); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-scroll-cue {
+    opacity: 1;
+    transform: translateX(-50%);
+    filter: none;
+    transition: color 0.25s ease;
+  }
+  .hero-scroll-cue-arrow,
+  .hero-scroll-cue.in .hero-scroll-cue-arrow,
+  .hero-scroll-cue:hover .hero-scroll-cue-arrow,
+  .hero-scroll-cue:focus-visible .hero-scroll-cue-arrow { transition: color 0.25s ease; transform: none; animation: none; }
+}
+@media (max-width: 640px) {
+  .hero-scroll-cue { bottom: clamp(16px, 3vh, 28px); }
+}
+
 /* DIVIDER */
 .divider { height: 1px; background: var(--border); margin: 0 48px; }
 
@@ -377,6 +461,15 @@ video::-webkit-media-controls { display: none !important; }
 video::-webkit-media-controls-enclosure { display: none !important; }
 video::-webkit-media-controls-panel { display: none !important; }
 .pcard:hover .card-bg { transform: scale(1.06); filter: brightness(0.88) saturate(1); }
+
+/* Design Exploration card — two stacked layers crossfade between curated
+   shots (see the throughlens card script). Same easing as the hover zoom
+   above so the rotation feels like part of the same motion language. */
+.card-bg--layer { opacity: 0; transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+.card-bg--layer.is-active { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .card-bg--layer { transition: transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+}
 
 .card-ov {
   position: absolute; inset: 0;
@@ -1267,6 +1360,7 @@ video::-webkit-media-controls-panel { display: none !important; }
 }
 .moment-body + .moment-body { margin-top: 14px; }
 .moment-media { margin-top: 24px; }
+.moment-body--after { margin-top: 24px; }
 .moment-media img, .moment-media video {
   width: 100%; max-height: 380px; object-fit: cover;
   display: block; border-radius: 2px;
@@ -1831,6 +1925,8 @@ video::-webkit-media-controls-panel { display: none !important; }
 
 /* ── PHOTOSTRIP: 4-col horizontal photo row (testing shots, etc.) */
 .case-photostrip .ps-lead { max-width: 620px; }
+.case-photostrip .ps-body { margin: 0 0 20px; }
+.case-photostrip .ps-body:last-of-type { margin-bottom: 40px; }
 .photostrip-grid {
   margin-top: 44px;
   display: grid;
@@ -3271,6 +3367,13 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
         <span class="lk-metal" aria-hidden="true"></span>
     </h1>
   </div>
+
+  <a href="#works" class="hero-scroll-cue" id="hero-scroll-cue" aria-label="View selected work">
+    <span>View Selected Work</span>
+    <span class="hero-scroll-cue-arrow" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </span>
+  </a>
 </section>
 
 <div class="divider"></div>
@@ -3859,18 +3962,7 @@ const PROJECTS = {
         why: "The support already exists. Snapchat could make it easier to know it is there."
       },
 
-      { context: true, n:"02", t:"RESEARCH", tocLabel:"Research",
-        lead: "Designing the connection, not the resource.",
-        body: "Finding support is only part of the problem. Feeling comfortable enough to use it is another.\n\nIn The Hope Center's 2020 #RealCollege Survey, 1 in 4 students experiencing basic needs insecurity who did not use campus support said they were embarrassed to apply, while 51% did not know the resources existed or were available.\n\nWith more than 450 million people using Snap Map every month, Snapchat presented an opportunity to make local support easier to discover and more approachable through a platform already built around people, places, and connection.",
-        midImg: "images/snap-world.jpg",
-        midAlt: "Snap Map viewed as a globe, with clusters of activity across cities worldwide",
-        subhead: "Turning organization feedback into product decisions",
-        body2: "Two rounds of conversations with S.P.Y. and St. Joseph Center helped ground the concept, first by building an understanding of the space and later by providing feedback on the feature. The experience was also tested with users throughout the sprint.\n\nHousing security became the main scenario because it often overlaps with needs like food, utilities, legal support, and mental health, making it a useful way to pressure-test a system designed to extend beyond one issue.",
-        img: "images/SnapBanner1.jpg",
-        alt: "The St. Joseph Center organization card on Snap Map, showing rent stipend and legal help tags, distance, hours and contact actions"
-      },
-
-      { showcase: true, n:"03", t:"THE CORE FLOWS", tocLabel:"Core flows",
+      { showcase: true, n:"02", t:"THE CORE FLOWS", tocLabel:"Core flows",
         lead: "Three surfaces carry the feature. Finding a need, understanding what is available, and seeing that someone has actually used it.",
         items: [
           { label:"Flow 01 - Resources tab",
@@ -3899,7 +3991,28 @@ const PROJECTS = {
         ]
       },
 
-      { moments: true, sideMedia: true, n:"04", t:"KEY DESIGN MOMENTS", tocLabel:"Design moments",
+      { context: true, n:"03", t:"RESEARCH", tocLabel:"Research",
+        lead: "Designing the connection, not the resource.",
+        body: "Finding support is only part of the problem. Feeling comfortable enough to use it is another.\n\nIn The Hope Center's 2020 #RealCollege Survey, 1 in 4 students experiencing basic needs insecurity who did not use campus support said they were embarrassed to apply, while 51% did not know the resources existed or were available.\n\nWith more than 450 million people using Snap Map every month, Snapchat presented an opportunity to make local support easier to discover and more approachable through a platform already built around people, places, and connection.",
+        midImg: "images/snap-world.jpg",
+        midAlt: "Snap Map viewed as a globe, with clusters of activity across cities worldwide",
+        subhead: "Turning organization feedback into product decisions",
+        body2: "Two rounds of conversations with S.P.Y. and St. Joseph Center helped ground the concept, first by building an understanding of the space and later by providing feedback on the feature. The experience was also tested with users throughout the sprint.\n\nHousing security became the main scenario because it often overlaps with needs like food, utilities, legal support, and mental health, making it a useful way to pressure-test a system designed to extend beyond one issue.",
+        img: "images/SnapBanner1.jpg",
+        alt: "The St. Joseph Center organization card on Snap Map, showing rent stipend and legal help tags, distance, hours and contact actions"
+      },
+
+      { photostrip: true, n:"04", t:"BUILDING THE FEATURE AS A TEAM", tocLabel:"Team collaboration",
+        body: "The project was shaped through constant collaboration between design, engineering, and marketing.\n\nResearch findings were shared across the team and became a starting point for discussion, not just a design handoff. Ideas were explored together, challenged from different perspectives, and refined based on what would be useful, realistic to build, and clear to communicate.\n\nThat teamwork helped turn a broad problem into a focused product that everyone had a hand in shaping.",
+        items: [
+          { img:"images/snap-team-04.jpg", caption:"Mapping the flow" },
+          { img:"images/snap-team-02.jpg", caption:"Working session" },
+          { img:"images/snap-team-03.jpg", caption:"Building the prototype" },
+          { img:"images/snap-team-01.jpg", caption:"Live at Snap" }
+        ]
+      },
+
+      { moments: true, sideMedia: true, n:"05", t:"KEY DESIGN MOMENTS", tocLabel:"Design moments",
         lead: "Four calls that shaped what Resources became, and one that defined where it stops.",
         items: [
           { title: "Fit the behaviors that already existed",
@@ -3914,21 +4027,33 @@ const PROJECTS = {
           { title: "Three weeks meant being clear about what mattered",
             stance: "Scoped the MVP before scoping the screens.",
             body: "With less than three weeks to move from an open prompt to a working prototype, defining the MVP became essential. The goal was not to skip steps, but to identify what actually needed to be built and how to get there efficiently.\n\nThat meant dividing work around the strengths of design, engineering, and marketing, then adjusting the pipeline together as the project evolved.\n\nMoving fast became less about doing more and more about knowing what mattered most.",
-          },
+            img: "images/snap-mvp-scope.jpg",
+            aspect: "1 / 1",
+            caption: "Scoping the MVP down to what the three weeks could actually ship",
+            alt: "Resources filtered by category, showing shelters and transitional homes near the user" },
+
+          { title: "Do not become the help",
+            stance: "Drew the boundary at the handoff.",
+            body: "As Resources grew, it was easy to imagine more happening inside Snapchat. Conversations with S.P.Y. and St. Joseph Center made the boundary clearer: Resources should help people discover, understand, trust, and connect, then hand them off to the organizations already equipped to provide support.",
+            img: "images/snap-connect-handoff.jpg",
+            aspect: "16 / 9",
+            caption: "Where Resources ends and the organization takes over",
+            alt: "St. Joseph Center organization card on Snap Map next to a bitmoji, with the organization's own site showing the handoff beyond Snapchat" },
 
           { title: "Information alone was not enough to create trust",
             stance: "Added testimonials as proof, not as ratings.",
-            body: "Organization pages covered the essentials: services, eligibility, location, and contact. But they still left a more human question unanswered: would someone actually feel comfortable asking for help?\n\nTestimonials showed short experiences from people who had received support there, not as ratings, but as proof that someone else had asked before.\n\nAnonymous contributions and Snapchat-native camera tools helped make those stories feel human while protecting privacy, raising a key tension: how much identity does trust require?",
-          },
-
-          { title: "Connect people to help, do not become the help",
-            stance: "Drew the boundary at the handoff.",
-            body: "As Resources grew, it was easy to imagine more happening inside Snapchat: applications, eligibility checks, appointments, or conversations with providers. Conversations with S.P.Y. and St. Joseph Center made the boundary clearer.\n\nThese organizations already had the expertise and systems to provide support. Resources instead focused on what Snapchat could improve: helping people discover, understand, trust, and connect.\n\nThe handoff was not a gap in the experience. It was the intended end of it. Snapchat made the connection easier, then the organization took it from there.",
-          }
+            body: "Organization pages covered the essentials: services, eligibility, location, and contact. But they still left a more human question unanswered: would someone actually feel comfortable asking for help?\n\nTestimonials added short experiences from people who had received support there, not as ratings, but as proof that someone else had asked before. Snapchat-native camera tools and anonymous posting options let people decide how much of themselves they wanted to share, keeping the stories personal without forcing identity into the experience.",
+            vid: "videos/snap-testimonial-strip.mp4",
+            poster: "videos/snap-testimonial-strip-poster.jpg",
+            aspect: "1000 / 394",
+            wide: true,
+            caption: "Giving Resources a face",
+            afterBody: "That choice mattered more than volume. A few honest, unfiltered stories built more trust than a long list of ratings ever could.",
+            alt: "Four Snapchat testimonial cards from CCFB, SD Youth Services, Alba Collaborative and Shelterinc side by side" }
         ]
       },
 
-      { triad: true, n:"05", t:"WHY SNAPCHAT", tocLabel:"Why Snapchat",
+      { triad: true, n:"06", t:"WHY SNAPCHAT", tocLabel:"Why Snapchat",
         lead: "Snapchat's identity shaped Resources from the beginning. The goal was never to put a resource directory inside Snapchat, but to use what the platform already does well.",
         items: [
           { n:"S / 01", title:"Close relationships",
@@ -3940,7 +4065,7 @@ const PROJECTS = {
         ]
       },
 
-      { impact: true, n:"06", t:"WHAT IT BECAME", tocLabel:"Impact",
+      { impact: true, n:"07", t:"WHAT IT BECAME", tocLabel:"Impact",
         lead: "From an open prompt to the Snap stage in three weeks.",
         metrics: [
           { v: "300+", label: "Snap employees at the live presentation" },
@@ -3955,7 +4080,7 @@ const PROJECTS = {
         statement: "The final concept became a functional prototype built across design, engineering and marketing, and presented live to more than 300 Snap employees.\n\nMore time spent inside the feature would not mean a better product. A successful session could be very short: find something useful, and continue with the organization on the other side."
       },
 
-      { insights: true, n:"07", t:"HOW SUCCESS WOULD BE MEASURED", tocLabel:"Measuring success",
+      { insights: true, n:"08", t:"HOW SUCCESS WOULD BE MEASURED", tocLabel:"Measuring success",
         lead: "If developed further, success should describe whether Resources creates a useful connection, not how long someone stays in it.",
         items: [
           { k:"Discovery",
@@ -3971,7 +4096,7 @@ const PROJECTS = {
         ]
       },
 
-      { reflection: true, n:"08", tocLabel:"Reflection",
+      { reflection: true, n:"09", tocLabel:"Reflection",
         body: "Knowing what not to build made the feature stronger. At first it was easy to imagine Resources doing more inside Snapchat: applications, eligibility, appointments, even communication with organizations. The real opportunity sat earlier in the journey, in helping someone find support, understand it and feel comfortable taking the next step.",
         prompts: [
           { q: "What I underestimated",
@@ -4277,32 +4402,43 @@ function drawJittered(stroke) {
 
       /* All three grids follow the same shape: one tall hero at span 7 / 2 rows,
          then the rest in short 1-row cells. Short cells crop far less than tall
-         narrow ones, which is why this reads better than a row of 2-row columns. */
+         narrow ones, which is why this reads better than a row of 2-row columns.
+
+         card:true opts an item into the homepage thumbnail's crossfade rotation
+         (see the "DESIGN EXPLORATION CARD" script). It's a curation gate, not
+         automatic — only flag shots that read well as a wide, dimmed background
+         with type over them. Always pair it with an explicit cardPos ("top" or
+         "center", same convention as the other .pcard background-position
+         tweaks) so the crop is a deliberate choice per image, not a guess —
+         defaults to "top" only if cardPos is left off. */
 
       { gallery: true, n:"01", t:"PHOTOGRAPHY", tocLabel:"Photography",
         b: "A project doesn't need to become a full case study to be worth showing. Here are a few other pieces of work I'm proud of.",
         items: [
-          { src:"images/photo_snowy.jpg",    span:7, rows:2, title:"", desc:"" },
-          { src:"images/photo_lake.jpg",     span:5, rows:1, title:"", desc:"" },
-          { src:"images/photo_forest.jpg",   span:5, rows:1, title:"", desc:"" },
-          { src:"images/photo_street.jpg",   span:4, rows:1, title:"", desc:"" },
-          { src:"images/photo_shop.jpg",     span:4, rows:1, title:"", desc:"" },
-          { src:"images/photo_triangle.jpg", span:4, rows:1, title:"", desc:"" }
+          { src:"images/photo_snowy.jpg",    span:7, rows:2, title:"", desc:"", card:true, cardPos:"center" },
+          { src:"images/photo_lake.jpg",     span:5, rows:1, title:"", desc:"", card:true, cardPos:"center" },
+          { src:"images/photo_forest.jpg",   span:5, rows:1, title:"", desc:"", card:true, cardPos:"center" },
+          { src:"images/photo_street.jpg",   span:4, rows:1, title:"", desc:"", card:true, cardPos:"center" },
+          { src:"images/photo_shop.jpg",     span:4, rows:1, title:"", desc:"", card:true, cardPos:"center" },
+          { src:"images/photo_triangle.jpg", span:4, rows:1, title:"", desc:"", card:true, cardPos:"center" }
         ]
       },
 
       { gallery: true, n:"02", t:"GRAPHIC WORK", tocLabel:"Graphic work",
         items: [
-          { src:"images/gw-hicollage.jpg",   span:7, rows:2, title:"", desc:"" },
-          { src:"images/gw-hicollage2.jpg",  span:5, rows:1, title:"", desc:"" },
-          { src:"images/gw-digicollage.jpg", span:5, rows:1, title:"", desc:"" }
+          { src:"images/gw-hicollage.jpg",   span:7, rows:2, title:"", desc:"", card:true, cardPos:"top" },
+          { src:"images/gw-hicollage2.jpg",  span:5, rows:1, title:"", desc:"", card:true, cardPos:"bottom" },
+          { src:"images/gw-digicollage.jpg", span:5, rows:1, title:"", desc:"" },
+          { src:"images/gw-gemini.jpg",  span:4, rows:1, title:"", desc:"" },
+          { src:"images/gw-siega.jpg",   span:4, rows:1, title:"", desc:"", card:true, cardPos:"center" },
+          { src:"images/gw-cartoon.jpg", span:4, rows:1, title:"", desc:"", card:true, cardPos:"top" }
         ]
       },
 
       { gallery: true, n:"03", t:"SIDE QUESTS", tocLabel:"Side quests",
         items: [
-          { src:"images/sq-mando.jpg",  span:7, rows:2, title:"", desc:"" },
-          { src:"images/sq-prime.jpg",  span:5, rows:1, title:"", desc:"" },
+          { src:"images/sq-mando.jpg",  span:7, rows:2, title:"", desc:"", card:true, cardPos:"top" },
+          { src:"images/sq-prime.jpg",  span:5, rows:1, title:"", desc:"", card:true, cardPos:"center" },
           { vid:"videos/sq-crape.mp4", poster:"videos/sq-crape-poster.jpg",
                                         span:5, rows:1, title:"", desc:"" }
         ]
@@ -4542,6 +4678,8 @@ function hideLoader() {
   loader.style.transition = 'opacity 0.5s';
   loader.style.opacity = '0';
   loader.style.pointerEvents = 'none';
+  var heroCueEl = document.getElementById('hero-scroll-cue');
+  if (heroCueEl) heroCueEl.classList.add('in');
   setTimeout(function() {
     loader.style.display = 'none';
     /* After page reveals, background-fetch the larger videos */
@@ -4968,6 +5106,27 @@ var revObs = new IntersectionObserver(function(entries) {
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(function(el) { revObs.observe(el); });
 
+/* Hero scroll cue — jumps to the works grid, offset for the fixed nav.
+   A hand-rolled rAF + per-frame scrollTo loop used to drive this (to get a
+   custom easing curve the native `smooth` doesn't offer), but calling
+   scrollTo() every animation frame forces the browser to recompute scroll
+   position on the main thread each frame — on a page already running a few
+   continuous rAF loops (grain, canvas glitch), that contention is what read
+   as laggy, not the curve shape. The nav filter links elsewhere on this page
+   already scroll to this same #works target with plain native smooth
+   scrolling, which the browser hands off to the compositor instead of the
+   main thread — matching that proven approach here instead of re-inventing it. */
+var heroCue = document.getElementById('hero-scroll-cue');
+if (heroCue) {
+  heroCue.addEventListener('click', function(e) {
+    e.preventDefault();
+    var el = document.getElementById('works');
+    var navH = document.getElementById('mainnav').offsetHeight;
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: el.offsetTop - navH, behavior: reduced ? 'auto' : 'smooth' });
+  });
+}
+
 /* Nav category links also trigger filter */
 document.querySelectorAll('.nav-filter').forEach(function(a) {
   a.addEventListener('click', function(e) {
@@ -5024,6 +5183,84 @@ if (isTouchDevice) {
     }
   });
 }
+
+/* ═══════════════════════════════
+   DESIGN EXPLORATION CARD — CROSSFADE
+   Rotates the homepage thumbnail through a curated set of shots pulled
+   live from the throughlens case study data (items flagged card:true).
+   Flip that flag on any future gallery item and it joins the rotation —
+   no HTML changes needed here, so this scales as new work gets added.
+═══════════════════════════════ */
+(function() {
+  var card = document.querySelector('.pcard[data-project="throughlens"]');
+  var front = card && card.querySelector('.card-bg');
+  if (!front) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var pool = [];
+  (PROJECTS.throughlens.sections || []).forEach(function(sec) {
+    (sec.items || []).forEach(function(it) {
+      /* Default anchor is the top of the frame, not the center — keeps
+         heads, logos and skylines intact instead of splitting the crop
+         evenly and clipping whatever sits near the top of the shot. */
+      if (it.card && it.src) pool.push({ src: it.src, pos: it.cardPos || 'top' });
+    });
+  });
+  if (pool.length < 2) return; /* need at least two curated shots to rotate */
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  var queue = shuffle(pool);
+  var qi = -1;
+
+  function nextShot() {
+    qi++;
+    if (qi >= queue.length) {
+      var last = queue[queue.length - 1];
+      queue = shuffle(pool);
+      if (queue.length > 1 && queue[0].src === last.src) {
+        var t = queue[0]; queue[0] = queue[1]; queue[1] = t;
+      }
+      qi = 0;
+    }
+    return queue[qi];
+  }
+
+  front.classList.add('card-bg--layer', 'is-active');
+  var back = front.cloneNode(false);
+  back.classList.remove('is-active');
+  front.parentNode.insertBefore(back, front.nextSibling);
+
+  /* Land on a random shot immediately (no fade — this is the first paint,
+     so there's nothing to crossfade from) instead of always opening on
+     the same default image every visit. */
+  var openingShot = nextShot();
+  front.style.backgroundImage = 'url(' + openingShot.src + ')';
+  front.style.backgroundPosition = openingShot.pos;
+
+  function tick() {
+    if (document.hidden) { return; }
+    var shot = nextShot();
+    var preload = new Image();
+    preload.onload = function() {
+      back.style.backgroundImage = 'url(' + shot.src + ')';
+      back.style.backgroundPosition = shot.pos;
+      back.classList.add('is-active');
+      front.classList.remove('is-active');
+      var tmp = front; front = back; back = tmp;
+    };
+    preload.src = shot.src;
+  }
+
+  setInterval(tick, 4200);
+})();
 
 function setVideoSpeed(v) {
   var src = v.src || v.getAttribute('src') || '';
@@ -5435,6 +5672,9 @@ document.querySelectorAll('.pcard').forEach(function(card) {
         var bodyHtml = (item.body || '').split('\n\n').map(function(p) {
           return '<p class="moment-body">' + p + '</p>';
         }).join('');
+        var afterBodyHtml = (item.afterBody || '').split('\n\n').map(function(p) {
+          return '<p class="moment-body moment-body--after">' + p + '</p>';
+        }).join('');
         // A real clip gets the lazy player (poster, pause, restart) and carries
         // its own aspect ratio, so a square phone recording is not cropped.
         var media = (item.vid && !isSlot(item.vid))
@@ -5444,12 +5684,13 @@ document.querySelectorAll('.pcard').forEach(function(card) {
               : '');
         var isVid = item.vid && !isSlot(item.vid);
         var cap = (item.caption && !isVid) ? '<p class="moment-cap">' + item.caption + '</p>' : '';
-        if (!side) {
-          return '<div class="moment-item">' + numTag +
+        var itemSide = side && !item.wide;
+        if (!itemSide) {
+          return '<div class="moment-item' + (side ? ' moment-item--wide' : '') + '">' + numTag +
             '<div class="moment-body-col">' +
               (item.title ? '<h4 class="moment-title">' + item.title + '</h4>' : '') +
               (item.stance ? '<p class="moment-stance">' + item.stance + '</p>' : '') +
-              bodyHtml + media +
+              bodyHtml + media + afterBodyHtml +
             '</div>' +
           '</div>';
         }
@@ -5669,6 +5910,9 @@ document.querySelectorAll('.pcard').forEach(function(card) {
 
     function buildPhotostripHTML(s, extra) {
       var lead = s.lead ? '<p class="ps-lead ctx-lead">' + s.lead + '</p>' : '';
+      var body = s.body ? s.body.split('\n\n').map(function(p) {
+        return '<p class="case-body ps-body">' + p + '</p>';
+      }).join('') : '';
       var cells = (s.items || []).map(function(item) {
         var media = '';
         var caption = item.caption ? '<div class="ps-caption">' + item.caption + '</div>' : '';
@@ -5681,7 +5925,7 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       return '<div class="case-block case-photostrip">' +
         (s.n ? '<div class="case-num">' + s.n + '</div>' : '') +
         (s.t ? '<h3 class="case-title">' + s.t + '</h3>' : '') +
-        lead +
+        lead + body +
         '<div class="photostrip-grid">' + cells + '</div>' +
         (extra || '') +
       '</div>';
