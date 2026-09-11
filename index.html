@@ -7031,12 +7031,29 @@ if (heroTitle) {
       dots.forEach(function(d) { d.classList.remove('spk'); });
     }, 180);
   }
-  function typeAssistantMessage(el, content, onDone) {
-    var i = 0;
+  /* Terminal typer. Drains a buffer that can still be growing, so the same
+     implementation handles a fixed string (greeting, easter eggs) and a live
+     token stream from the API. push() as text arrives, end() when the source
+     is finished; onDone fires once, after the last character is painted. */
+  function createTyper(el, onDone) {
+    var buf = '', shown = 0;
+    var ended = false, draining = false, fired = false;
     var atWordStart = true; // first character starts a word
-    function tick() {
-      if (i >= content.length) { if (onDone) onDone(); return; }
-      var ch = content.charAt(i++);
+
+    function finish() {
+      if (fired) return;
+      fired = true;
+      if (onDone) onDone();
+    }
+
+    function pump() {
+      if (shown >= buf.length) {
+        draining = false;
+        if (ended) finish();
+        return;
+      }
+      draining = true;
+      var ch = buf.charAt(shown++);
       var isSpace = (ch === ' ' || ch === '\n' || ch === '\t');
       if (atWordStart && !isSpace) {
         speakPulse();
@@ -7058,16 +7075,38 @@ if (heroTitle) {
       } else {
         delay = 8 + Math.random() * 12;
       }
-      setTimeout(tick, delay);
+      /* Stay caught up with generation. If tokens are arriving faster than the
+         typing rhythm, compress the delay so the animation never becomes the
+         bottleneck it used to be when it ran after the full response landed. */
+      var backlog = buf.length - shown;
+      if (backlog > 160) delay = Math.min(delay, 3);
+      else if (backlog > 80) delay = Math.min(delay, 6);
+      else if (backlog > 40) delay = Math.min(delay, 10);
+
+      setTimeout(pump, delay);
     }
-    tick();
+
+    return {
+      push: function(text) {
+        if (!text) return;
+        buf += text;
+        if (!draining) pump();
+      },
+      end: function() {
+        ended = true;
+        if (!draining) finish();
+      }
+    };
   }
+
   function addAssistantMessage(content, onDone) {
     clearInitialSuggestions();
     var el = document.createElement('div');
     el.className = 'nibble-msg assistant';
     bodyEl.appendChild(el);
-    typeAssistantMessage(el, content, onDone);
+    var typer = createTyper(el, onDone);
+    typer.push(content);
+    typer.end();
     return el;
   }
 
@@ -7330,6 +7369,59 @@ if (heroTitle) {
 
     var typing = addTyping();
 
+    /* The endpoint streams SSE. We open the reply bubble on the first token
+       and feed the typer as text arrives, so typing overlaps generation
+       instead of starting after it. */
+    var typer = null, acc = '', toolCall = null, failed = false;
+
+    function ensureBubble() {
+      if (typer) return;
+      if (typing) { typing.remove(); typing = null; }
+      setPresenceState('typing');
+      clearInitialSuggestions();
+      var el = document.createElement('div');
+      el.className = 'nibble-msg assistant';
+      bodyEl.appendChild(el);
+      typer = createTyper(el, onTyped);
+    }
+
+    function onTyped() {
+      setPresenceState('idle');
+      assistantReplyCount++;
+      if (toolCall && toolCall.name === 'open_project') {
+        /* Context has finished typing. Give the visitor a short beat
+           to register the "why", then auto-open the modal. No button —
+           context + auto-open reads as one confident gesture. */
+        setTimeout(function() { openProjectById(toolCall.args.project_id); }, 550);
+      } else if (assistantReplyCount % 2 === 1) {
+        /* Follow-up chips only on non-project replies, every other turn. */
+        renderFollowup();
+      }
+    }
+
+    function fail(message) {
+      if (failed) return;
+      failed = true;
+      if (typing) { typing.remove(); typing = null; }
+      addMessage('error', message);
+      setPresenceState('idle');
+    }
+
+    function handleEvent(ev) {
+      if (ev.t === 'delta') {
+        ensureBubble();
+        acc += ev.v;
+        typer.push(ev.v);
+      } else if (ev.t === 'tool') {
+        toolCall = { name: ev.name, args: ev.args };
+      } else if (ev.t === 'error') {
+        fail(ev.message || 'NibbleLM lost its train of thought. Try again.');
+      } else if (ev.t === 'done') {
+        if (acc.trim()) history.push({ role: 'assistant', content: acc });
+        if (typer) typer.end();
+      }
+    }
+
     fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -7342,46 +7434,47 @@ if (heroTitle) {
       })
     })
     .then(function(res) {
-      return res.json().then(function(data) { return { ok: res.ok, data: data }; });
-    })
-    .then(function(result) {
-      typing.remove();
-      if (!result.ok) {
-        addMessage('error', (result.data && result.data.error) || 'Something went sideways. Try again.');
-        setPresenceState('idle');
-        return;
-      }
-      var content = (result.data.content || '').trim();
-      var toolCall = result.data.toolCall;
-
-      if (content) {
-        history.push({ role: 'assistant', content: content });
-        /* Terminal-typing state: dots hold dim, JS pulses them per word. */
-        setPresenceState('typing');
-        var el = addAssistantMessage(content, function() {
-          setPresenceState('idle');
-          assistantReplyCount++;
-          if (toolCall && toolCall.name === 'open_project') {
-            /* Context has finished typing. Give the visitor a short beat
-               to register the "why", then auto-open the modal. No button —
-               context + auto-open reads as one confident gesture. */
-            setTimeout(function() { openProjectById(toolCall.args.project_id); }, 550);
-          } else if (assistantReplyCount % 2 === 1) {
-            /* Follow-up chips only on non-project replies, every other turn. */
-            renderFollowup();
-          }
+      var isStream = (res.headers.get('content-type') || '').indexOf('text/event-stream') !== -1;
+      if (!res.ok || !res.body || !isStream) {
+        /* Errors (rate limit, bad key, upstream down) still come back as JSON. */
+        return res.json().catch(function() { return {}; }).then(function(data) {
+          fail((data && data.error) || 'Something went sideways. Try again.');
         });
-      } else if (toolCall && toolCall.name === 'open_project') {
-        openProjectById(toolCall.args.project_id);
-        setPresenceState('idle');
-      } else {
-        setPresenceState('idle');
       }
+
+      var reader = res.body.getReader();
+      var decoder = new TextDecoder();
+      var buf = '';
+
+      function read() {
+        return reader.read().then(function(chunk) {
+          if (chunk.done) {
+            if (typer) typer.end();
+            else if (!failed) {
+              if (typing) { typing.remove(); typing = null; }
+              setPresenceState('idle');
+            }
+            return;
+          }
+          buf += decoder.decode(chunk.value, { stream: true });
+          var lines = buf.split('\n');
+          buf = lines.pop() || '';
+          lines.forEach(function(line) {
+            line = line.trim();
+            if (line.indexOf('data:') !== 0) return;
+            var payload = line.slice(5).trim();
+            if (!payload) return;
+            var ev;
+            try { ev = JSON.parse(payload); } catch (e) { return; }
+            handleEvent(ev);
+          });
+          return read();
+        });
+      }
+      return read();
     })
     .catch(function() {
-      typing.remove();
-      addMessage('error', 'NibbleLM lost connection. Try again in a moment.');
-      setPresenceState('idle');
+      fail('NibbleLM lost connection. Try again in a moment.');
     })
     .then(function() {
       inFlight = false;

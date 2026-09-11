@@ -1,75 +1,57 @@
 # NibbleLM Archive
 
-This folder preserves the original ("full") versions of NibbleLM's system
-prompt, brain projection, and history window. They exist so the trimmed
-version currently running in production can be reverted cleanly once
-Groq's Dev Tier is available again (or usage moves elsewhere).
+This folder preserves the original ("full") version of NibbleLM's system
+prompt. It is the canonical record of the assistant's intended behavior in
+its most explicit, unabbreviated form.
 
-## Why the trim exists
+`lib/projects.js` (PROJECTS_BRAIN) remains the canonical source of truth for
+all project facts and is **not** archived here — it is still live and still
+complete. Nothing about Rafael's work has been summarized away.
 
-Groq's free-tier `on_demand` service has an **8000 token-per-minute
-(TPM) cap per organization**, shared across all models. The original
-("full") system prompt + full brain projection + user message ran ~5000
-to 6000 tokens per request, which meant visitors could only send one
-message per minute before hitting a 429 rate limit.
+## Current architecture (replaces the old Groq TPM trim)
 
-Groq's Dev Tier removes that cap and costs cents per month at portfolio
-traffic, but on 2026-08-21 Dev Tier upgrades were paused ("temporarily
-unavailable due to high demand"). Rather than leave NibbleLM broken in
-production, the prompt and brain projection were trimmed to fit the
-free tier.
+The earlier version of this README described a trimmed prompt built to fit
+Groq's free-tier 8000 TPM cap. That situation is gone. The app runs on
+OpenRouter (`openai/gpt-oss-120b`) and the constraint is now **latency**, not
+a token cap.
 
-## What changed
+Production no longer sends the whole portfolio on every request:
 
-Every trim site in `api/chat.js` is marked with a `[NIBBLE_TRIM]`
-comment. Search the repo for that tag to find every edit.
+| Piece | File | Sent |
+|---|---|---|
+| `SYSTEM_PROMPT_V3` | `lib/nibble-prompt.js` | always (stable, cacheable) |
+| `PROJECT_INDEX` | `lib/nibble-context.js` | always (~1.6k tokens, all projects) |
+| `PROJECT_DETAILS` | `lib/nibble-context.js` | only the 0-2 projects a request needs |
+| `SYSTEM_PROMPT_FULL_V2` | here | never — reference only |
+| `PROJECTS_BRAIN` | `lib/projects.js` | never sent raw; both representations derive from it |
 
-1. **`api/chat.js` — `SYSTEM_PROMPT` constant**
-   Full v2 preserved in `system-prompt-full.js` below. Running v3 is a
-   compressed rewrite of the same rules (identity, grounding, capability
-   claims, security boundary, response procedure, project matching,
-   tool use, conversational rhythm, curatorial judgment, context
-   awareness, availability, voice, quirks, humor, selling without
-   selling, never-discuss list, edge case examples, format). Same rules,
-   fewer words.
+Average input dropped from ~11,500 tokens per request to ~3,200.
 
-2. **`api/chat.js` — `compactBrain()`**
-   Was already dropping token-heavy fields. Trim added: also drops
-   `approach` and `outcomes` from what's sent to the model. Full brain
-   in `lib/projects.js` is untouched.
+## Why v2 is still here
 
-3. **`api/chat.js` — history slice**
-   Changed from `messages.slice(-12)` to `messages.slice(-6)`. Model
-   now sees the last 3 back-and-forths instead of 6.
+`SYSTEM_PROMPT_FULL_V2` is the long-form statement of Nibble's rules. v3 is a
+compression of it, not a replacement of intent: identity, grounding, capability
+language, project matching, voice, humor, security boundary, never-discuss
+list and the open_project brief all survive. If a behavior in v3 ever reads as
+ambiguous, v2 is the reference for what was meant.
 
-## How to revert (no conversation context needed)
+Two things in v2 were deliberately **not** carried into v3:
 
-When you regain headroom (Dev Tier upgrade, model change, tier change):
+1. **The UX/product/interaction design skill taxonomy** (~120 lines). GPT-OSS-120B
+   already knows this vocabulary, so the section was paying ~1,500 tokens per
+   request to teach the model words it has. v3 replaces it with a single
+   instruction to use precise industry language only where the data supports it.
+2. **Repetition.** v2 stated several rules two or three times in different
+   sections. Each now appears once.
 
-1. Open `api/chat.js`. Search for `[NIBBLE_TRIM]`.
-2. At each hit, the comment lists what the trimmed version does and
-   what to restore. Follow the instructions inline.
-3. For the system prompt specifically:
-   - Delete the current `SYSTEM_PROMPT` constant block.
-   - `import { SYSTEM_PROMPT_FULL_V2 } from '../lib/nibble-archive/system-prompt-full.js';`
-   - Rename the imported constant to `SYSTEM_PROMPT` at the reference
-     site, OR change every reference in the file from `SYSTEM_PROMPT`
-     to `SYSTEM_PROMPT_FULL_V2`.
-4. For `compactBrain`: uncomment the fields marked `[NIBBLE_TRIM]`.
-5. For history slice: change `.slice(-6)` back to `.slice(-12)`.
-6. Delete this archive folder if you want, or keep it as reference.
+## Important
 
-## What this archive is NOT
+- Nothing here is loaded at runtime. It is a plain source archive.
+- If you change voice or rules in `lib/nibble-prompt.js`, consider updating
+  this file too, so the long-form record doesn't drift from the live behavior.
+- Not a place for secrets or API keys.
 
-- Not a fallback loaded at runtime. Nothing imports from here in the
-  trimmed version. It is a plain source-code archive so it lives in
-  git history.
-- Not a place to store secrets or API keys.
-- Not automatically kept in sync. If you edit voice/rules in the live
-  `SYSTEM_PROMPT`, update `system-prompt-full.js` too, or the revert
-  will overwrite recent improvements.
-
-## Files in this folder
+## Files
 
 - `README.md` — this file
-- `system-prompt-full.js` — the full v2 system prompt preserved verbatim
+- `system-prompt-full.js` — the full v2 system prompt, preserved verbatim

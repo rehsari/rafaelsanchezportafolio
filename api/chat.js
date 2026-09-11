@@ -1,12 +1,28 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    NIBBLE-LM CHAT ENDPOINT
-   Vercel Edge function. Takes visitor messages + page context, calls
-   OpenRouter, returns the assistant's response and any tool call
-   (open_project). Rate-limited via Upstash so no one can drain the key.
+   Vercel Edge function. Takes visitor messages + page context, routes the
+   smallest relevant slice of the portfolio into the prompt, calls OpenRouter,
+   and streams the answer back as SSE. Rate-limited via Upstash.
+
+   Latency architecture (see lib/nibble-context.js for the routing rationale):
+   - Only the relevant project detail is sent, not the whole brain.
+   - Stable content goes first so the prompt prefix stays cacheable.
+   - Reasoning effort is low; Nibble answers retrieval questions, not puzzles.
+   - Provider routing is throughput-sorted.
+   - The response streams, so the visitor sees words instead of a spinner.
+
+   Set NIBBLE_DEBUG=1 to log the latency/token breakdown to the server log.
+   Diagnostics are never sent to the browser.
 ═══════════════════════════════════════════════════════════════════════════ */
 
 import { PROJECTS_BRAIN, PROJECT_IDS } from '../lib/projects.js';
-import { SYSTEM_PROMPT_FULL_V2 } from '../lib/nibble-archive/system-prompt-full.js';
+import { SYSTEM_PROMPT_V3 } from '../lib/nibble-prompt.js';
+import {
+  routeContext,
+  buildContextMessage,
+  wantsDetail,
+  estimateTokens,
+} from '../lib/nibble-context.js';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 
@@ -37,6 +53,11 @@ try {
 }
 
 const MODEL = 'openai/gpt-oss-120b';
+const DEBUG = process.env.NIBBLE_DEBUG === '1';
+
+/* Recent turns kept verbatim. Older turns collapse into a one-line digest so
+   a long session stops growing the request instead of growing it forever. */
+const KEEP_TURNS = 6;
 
 const TOOLS = [
   {
@@ -44,7 +65,7 @@ const TOOLS = [
     function: {
       name: 'open_project',
       description:
-        "Open a specific project modal on the portfolio. Call this when the visitor asks to see, open, or learn more about a specific project, or when you are confident a specific project is what they should look at next.",
+        'Open a specific project modal on the portfolio. Call this when the visitor asks to see, open, or learn more about a specific project, or when you are confident a specific project is what they should look at next.',
       parameters: {
         type: 'object',
         properties: {
@@ -60,43 +81,42 @@ const TOOLS = [
   },
 ];
 
-/* Full v2 system prompt lives in lib/nibble-archive/system-prompt-full.js
-   so it's easy to see and edit in one place. If you ever need to trim
-   again (rate limits, cost cap), see lib/nibble-archive/README.md for
-   the compressed v3 and the list of trim sites. */
-const SYSTEM_PROMPT = SYSTEM_PROMPT_FULL_V2;
+const TITLES = new Map(PROJECTS_BRAIN.map((p) => [p.id, p.title]));
 
-/* Compact projection of the brain — sends only the fields NibbleLM
-   actually needs in-conversation. Full brain stays intact in
-   lib/projects.js for future use. */
-function compactBrain(brain) {
-  return brain.map((p) => ({
-    id: p.id,
-    title: p.title,
-    one_liner: p.one_liner,
-    type: p.type,
-    year: p.year,
-    role: p.role,
-    tools: p.tools,
-    context: p.context,
-    problem: p.problem,
-    approach: p.approach,
-    key_decisions: p.key_decisions,
-    outcomes: p.outcomes,
-    skills_proven: p.skills_proven,
-  }));
-}
+/* Deterministic history compaction. No extra model call: older turns are
+   reduced to the list of projects they covered, which is the only thing later
+   turns need in order to resolve a reference. */
+function prepareHistory(messages) {
+  const clean = messages
+    .filter((m) => m && typeof m.content === 'string' && m.content.trim())
+    .map((m) => ({
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: m.content.slice(0, 2000),
+    }));
 
-function buildSystemMessage(pageContext) {
-  return SYSTEM_PROMPT
-    .replace('{{PROJECT_BRAIN_JSON}}', JSON.stringify(compactBrain(PROJECTS_BRAIN)))
-    .replace('{{PAGE_CONTEXT_JSON}}', JSON.stringify(pageContext || { current_project_id: null, current_page: 'home' }));
+  if (clean.length <= KEEP_TURNS) return { history: clean, digest: null };
+
+  const older = clean.slice(0, -KEEP_TURNS);
+  const recent = clean.slice(-KEEP_TURNS);
+  const seen = [];
+  for (const m of older) {
+    for (const id of PROJECT_IDS) {
+      if (!seen.includes(id) && m.content.toLowerCase().includes(id)) seen.push(id);
+    }
+  }
+  const digest = seen.length
+    ? `Earlier in this conversation you already covered: ${seen
+        .map((id) => TITLES.get(id) || id)
+        .join(', ')}.`
+    : null;
+  return { history: recent, digest };
 }
 
 export default async function handler(req) {
-  if (req.method !== 'POST') {
-    return json({ error: 'Method not allowed' }, 405);
-  }
+  const t0 = Date.now();
+  const mark = {};
+
+  if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   const ip =
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
@@ -108,15 +128,15 @@ export default async function handler(req) {
       const { success } = await ratelimit.limit(ip);
       if (!success) {
         return json(
-          { error: "Rate limit reached. NibbleLM needs a coffee. Try again in a bit." },
+          { error: 'Rate limit reached. NibbleLM needs a coffee. Try again in a bit.' },
           429
         );
       }
     } catch (e) {
-      // Fail open if Upstash is unreachable
-      console.error('Rate limit check failed:', e);
+      console.error('Rate limit check failed:', e); // fail open
     }
   }
+  mark.ratelimit = Date.now() - t0;
 
   let body;
   try {
@@ -130,91 +150,255 @@ export default async function handler(req) {
     return json({ error: 'messages array is required' }, 400);
   }
 
-  // Basic sanity limits so no one crams the context
-  const trimmed = messages.slice(-12).map((m) => ({
-    role: m.role === 'assistant' ? 'assistant' : 'user',
-    content: String(m.content || '').slice(0, 2000),
-  }));
-
-  const systemMessage = { role: 'system', content: buildSystemMessage(pageContext) };
-
   const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
-    return json({ error: 'Server missing OPENROUTER_API_KEY' }, 500);
+  if (!apiKey) return json({ error: 'Server missing OPENROUTER_API_KEY' }, 500);
+
+  /* ── Context routing ─────────────────────────────────────────────────── */
+  const { history, digest } = prepareHistory(messages);
+  const route = routeContext({ messages: history, pageContext });
+  const contextText = buildContextMessage(route, pageContext);
+  mark.routed = Date.now() - t0;
+
+  /* Stable first, dynamic last, so the cacheable prefix is as long as
+     possible: system prompt never changes, context changes only by route. */
+  const payloadMessages = [
+    { role: 'system', content: SYSTEM_PROMPT_V3 },
+    { role: 'system', content: contextText },
+    ...(digest ? [{ role: 'system', content: digest }] : []),
+    ...history,
+  ];
+
+  const latest = history[history.length - 1]?.content || '';
+  const maxTokens = wantsDetail(latest) ? 700 : 320;
+
+  const tokens = {
+    system: estimateTokens(SYSTEM_PROMPT_V3),
+    context: estimateTokens(contextText),
+    history: estimateTokens(history.map((m) => m.content).join(' ')),
+  };
+  tokens.total = tokens.system + tokens.context + tokens.history;
+  mark.builtContext = Date.now() - t0;
+
+  let upstream;
+  try {
+    upstream = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://www.rafaelsanchez.design',
+        'X-Title': 'NibbleLM',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: payloadMessages,
+        tools: TOOLS,
+        tool_choice: 'auto',
+        temperature: 0.6,
+        max_tokens: maxTokens,
+        stream: true,
+        /* gpt-oss-120b is a reasoning model. Nibble does grounded retrieval and
+           short curatorial writing, so deep reasoning buys nothing and costs
+           seconds of pre-answer tokens. Low keeps matching quality intact. */
+        reasoning: { effort: 'low', exclude: true },
+        /* Prefer the fastest provider serving this model, but keep fallbacks
+           so a single slow or down provider can't break the assistant. */
+        provider: { sort: 'throughput', allow_fallbacks: true },
+      }),
+    });
+  } catch (e) {
+    console.error('OpenRouter request failed:', e);
+    return json({ error: 'NibbleLM had trouble thinking. Try again in a moment.' }, 502);
   }
+  mark.upstreamHeaders = Date.now() - t0;
 
-  const groqRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      // OpenRouter attribution headers — appear on their dashboard, help
-      // identify traffic and unlock some model rankings.
-      'HTTP-Referer': 'https://www.rafaelsanchez.design',
-      'X-Title': 'NibbleLM',
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [systemMessage, ...trimmed],
-      tools: TOOLS,
-      tool_choice: 'auto',
-      temperature: 0.6,
-      max_tokens: 500,
-    }),
-  });
-
-  if (!groqRes.ok) {
-    const detail = await groqRes.text();
-    console.error('OpenRouter error:', groqRes.status, detail);
+  if (!upstream.ok || !upstream.body) {
+    const detail = await upstream.text().catch(() => '');
+    console.error('OpenRouter error:', upstream.status, detail);
     return json({ error: 'NibbleLM had trouble thinking. Try again in a moment.' }, 502);
   }
 
-  const data = await groqRes.json();
-  const choice = data.choices?.[0];
-  const message = choice?.message || {};
+  /* ── Stream translation ────────────────────────────────────────────────
+     OpenRouter SSE in, a small typed event protocol out:
+       {t:"delta", v:"..."}  text to render as it arrives
+       {t:"tool",  ...}      resolved open_project call
+       {t:"error", ...}      upstream died mid-stream
+       {t:"done"}            end of turn                                    */
 
-  let toolCall = null;
-  const calls = message.tool_calls || [];
-  if (calls.length > 0) {
-    const call = calls[0];
-    try {
-      const args = JSON.parse(call.function.arguments);
-      if (call.function.name === 'open_project' && PROJECT_IDS.includes(args.project_id)) {
-        toolCall = { name: 'open_project', args };
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (obj) =>
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
+
+      let buffer = '';
+      let fullText = '';
+      let firstTokenAt = null;
+      let provider = null;
+      let usage = null;
+
+      /* Accumulates streamed tool_call argument fragments by index. */
+      const toolParts = new Map();
+      let leakedId = null;
+
+      /* gpt-oss occasionally emits its intended tool call as a raw JSON blob in
+         the content instead of using tool_calls. Hold back text from an
+         unclosed `{` so a leak is never painted on screen before we can
+         classify it. Normal prose containing a brace flushes untouched. */
+      let held = '';
+      function safeText(chunk) {
+        held += chunk;
+        let out = '';
+        for (;;) {
+          const open = held.indexOf('{');
+          if (open === -1) {
+            out += held;
+            held = '';
+            return out;
+          }
+          out += held.slice(0, open);
+          const rest = held.slice(open);
+          const close = rest.indexOf('}');
+          if (close === -1) {
+            held = rest; // incomplete, wait for more
+            return out;
+          }
+          const blob = rest.slice(0, close + 1);
+          held = rest.slice(close + 1);
+          const m = blob.match(/\{\s*["']?project_id["']?\s*:\s*["']([^"']+)["']\s*\}/);
+          if (m && PROJECT_IDS.includes(m[1])) leakedId = m[1];
+          else out += blob;
+        }
       }
-    } catch {
-      // ignore malformed
-    }
-  }
 
-  let content = (message.content || '').trim();
+      try {
+        const reader = upstream.body.getReader();
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
 
-  /* JSON-leak guard: gpt-oss-120b occasionally emits its intended tool
-     call as a raw JSON blob inside content (e.g. `{ "project_id": "..." }`)
-     instead of using the tool_calls array. Detect that, promote it to
-     a real toolCall, and strip it from the visible text. */
-  if (!toolCall && content) {
-    const leak = content.match(/\{\s*["']?project_id["']?\s*:\s*["']([^"']+)["']\s*\}/);
-    if (leak && PROJECT_IDS.includes(leak[1])) {
-      toolCall = { name: 'open_project', args: { project_id: leak[1] } };
-      content = content.replace(leak[0], '').trim();
-    }
-  }
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
 
-  /* Silent-open guard: even with a valid tool call, the model often
-     returns an empty content field. Synthesize a short one-liner from
-     the project brain so the visitor always sees a "why" before the
-     modal opens. */
-  if (!content && toolCall && toolCall.name === 'open_project') {
-    const project = PROJECTS_BRAIN.find((p) => p.id === toolCall.args.project_id);
-    if (project) {
-      content = `Opening ${project.title}. ${project.one_liner}`;
-    } else {
-      content = 'Opening that one now.';
-    }
-  }
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data:')) continue;
+            const data = trimmed.slice(5).trim();
+            if (!data || data === '[DONE]') continue;
 
-  return json({ content, toolCall });
+            let parsed;
+            try {
+              parsed = JSON.parse(data);
+            } catch {
+              continue; // OpenRouter sends periodic comment/keepalive lines
+            }
+
+            if (parsed.provider) provider = parsed.provider;
+            if (parsed.usage) usage = parsed.usage;
+
+            const delta = parsed.choices?.[0]?.delta;
+            if (!delta) continue;
+
+            if (delta.content) {
+              if (firstTokenAt === null) firstTokenAt = Date.now() - t0;
+              fullText += delta.content;
+              const safe = safeText(delta.content);
+              if (safe) send({ t: 'delta', v: safe });
+            }
+
+            for (const call of delta.tool_calls || []) {
+              const i = call.index ?? 0;
+              const prev = toolParts.get(i) || { name: '', args: '' };
+              toolParts.set(i, {
+                name: call.function?.name || prev.name,
+                args: prev.args + (call.function?.arguments || ''),
+              });
+            }
+          }
+        }
+
+        if (held) {
+          send({ t: 'delta', v: held });
+          held = '';
+        }
+
+        /* Resolve the tool call: real tool_calls first, JSON leak as fallback. */
+        let toolCall = null;
+        for (const { name, args } of toolParts.values()) {
+          if (name !== 'open_project') continue;
+          try {
+            const parsedArgs = JSON.parse(args);
+            if (PROJECT_IDS.includes(parsedArgs.project_id)) {
+              toolCall = { name: 'open_project', args: parsedArgs };
+              break;
+            }
+          } catch {
+            /* ignore malformed fragments */
+          }
+        }
+        if (!toolCall && leakedId) {
+          toolCall = { name: 'open_project', args: { project_id: leakedId } };
+        }
+
+        /* Silent-open guard: a valid tool call with empty content would open a
+           modal with no explanation, so synthesize the "why" from the brain. */
+        if (toolCall && !fullText.trim()) {
+          const project = PROJECTS_BRAIN.find((p) => p.id === toolCall.args.project_id);
+          const fallback = project
+            ? `Opening ${project.title}. ${project.one_liner}`
+            : 'Opening that one now.';
+          send({ t: 'delta', v: fallback });
+        }
+
+        if (toolCall) send({ t: 'tool', name: toolCall.name, args: toolCall.args });
+        send({ t: 'done' });
+
+        if (DEBUG) {
+          console.log(
+            JSON.stringify({
+              nibble: 'latency',
+              question: latest.slice(0, 80),
+              route: route.reason,
+              projects: route.ids,
+              ms: {
+                ratelimit: mark.ratelimit,
+                routing: mark.routed - mark.ratelimit,
+                contextBuild: mark.builtContext - mark.routed,
+                upstreamHeaders: mark.upstreamHeaders,
+                timeToFirstToken: firstTokenAt,
+                generation: firstTokenAt === null ? null : Date.now() - t0 - firstTokenAt,
+                totalServer: Date.now() - t0,
+              },
+              tokensEstimated: tokens,
+              tokensActual: usage
+                ? { in: usage.prompt_tokens, out: usage.completion_tokens }
+                : null,
+              maxTokens,
+              provider,
+              toolCall: toolCall ? toolCall.args.project_id : null,
+            })
+          );
+        }
+      } catch (e) {
+        console.error('NibbleLM stream failed:', e);
+        send({ t: 'error', message: 'NibbleLM lost its train of thought. Try again.' });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'content-type': 'text/event-stream; charset=utf-8',
+      'cache-control': 'no-cache, no-transform',
+      connection: 'keep-alive',
+      'x-accel-buffering': 'no',
+    },
+  });
 }
 
 function json(payload, status = 200) {
