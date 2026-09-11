@@ -7415,8 +7415,20 @@ if (heroTitle) {
       } else if (ev.t === 'tool') {
         toolCall = { name: ev.name, args: ev.args };
       } else if (ev.t === 'error') {
-        fail(ev.message || 'NibbleLM lost its train of thought. Try again.');
+        if (ev.partial && typer) {
+          /* Text is already on screen and may be useful. Keep it, mark it as
+             interrupted, and don't throw an error bubble over the top. */
+          typer.push('\u2026');
+          if (acc.trim()) history.push({ role: 'assistant', content: acc });
+          typer.end();
+        } else {
+          fail(ev.message || 'NibbleLM lost its train of thought. Try again.');
+        }
       } else if (ev.t === 'done') {
+        /* A reply cut off by the token cap must not look finished. */
+        if (typer && (ev.ended === 'length' || ev.ended === 'incomplete')) {
+          typer.push('\u2026');
+        }
         if (acc.trim()) history.push({ role: 'assistant', content: acc });
         if (typer) typer.end();
       }

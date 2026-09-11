@@ -169,7 +169,16 @@ export default async function handler(req) {
   ];
 
   const latest = history[history.length - 1]?.content || '';
-  const maxTokens = wantsDetail(latest) ? 700 : 320;
+
+  /* max_tokens caps TOTAL completion tokens, and on a reasoning model that
+     includes the reasoning pass — `exclude: true` hides those tokens from the
+     response but they are still generated and still counted. So the cap has to
+     cover reasoning headroom + prose, or long answers die mid-sentence with
+     finish_reason "length".
+
+     Brevity is enforced by the prompt, not by starving the cap. These numbers
+     are headroom, not a target: a normal 2-6 sentence reply uses a fraction. */
+  const maxTokens = wantsDetail(latest) ? 1600 : 1000;
 
   const tokens = {
     system: estimateTokens(SYSTEM_PROMPT_V3),
@@ -239,6 +248,12 @@ export default async function handler(req) {
       let provider = null;
       let usage = null;
 
+      /* Stream-completion diagnostics. A truncated answer and a dropped
+         connection look identical to the visitor, so record which one it was. */
+      let finishReason = null;
+      let sawTerminal = false; // upstream sent its [DONE] sentinel
+      let upstreamError = null;
+
       /* Accumulates streamed tool_call argument fragments by index. */
       const toolParts = new Map();
       let leakedId = null;
@@ -287,7 +302,11 @@ export default async function handler(req) {
             const trimmed = line.trim();
             if (!trimmed.startsWith('data:')) continue;
             const data = trimmed.slice(5).trim();
-            if (!data || data === '[DONE]') continue;
+            if (!data) continue;
+            if (data === '[DONE]') {
+              sawTerminal = true;
+              continue;
+            }
 
             let parsed;
             try {
@@ -298,8 +317,17 @@ export default async function handler(req) {
 
             if (parsed.provider) provider = parsed.provider;
             if (parsed.usage) usage = parsed.usage;
+            /* Mid-stream provider failures arrive as an error object rather
+               than an HTTP status, so they'd otherwise surface as a silently
+               truncated answer. */
+            if (parsed.error) {
+              upstreamError = parsed.error.message || JSON.stringify(parsed.error);
+            }
 
-            const delta = parsed.choices?.[0]?.delta;
+            const choice = parsed.choices?.[0];
+            if (choice?.finish_reason) finishReason = choice.finish_reason;
+
+            const delta = choice?.delta;
             if (!delta) continue;
 
             if (delta.content) {
@@ -354,12 +382,22 @@ export default async function handler(req) {
         }
 
         if (toolCall) send({ t: 'tool', name: toolCall.name, args: toolCall.args });
-        send({ t: 'done' });
+
+        /* Tell the client how the turn actually ended so a cut-off answer is
+           never presented as if it were complete.
+             length      — hit the token cap mid-sentence
+             incomplete  — upstream stopped without finishing or signalling  */
+        const ended =
+          upstreamError ? 'error' : finishReason === 'length' ? 'length'
+          : !sawTerminal && !finishReason ? 'incomplete'
+          : finishReason || 'stop';
+
+        send({ t: 'done', ended });
 
         if (DEBUG) {
           console.log(
             JSON.stringify({
-              nibble: 'latency',
+              nibble: 'turn',
               question: latest.slice(0, 80),
               route: route.reason,
               projects: route.ids,
@@ -374,17 +412,45 @@ export default async function handler(req) {
               },
               tokensEstimated: tokens,
               tokensActual: usage
-                ? { in: usage.prompt_tokens, out: usage.completion_tokens }
+                ? {
+                    in: usage.prompt_tokens,
+                    out: usage.completion_tokens,
+                    /* If reasoning eats most of completion_tokens, the cap is
+                       the thing to raise — not the prompt to shorten. */
+                    reasoning:
+                      usage.completion_tokens_details?.reasoning_tokens ?? null,
+                  }
                 : null,
               maxTokens,
+              finishReason,
+              sawTerminalEvent: sawTerminal,
+              ended,
+              upstreamError,
+              outputChars: fullText.length,
               provider,
               toolCall: toolCall ? toolCall.args.project_id : null,
             })
           );
+          if (ended === 'length') {
+            console.warn(
+              `NibbleLM: response hit the ${maxTokens}-token cap and was cut off. ` +
+                `Reasoning tokens: ${usage?.completion_tokens_details?.reasoning_tokens ?? 'unknown'}.`
+            );
+          }
+          if (ended === 'incomplete') {
+            console.warn('NibbleLM: upstream stream ended without a terminal event.');
+          }
         }
       } catch (e) {
-        console.error('NibbleLM stream failed:', e);
-        send({ t: 'error', message: 'NibbleLM lost its train of thought. Try again.' });
+        /* Partial text is already on screen. Flag it as interrupted so the
+           client can close it off instead of leaving a dangling half-sentence,
+           and don't discard what was already useful. */
+        console.error('NibbleLM stream failed:', e, '| chars already sent:', fullText.length);
+        send({
+          t: 'error',
+          message: 'NibbleLM lost its train of thought there. Ask again?',
+          partial: fullText.length > 0,
+        });
       } finally {
         controller.close();
       }
