@@ -6964,6 +6964,12 @@ if (heroTitle) {
 
   var history = [];
   var currentProjectId = null;
+  /* The order the project cards actually appear in on the page. Read from the
+     DOM so reordering the grid reorders Nibble's recommendations too. */
+  var homepageOrder = [].map.call(
+    document.querySelectorAll('.pcard[data-project]'),
+    function(card) { return card.getAttribute('data-project'); }
+  );
   var inFlight = false;
   var greeted = false;
   var initialSuggestionsEl = null;
@@ -7441,7 +7447,8 @@ if (heroTitle) {
         messages: history,
         pageContext: {
           current_project_id: currentProjectId,
-          current_page: 'home'
+          current_page: 'home',
+          homepage_order: homepageOrder
         }
       })
     })
