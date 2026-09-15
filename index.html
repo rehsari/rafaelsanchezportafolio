@@ -5700,7 +5700,47 @@ function restoreProjectPosition() {
   requestAnimationFrame(restore);
 }
 
+/* ── Live p5 sketches and the Back button ──
+   The p5 editor renders each sketch inside a frame of its own, and that nested
+   navigation lands in the browser's shared session history about a second after
+   our embed reports itself loaded. If the case study has already claimed its
+   address by then, the sketch's entry sits on top of ours: the first Back press
+   rewinds the sketch, leaving a blank embed inside a case study that is still
+   open, and the viewer has to press Back a second time to get out.
+
+   So on sketch projects we let the frame take its entry first and claim ours
+   above it. The entry the sketch leaves behind still points at the grid, so one
+   Back press closes the case study, the same as everywhere else on the site. */
+var sketchClaimTimer = null;
+
+function cancelSketchClaim() {
+  clearTimeout(sketchClaimTimer);
+  sketchClaimTimer = null;
+}
+
+function claimSketchHistoryEntry(state, path) {
+  cancelSketchClaim();
+  var revision = modalRevision;
+  var baseline = history.length;
+  /* If the frame is slow or never settles we claim the address anyway, which
+     still leaves our entry on top of anything the sketch added before now. */
+  var deadline = Date.now() + 2500;
+  function settle() {
+    if (revision !== modalRevision || !modal.classList.contains('open')) return;
+    if (history.length > baseline || Date.now() > deadline) {
+      history.pushState(state, '', path);
+      modalHistoryOpen = true;
+      return;
+    }
+    sketchClaimTimer = setTimeout(settle, 80);
+  }
+  /* The panel is only marked open after this call returns, so the first check
+     has to wait a tick or it would see a closed panel and give up. */
+  sketchClaimTimer = setTimeout(settle, 80);
+}
+
 function disposeCaseStudy() {
+  cancelSketchClaim();
   if (modal._closeLightbox) modal._closeLightbox();
   (modal._timers || []).forEach(clearTimeout);
   modal._timers = [];
@@ -6753,10 +6793,24 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       var caseState = Object.assign({}, history.state, {
         portfolio: { view: 'caseStudy', id: id, position: modalReturnPosition }
       });
-      if (wasOpen) history.replaceState(caseState, '', projectPath(id));
-      else history.pushState(caseState, '', projectPath(id));
+      if (d.sketch) {
+        // Hold the grid entry until the sketch frame has taken its own (see
+        // claimSketchHistoryEntry), then stack the case study on top of it.
+        history.replaceState(Object.assign({}, history.state, {
+          portfolio: { view: 'projects', position: modalReturnPosition }
+        }), '', homePath());
+        modalHistoryOpen = false;
+        claimSketchHistoryEntry(caseState, projectPath(id));
+      } else if (wasOpen) {
+        history.replaceState(caseState, '', projectPath(id));
+        modalHistoryOpen = true;
+      } else {
+        history.pushState(caseState, '', projectPath(id));
+        modalHistoryOpen = true;
+      }
+    } else {
+      modalHistoryOpen = true;
     }
-    modalHistoryOpen = true;
 
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -7172,12 +7226,18 @@ window.addEventListener('popstate', function(event) {
 ═══════════════════════════════ */
 var urlRoutingEnabled = location.protocol === 'http:' || location.protocol === 'https:';
 
+/* Two case studies are filed under the working names they were built with.
+   Those read as noise in an address bar, so their links use the name the work
+   is actually presented under. */
+var PROJECT_SLUGS = { pixelgame: 'callisto', throughlens: 'exploration' };
+
 /* An empty string tells pushState to keep the current address. */
-function projectPath(id) { return urlRoutingEnabled ? '/' + id : ''; }
+function projectPath(id) { return urlRoutingEnabled ? '/' + (PROJECT_SLUGS[id] || id) : ''; }
 function homePath() { return urlRoutingEnabled ? '/' : ''; }
 
 function projectFromPath() {
   var slug = location.pathname.replace(/^\/+|\/+$/g, '');
+  for (var id in PROJECT_SLUGS) { if (PROJECT_SLUGS[id] === slug) return id; }
   return PROJECTS[slug] ? slug : null;
 }
 
