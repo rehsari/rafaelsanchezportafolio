@@ -3,7 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rafael C. Sanchez — Portfolio</title>
+<title>Rafael C. Sanchez — UX / Product Designer &amp; Artist</title>
+<meta name="description" content="UX and product design portfolio of Rafael C. Sanchez. Selected work includes Resources on Snapchat, Pantri, Her-Way and Signify AR.">
+<link rel="canonical" href="https://rafaelsanchez.design/">
+
+<!-- Link previews. Without these, a recruiter pasting the URL into Slack,
+     LinkedIn or email gets a bare link. The title and description here are the
+     only version of the positioning statement that travels off the page. -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://rafaelsanchez.design/">
+<meta property="og:title" content="Rafael C. Sanchez — UX / Product Designer &amp; Artist">
+<meta property="og:description" content="UX and product design portfolio. Selected work includes Resources on Snapchat, Pantri, Her-Way and Signify AR.">
+<meta property="og:image" content="https://rafaelsanchez.design/images/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -39,6 +52,21 @@ a { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 ::selection { background: var(--accent); color: #fff; text-shadow: none; }
 ::-moz-selection { background: var(--accent); color: #fff; text-shadow: none; }
+
+/* Real text that occupies no pixels. The hero lockup has to be an SVG because
+   the liquid-metal shader needs vector paths, which means the words it draws
+   exist nowhere a crawler, a screen reader or a text search can reach them.
+   This carries the same words, invisibly, so nothing about the design moves. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* GRAIN */
 #grain {
@@ -448,6 +476,7 @@ section { padding: 100px 48px; position: relative; z-index: 2; }
 .pcard[data-id="illus"]   { background: #160a00; }
 .pcard[data-id="yellow"]  { background: #0d0a00; }
 .pcard[data-id="teal"]    { background: #001010; }
+.pcard[data-id="cyan"]    { background: #000f0f; }
 .pcard[data-id="green"]   { background: #021008; }
 .pcard[data-id="lblue"]   { background: #000d18; }
 
@@ -482,6 +511,7 @@ video::-webkit-media-controls-panel { display: none !important; }
 .pcard[data-id="illus"]   .card-ov { background: linear-gradient(to top, rgba(140,10,10,0.58) 0%, transparent 50%); }
 .pcard[data-id="yellow"]  .card-ov { background: linear-gradient(to top, rgba(160,120,0,0.65) 0%, transparent 50%); }
 .pcard[data-id="teal"]    .card-ov { background: linear-gradient(to top, rgba(0,130,115,0.65) 0%, transparent 50%); }
+.pcard[data-id="cyan"]    .card-ov { background: linear-gradient(to top, rgba(0,180,180,0.6) 0%, transparent 50%); }
 .pcard[data-id="green"]   .card-ov { background: linear-gradient(to top, rgba(10,120,30,0.65) 0%, transparent 50%); }
 .pcard[data-id="lblue"]   .card-ov { background: linear-gradient(to top, rgba(30,110,210,0.65) 0%, transparent 50%); }
 
@@ -621,10 +651,19 @@ video::-webkit-media-controls-panel { display: none !important; }
 .modal-head { padding: 110px 48px 56px; border-bottom: 1px solid var(--border); }
 .modal-tag { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--project-accent, var(--accent)); margin-bottom: 18px; }
 .modal-title { font-family: var(--font-display); font-size: clamp(56px, 8.5vw, 120px); line-height: 0.88; letter-spacing: -0.01em; }
-.modal-meta { display: flex; gap: 44px; margin-top: 36px; flex-wrap: wrap; }
+.modal-meta { display: flex; gap: 24px 44px; margin-top: 36px; flex-wrap: wrap; }
 .mmeta-item { display: flex; flex-direction: column; gap: 3px; }
 .mmeta-label { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }
 .mmeta-val { font-family: var(--font-body); font-size: 14px; }
+/* A full-width contribution line follows the compact project facts. */
+.mmeta-contribution {
+  flex: 1 0 100%; min-width: 0; max-width: 100%;
+  border-top: 1px solid var(--border); padding-top: 16px; gap: 8px;
+}
+.mmeta-contribution .mmeta-val {
+  max-width: 72ch; font-size: 16px; line-height: 1.5;
+  white-space: normal; overflow-wrap: anywhere;
+}
 
 .modal-body { padding: 72px 48px; max-width: 1200px; }
 
@@ -709,10 +748,6 @@ video::-webkit-media-controls-panel { display: none !important; }
 /* Pantri — kitchen photo behind the brand's deep green */
 .pcard[data-id="pantri"] { background: #16301f; }
 .pcard[data-id="pantri"] .card-ov { background: linear-gradient(to top, rgba(12,40,24,0.62) 0%, transparent 55%); }
-
-/* Dystopia XX26 — red on near-black */
-.pcard[data-id="dystopia"] { background: #0d0202; }
-.pcard[data-id="dystopia"] .card-ov { background: linear-gradient(to top, rgba(224,0,0,0.55) 0%, transparent 55%); }
 
 /* gallery */
 .modal-gallery { display: grid; grid-template-columns: repeat(12,1fr); gap: 2px; margin-bottom: 72px; }
@@ -1161,6 +1196,7 @@ video::-webkit-media-controls-panel { display: none !important; }
   width: 100%; max-height: 420px; object-fit: cover;
   margin: 40px 0; display: block; border-radius: 2px;
 }
+.case-context .ctx-mid-media { margin: 40px 0; }
 .case-context .ctx-subhead {
   font-family: var(--font-display);
   font-size: clamp(20px, 2.1vw, 26px);
@@ -1723,6 +1759,7 @@ video::-webkit-media-controls-panel { display: none !important; }
   padding: 6px 10px;
   border: 1px solid rgba(255,255,255,0.32);
   backdrop-filter: blur(4px);
+  background: rgba(8,8,8,0.35);
 }
 .hero-concept-center {
   position: absolute; inset: 0;
@@ -3180,10 +3217,9 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
     </svg>
   </a>
   <ul class="nav-links">
-    <li><a href="#works" class="nav-filter" data-f="ux">UX / Interaction</a></li>
-    <li><a href="#works" class="nav-filter" data-f="product">Product &amp; 3D</a></li>
-    <li><a href="#works" class="nav-filter" data-f="visual">Visual Identity</a></li>
-    <li><a href="#works" class="nav-filter" data-f="game">Illustration</a></li>
+    <li><a href="#works" class="nav-filter" data-f="ux">UX / Product</a></li>
+    <li><a href="#works" class="nav-filter" data-f="visual">3D &amp; Visual Identity</a></li>
+    <li><a href="resume/Rafael-Sanchez-Resume.pdf" target="_blank" rel="noopener">Resume</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
   <button type="button" class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
@@ -3228,10 +3264,9 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       <line x1="17" y1="3" x2="3" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>
   </button>
-  <a href="#works" class="nav-filter mob-link" data-f="ux">UX / Interaction</a>
-  <a href="#works" class="nav-filter mob-link" data-f="product">Product &amp; 3D</a>
-  <a href="#works" class="nav-filter mob-link" data-f="visual">Visual Identity</a>
-  <a href="#works" class="nav-filter mob-link" data-f="game">Illustration</a>
+  <a href="#works" class="nav-filter mob-link" data-f="ux">UX / Product</a>
+  <a href="#works" class="nav-filter mob-link" data-f="visual">3D &amp; Visual Identity</a>
+  <a href="resume/Rafael-Sanchez-Resume.pdf" class="mob-link" target="_blank" rel="noopener">Resume</a>
   <a href="#contact" class="mob-link">Contact</a>
   <div class="mobile-menu-social">
     <a href="https://www.behance.net/rafaelcarbajal3" target="_blank" rel="noopener noreferrer" aria-label="Behance">
@@ -3253,13 +3288,19 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
 
   <div class="hero-inner">
     <h1 class="hero-lockup">
+        <!-- The heading, as text. Everything below this line is artwork and is
+             hidden from assistive tech, so these words are announced and
+             indexed exactly once. Keep this copy identical to what the SVG
+             draws: matching text is an accessibility pattern, diverging text
+             is cloaking. -->
+        <span class="sr-only">Rafael C. Sanchez. UX / Product Designer &amp; Artist. Testing possibilities, then building with purpose.</span>
         <!-- The plain artwork. It is the whole lockup on its own: if WebGL is
              unavailable or the shader fails, this is what ships, unharmed.
              RafaelHeader2 is 53.29 units shorter than the export it replaces,
              and that missing band is exactly where the name used to live.
              Nudged up slightly from the original 53.29 to close the gap
              beneath the name a touch. -->
-        <svg class="lockup" viewBox="0 0 927.27 382.99" role="img" aria-label="Rafael C. Sanchez. UX / Product Designer &amp; Artist. Testing possibilities, then building with purpose." focusable="false">
+        <svg class="lockup" viewBox="0 0 927.27 382.99" aria-hidden="true" focusable="false">
           <g class="lk-art" fill="#ffffff" transform="translate(0 47.29)">
             <g>
             <path d="M0,324.1l3.52-25.27H.34l.64-4.46h11.17l-.64,4.46h-3.18l-3.52,25.27H0Z"/>
@@ -3385,11 +3426,8 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
 
   <div class="works-filter reveal">
     <button class="fbtn active" data-f="all">All</button>
-    <button class="fbtn" data-f="ux">UX / Interaction</button>
-    <button class="fbtn" data-f="game">Illustration</button>
-    <button class="fbtn" data-f="product">Product &amp; 3D</button>
-    <button class="fbtn" data-f="visual">Visual Identity</button>
-    <button class="fbtn" data-f="creative">Creative Coding</button>
+    <button class="fbtn" data-f="ux">UX / Product</button>
+    <button class="fbtn" data-f="visual">3D &amp; Visual Identity</button>
   </div>
 
   <!-- ═ PROJECT GRID ══════════════════════════════════════════════════
@@ -3403,7 +3441,7 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
     <!-- ROW 1–2: feature left + two stacked right -->
     <!-- Snapchat Resources — biggest project to date. Case study is
          intentionally minimal (under wraps); see PROJECTS.resources below. -->
-    <div class="pcard feature reveal" data-project="resources" data-id="snapyellow" data-f="ux product"
+    <div class="pcard feature reveal" data-project="resources" data-id="snapyellow" data-f="ux"
          style="grid-column:span 8; grid-row:span 2;">
       <div class="card-bg" style="background-image:url(images/SnapR_Thumbnail.png); background-size:contain; background-position:center; background-repeat:no-repeat;"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
@@ -3415,7 +3453,7 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       </div>
     </div>
 
-    <div class="pcard reveal d1" data-project="pantri" data-id="pantri" data-f="product"
+    <div class="pcard reveal d1" data-project="pantri" data-id="pantri" data-f="ux"
          style="grid-column:span 4;">
       <div class="card-bg" style="background-image:url(images/pantri-thumb.jpg);"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
@@ -3426,7 +3464,7 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       </div>
     </div>
 
-    <div class="pcard reveal d2" data-project="pixelgame" data-id="game" data-f="ux game product visual" data-mobile-bg="images/callisto-mobile.jpg"
+    <div class="pcard reveal d2" data-project="pixelgame" data-id="game" data-f="ux visual" data-mobile-bg="images/callisto-mobile.jpg"
          style="grid-column:span 4;">
       <div class="card-bg" style="overflow:hidden;">
         <video autoplay muted loop playsinline preload="none" poster="images/callisto-result1.jpg"
@@ -3435,23 +3473,22 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
         </video>
       </div>
       <div class="card-ov"></div><div class="card-glitch"></div>
-      <div class="card-badge">In Progress</div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
-        <div class="card-cat">UX / Interaction</div>
+        <div class="card-cat">UX / Game Design</div>
         <div class="card-name">CALLISTO'S RETRIBUTION</div>
       </div>
     </div>
 
     <!-- ROW 3: (5+4+3=12) ordered by impressiveness -->
-    <div class="pcard reveal" data-project="signify" data-id="teal" data-f="ux"
+    <div class="pcard reveal" data-project="nibble" data-id="cyan" data-f="ux"
          style="grid-column:span 5;">
-      <div class="card-bg" style="background-image:url(images/signify-thumb.jpg);"></div>
+      <div class="card-bg"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
-        <div class="card-cat">UX / Interaction</div>
-        <div class="card-name">SIGNIFY AR</div>
+        <div class="card-cat">AI / Systems</div>
+        <div class="card-name">NIBBLE AI ASSISTANT</div>
       </div>
     </div>
 
@@ -3466,19 +3503,19 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       </div>
     </div>
 
-    <div class="pcard reveal d2" data-project="glitterbomb" data-id="green" data-f="product illustration game" data-mobile-bg="images/AltThumbGBY2K.jpg"
+    <div class="pcard reveal d2" data-project="glitterbomb" data-id="green" data-f="visual" data-mobile-bg="images/AltThumbGBY2K.jpg"
          style="grid-column:span 3;">
       <video class="card-bg" autoplay muted loop playsinline preload="none" src="images/glitterbomb-thumb.mp4" poster="images/glitterbomb-model.png"></video>
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
-        <div class="card-cat">Product &amp; 3D</div>
+        <div class="card-cat">3D / Character</div>
         <div class="card-name">GLITTERBOMB Y2K</div>
       </div>
     </div>
 
     <!-- ROW 4: (7+5=12) — Velisar + flipsketch -->
-    <div class="pcard reveal" data-project="velisar" data-id="visual" data-f="visual creative"
+    <div class="pcard reveal" data-project="velisar" data-id="visual" data-f="ux"
          data-mobile-bg="images/VelisarAlt.png"
          style="grid-column:span 7;">
       <div class="card-bg">
@@ -3495,7 +3532,7 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       </div>
     </div>
 
-    <div class="pcard reveal d1" data-project="flipsketch" data-id="sketch" data-f="ux creative"
+    <div class="pcard reveal d1" data-project="flipsketch" data-id="sketch" data-f="ux"
          data-mobile-bg="images/FlipAlt.png"
          style="grid-column:span 5;">
       <video class="card-bg" autoplay muted loop playsinline preload="none" src="images/flipsketch-thumb.mp4" poster="images/flipsketch-poster.jpg"></video>
@@ -3514,7 +3551,7 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
-        <div class="card-cat">Visual Identity</div>
+        <div class="card-cat">Photography</div>
         <div class="card-name">DESIGN EXPLORATION</div>
       </div>
     </div>
@@ -3530,7 +3567,7 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       </div>
     </div>
 
-    <div class="pcard reveal d2" data-project="junomerced" data-id="illus" data-f="game"
+    <div class="pcard reveal d2" data-project="junomerced" data-id="illus" data-f="visual"
          style="grid-column:span 4;">
       <div class="card-bg" style="background-image:url(images/img_05.jpg); background-position: center 15%;"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
@@ -3541,14 +3578,14 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       </div>
     </div>
 
-    <!-- ROW 7: (5+4+3=12) — ModuleCraft + CloudCup + Dystopia XX26 -->
-    <div class="pcard reveal" data-project="modulecraft" data-id="lblue" data-f="product visual" data-mobile-bg="images/modulecraft-mobile.jpg"
+    <!-- ROW 7: (5+4+3=12) — ModuleCraft + CloudCup + Signify AR -->
+    <div class="pcard reveal" data-project="modulecraft" data-id="lblue" data-f="ux visual" data-mobile-bg="images/modulecraft-mobile.jpg"
          style="grid-column:span 5;">
       <div class="card-bg" style="background-image:url(images/modulecraft-thumb.jpg);"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
-        <div class="card-cat">Product & 3D</div>
+        <div class="card-cat">Product Design</div>
         <div class="card-name">MODULECRAFT</div>
       </div>
     </div>
@@ -3559,21 +3596,19 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
-        <div class="card-cat">UX / Interaction</div>
+        <div class="card-cat">Brand &amp; Web Design</div>
         <div class="card-name">CLOUDCUP 2.0</div>
       </div>
     </div>
 
-    <!-- Placeholder: add a card-bg image/video once assets exist -->
-    <div class="pcard reveal d2" data-project="dystopia" data-id="dystopia" data-f="visual"
+    <div class="pcard reveal d2" data-project="signify" data-id="teal" data-f="ux"
          style="grid-column:span 3;">
-      <div class="card-bg"></div>
+      <div class="card-bg" style="background-image:url(images/signify-thumb.jpg);"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
-      <div class="card-badge">Coming Soon</div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
-        <div class="card-cat">Visual Identity</div>
-        <div class="card-name">DYSTOPIA-XX26</div>
+        <div class="card-cat">UX / Interaction</div>
+        <div class="card-name">SIGNIFY AR</div>
       </div>
     </div>
 
@@ -3657,7 +3692,7 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
 
 <footer>
   <div class="fcopy">© 2026 Rafael C. Sanchez — All Rights Reserved</div>
-  <div class="fcopy">UX - Product - Visual Identity - Illustration</div>
+  <div class="fcopy">UX - Product - 3D - Visual Identity</div>
   <div class="fcredits">
     Photo Credits &mdash;
     <a href="https://unsplash.com/@art_almighty" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">Art Almighty</a>,
@@ -3765,9 +3800,12 @@ const PROJECTS = {
 
      Section types (each opt-in, mix and match):
        { context:    true, n, t, tocLabel?, lead, body, why, img,
-                     midImg?, midAlt?, subhead?, body2? }
+                     midImg?, midAlt?, subhead?, body2?,
+                     midVid?, midPoster?, midAspect?, midCaption? }
               — midImg/subhead/body2 split the section in two, for prose
                 that needs a visual beat and a headed second half.
+              — midVid swaps that beat for the self-hosted player; give it
+                midPoster and midAspect the same way artifacts/moments do.
        { artifacts:  true, n, t, tocLabel?, lead, items:[{img|vid,label,body?,caption,contain?}] }
               — an item with `vid` renders the self-hosted player:
                   vid     "videos/name.mp4"   (local H.264, not an embed URL)
@@ -3797,6 +3835,7 @@ const PROJECTS = {
        Drop in a real path later; no code change needed.
   ═══════════════════════════════════════════════════════════ */
   herway: {
+    contribution: "Designed the user flows, interface, and interactive prototype for community-based transit support.",
     tag: "UX / Interaction Design",
     title: "HER—WAY",
     duration: "16 Weeks",
@@ -3935,10 +3974,11 @@ const PROJECTS = {
     ]
   },
   resources: {
+    contribution: "Led design across a cross-functional team with two designers. Designed the interface and presentation materials within Snapchat’s existing visual language.",
     tag: "UX / Product Design - Prototyping",
     title: "RESOURCES ON SNAPCHAT",
     duration: "Summer 2026 - 3-Week Sprint",
-    role: "UX Designer",
+    role: "Lead Designer",
     team: "Alex Nguyen, Daniel Lee, Lezette Flores, Vita Medina",
     tools: "Figma, Adobe CC",
     context: "Snap Inc. Contractor - Snap Design Academy",
@@ -3951,7 +3991,8 @@ const PROJECTS = {
     },
     hero: {
       img: "images/SnapResources.jpg",
-      alt: "Resources on Snapchat cover"
+      alt: "Resources on Snapchat cover",
+      badge: "Contract Work - 2026"
     },
     images: [],
     sections: [
@@ -4111,61 +4152,212 @@ const PROJECTS = {
     ]
   },
   pixelgame: {
-    tag: "UX / Interaction - Illustration - Product - Visual Identity",
-    title: "CALLISTO'S ASCENT",
-    duration: "Ongoing", role: "UX Designer / Concept Artist",
-    tools: "Figma, Unreal, After Effects, ChatGPT",
+    contribution: "Created the gameplay, UX, artwork, and animations. Built the browser game with AI coding assistance.",
+    tag: "Game Design - UX / Interaction - Illustration - World Building",
+    title: "CALLISTO'S RETRIBUTION",
+    duration: "Ongoing",
+    role: "Solo Designer / Developer / Artist",
+    team: "Solo",
+    tools: "JavaScript, Codex, Claude Code, Procreate, Figma",
     context: "Personal Project",
+    focus: "Game design, systems design, world building, pixel art, front-end development",
+    status: "In Development",
     accent: "linear-gradient(90deg,#6e0000,#bb2200)",
-    caseStudy: "https://drive.google.com/file/d/1hqqrUwCrQuXt2mVCO2FpufgeTYE35jBg/preview",
+    cover: {
+      subtitle: "A browser roguelike where the world is there for whoever looks for it."
+    },
+    hero: {
+      vid: "images/callisto-thumb.mp4",
+      alt: "Callisto's Retribution cover",
+      badge: "In Progress"
+    },
     images: [],
     sections: [
-      { n:"01", t:"THE CONCEPT", b:"A narrative-driven retro platformer built around a single visual decision: red and black. Every environment, character, and UI element was designed to serve that atmosphere. Less game design, more world-building with controls attached.", vid:"images/callisto-thumb.mp4" },
-      { n:"02", t:"THE BUILD", b:"All art created by hand in Procreate using pixel-texture brushes to emulate a 16-bit aesthetic. Every animation was done frame by frame, balancing clarity and movement within tight pixel constraints. Characters, environments, and UI were treated as one cohesive system — not separate tasks.", imgs:["images/callisto-process-attack.jpg","images/callisto-bg-process1.jpg","images/callisto-bg-process2.jpg","images/callisto-bg-sketch.jpg","images/callisto-bg-mid.png","images/callisto-bg-final.png"], imgsColumns:3 },
-      { n:"03", t:"ON THE CODE", b:"Written through trial and error. ChatGPT was used to generate and interpret code snippets, which became a way to actually learn the logic behind what was being built rather than just copy it.", img:"images/callisto-sprite-callisto.png", imgContain:true },
-      { n:"04", t:"KEY DECISIONS", b:"Some of the choices that shaped how Callisto's Ascent came together.", decisions: [
-        { title: "BUILDING WITHIN WHAT WAS POSSIBLE", body: "The project started with a bigger idea, but quickly became about understanding what could realistically be built. Instead of trying to force features beyond what was possible, the direction shifted to working with existing skills and limitations. That shift is what led to the SNES-style approach, focusing on something that could be executed well rather than something overly ambitious. This helped define the scope of the project early on." },
-        { title: "LETTING VISUALS CARRY THE EXPERIENCE", body: "Keeping the project small meant that there was less space for complex systems or mechanics. Because of that, the visuals became the main way the experience communicates. Environment, color, and movement started to carry more weight, shaping how the world is understood without relying on heavy interaction. The story is less told through actions and more through how the space feels." },
-        { title: "WORKING WITH LIMITATIONS IN CODE", body: "Handling all aspects of the project alone meant working within coding limitations. Some features had to be simplified or removed, not because they weren't interesting, but because they would take time away from finishing the project as a whole. The focus shifted toward what could realistically be built and polished, instead of trying to include everything." },
-        { title: "DESIGNING A COMPLETE IDEA", body: "As the scope became more defined, the project shifted from trying to build a full game to creating a clear idea that could stand on its own. The focus became putting together a small but complete experience that communicates its direction through visuals, tone, and interaction. Something that feels intentional and could be understood quickly. Instead of aiming for scale, the project became a demo of what the full idea could be." }
-      ]},
-      { n:"05", t:"WHERE IT STANDS", b:"The visual identity and all assets are fully developed. The playable prototype is still in progress. The goal is to bring in collaborators — developers and composers — to take it further.", imgs:["images/callisto-result1.jpg","images/callisto-result2.jpg"] },
-      { reflection: true, body: "This project became a lesson in working within constraints and making decisions based on what actually matters. It showed how quickly ideas can grow beyond what's realistic, and how important it is to step back and focus on what can be built well. Working within those limits made each decision more intentional, since every choice had a direct impact on the final result. It also made clear that this project doesn't have to stay in this form. There's interest in coming back to it in the future with the right collaborators, especially people who can support areas like development or systems design. Opening the project up instead of keeping it fully individual could allow it to grow into something more complete." }
-    ]
-  },
-  quickqueue: {
-    tag: "UX / Interaction - Visual Identity",
-    title: "QUICK QUEUE",
-    duration: "3 Weeks", role: "UX / Product Designer",
-    tools: "Figma, Principle",
-    context: "Product Design Case Study",
-    accent: "linear-gradient(90deg,#002b55,#0055aa)",
-    caseStudy: "https://drive.google.com/file/d/1WU21Cm4UNtCLQkVw8kBsOQBVNBLGRfd7/preview",
-    images: [],
-    sections: [
-      { n:"01", t:"THE PROBLEM", b:"Waiting is dead time. The idea came from sitting at the DMV, unable to step away, take a call, or grab food without losing your spot. Real interviews with DMV visitors confirmed it wasn't just a bad experience, it was a gap nobody had designed for.", img:"images/quickque-problem.jpg" },
-      { n:"02", t:"THE GAP", b:"Banks have appointment portals. Disney has Genie+. OpenTable handles reservations. Everyone solved their own slice of the problem and left the rest alone. Quick Queue was built to do what nobody had bothered to: let you join any queue, anywhere, in real time.", img:"images/quickque-intro.png", imgContain:true },
-      { n:"03", t:"KEY DECISIONS", b:"Some of the choices that shaped how QuickQueue came together.", decisions: [
-        { title: "STARTING FROM A REAL CONTEXT", body: "The idea came from waiting in line at the DMV. Instead of treating it as a general inconvenience, the focus was on understanding what people actually needed in that moment. Talking to others in line helped clarify that the problem wasn't just waiting, but not knowing how long it would take or what to expect. That became the starting point for the project." },
-        { title: "PRIORITIZING TIME VISIBILITY", body: "One of the main decisions was to focus on making wait time clear and easy to understand. Instead of just showing position in line, the system emphasizes estimated time and updates as conditions change. This helps users decide whether to stay, leave, or plan around it. The goal was to reduce uncertainty rather than just track the queue." },
-        { title: "DEFINING CLEAR FLOWS", body: "As more features were added, the flow between joining a queue, checking updates, and managing a spot started to feel unclear. The solution was to look at food ordering and delivery apps, since they handle similar moments like waiting, tracking progress, and knowing when to act. It wasn't about copying those flows, but understanding what makes them easy to follow and applying that here. This helped make the transitions between joining a queue, tracking it, and taking action feel more natural." },
-        { title: "EXTENDING THE EXPERIENCE WITH A WIDGET", body: "A key decision was to extend the experience beyond the app itself. Inspired by ride-sharing apps, a widget was introduced to show real-time wait updates without needing to open the app. This keeps users informed while they go about their day. The goal was to make waiting feel less restrictive." }
-      ]},
-      { n:"04", t:"THE DESIGN", b:"Identity built on motion through typography alone, no icons, just flow. The layout follows patterns from productivity apps users already trust, reducing joining, tracking, and scheduling to a few taps. Consistency over complexity.", imgsAfter:["images/quickque-mockup-dual.png"], imgsAfterColumns:1 },
-      { n:"05", t:"WHAT USERS SAID", b:"Tested with 20 real DMV visitors. 72% found it very or somewhat useful. Feedback directly shaped two features that weren't in the original concept: a lock screen widget for at-a-glance tracking, and Q-Points, a gamification layer that turns idle wait time into something earned.", chart: {
-        unit: '', max: 8, caption: '20 DMV visitors surveyed',
-        data: [
-          { label: "Very useful", v: 7 },
-          { label: "Somewhat useful", v: 6 },
-          { label: "Neutral", v: 2 },
-          { label: "Needs improvement", v: 4 },
-          { label: "Not useful", v: 1 }
+
+      { context: true, n:"01", t:"OVERVIEW", tocLabel:"Overview",
+        lead: "Callisto started as a world, not a game.",
+        body: "The characters, conflicts and larger story existed long before Retribution. The challenge was figuring out how someone should experience all of it.\n\nA novel could explain the world. Animation could show it exactly as imagined. But both would decide what the audience sees, when they see it and how much attention they need to give it.\n\nCallisto needed something that could work at different levels of investment.",
+        midImg: "images/callisto-title.jpg",
+        midAlt: "Callisto's Retribution title card",
+        subhead: "What if the story was there for whoever wanted to find it?",
+        body2: "A game created a different relationship with the world.\n\nSomeone could come in because moving and fighting felt good. Another player could pay attention to the environments, characters and smaller details and slowly understand something much larger.\n\nNeither experience needed to feel incomplete.",
+        why: "The story could reward attention without demanding it. That became the foundation of Retribution."
+      },
+
+      { impact: true, n:"02", t:"THE SOLUTION", tocLabel:"The solution",
+        lead: "A fast roguelike where the world lives around the run.",
+        metrics: [
+          { v: "30+",  label: "Upgrades in the current pool" },
+          { v: "200+", label: "Original assets created so far" },
+          { v: "01",   label: "Mechanic carrying movement and combat" }
+        ],
+        vid: "videos/callisto-overview.mp4",
+        alt: "A full run through Callisto's Retribution, from the first floor upward",
+        statement: "Callisto's Retribution is a browser-based 2D platformer built around short, aggressive runs through a hostile world. The player climbs through floors, fights enemies, collects Scrap and builds Callisto differently each time.\n\nDeath resets the run. The world does not. Repeated runs create new builds, new encounters and more opportunities to understand the places and characters surrounding them."
+      },
+
+      { showcase: true, n:"03", t:"CORE FLOW", tocLabel:"Core flow",
+        lead: "One run is deliberately simple. Five steps carry the entire game, and each one assumes the player will end up somewhere different than last time.",
+        items: [
+          { label:"Step 01 - Enter a floor",
+            title:"Every floor is its own checkpoint",
+            caption:"Each run moves upward through a sequence of floors.\n\nEvery floor creates a small checkpoint with its own encounter, environment or decision before the player continues.",
+            vid: "videos/callisto-flow-01.mp4",
+            poster: "videos/callisto-flow-01-poster.jpg",
+            aspect: "1 / 1",
+            alt: "Callisto entering a new floor and the encounter that opens it" },
+
+          { label:"Step 02 - Move and fight",
+            title:"One mechanic does both jobs",
+            caption:"Callisto's main ability is a blade dash. It closes distance, crosses gaps, damages enemies and can be chained into longer movements and combos.\n\nThe same action drives both traversal and combat.",
+            vid: "videos/callisto-flow-02.mp4",
+            poster: "videos/callisto-flow-02-poster.jpg",
+            aspect: "1 / 1",
+            alt: "The blade dash crossing a gap, then chaining through an enemy" },
+
+          { label:"Step 03 - Collect Scrap",
+            title:"Surviving longer buys more options",
+            caption:"Enemies drop Scrap, the main currency of a run.\n\nSurviving longer creates more opportunities to change how Callisto plays.",
+            vid: "videos/callisto-flow-03.mp4",
+            poster: "videos/callisto-flow-03-poster.jpg",
+            aspect: "1 / 1",
+            alt: "Enemies dropping Scrap and Callisto collecting it mid-fight" },
+
+          { label:"Step 04 - Build around what appears",
+            title:"The choices change every floor",
+            caption:"Scrap can be exchanged for upgrades. There are more than 30 in the current system, but the available choices change from floor to floor.\n\nThe player cannot rely on getting the same build twice.",
+            vid: "videos/callisto-flow-04.mp4",
+            poster: "videos/callisto-flow-04-poster.jpg",
+            aspect: "1 / 1",
+            alt: "The upgrade interface showing the options available on that floor" },
+
+          { label:"Step 05 - Keep climbing or start again",
+            title:"Fight. Adapt. Climb. Die. Repeat.",
+            caption:"Eventually the run ends.\n\nThe next one starts from the same mechanics, but a different sequence of upgrades creates another problem to solve.",
+            vid: "videos/callisto-flow-05.mp4",
+            poster: "videos/callisto-flow-05-poster.jpg",
+            aspect: "1 / 1",
+            alt: "A run ending and the next one starting immediately" }
         ]
-      }},
-      { reflection: true, body: "This project showed that design is really about finding solutions, and that starts with understanding what people are actually going through. Looking at the situation more closely and talking to others made it clear where the real frustration was. The problem wasn't just waiting, it was the uncertainty around it. That shift made time visibility and clear updates the most important parts of the design. It also reinforced how important familiar patterns are. The app works best when it feels obvious, especially in moments where people don't want to think too much. Working through this project made it clear how small decisions in flow and structure can have a big impact, especially in tools that are meant to fit into everyday routines." }
+      },
+
+      { insights: true, n:"04", t:"UNDERSTANDING THE LOOP", tocLabel:"Understanding the loop",
+        lead: "Once the core direction was clear, games in similar genres became more than references. Roguelikes, arcade platformers and other fast repeatable games were played while paying attention to the systems underneath them: what made another run feel worth starting, when repetition became frustrating, how upgrades changed decisions, and how much downtime a fast game could handle before losing momentum.",
+        items: [
+          { k:"The question that changed",
+            v:"Instead of asking whether a game was simply fun, the questions became specific. Why did this encounter work? What made this upgrade actually change how I played? Why did dying make me want another run instead of making me stop?" },
+          { k:"Convention against function",
+            v:"Looking at games this way helped separate genre conventions from the parts that actually supported Callisto." },
+          { k:"Not another roguelike",
+            v:"The goal was never to reproduce one. It was to understand why these systems worked well enough to decide which ones belonged here and which ones needed to change." },
+          { k:"What was left out",
+            v:"Part of the same process was recognizing which systems Callisto did not need at all, which was as useful as deciding what to keep." }
+        ]
+      },
+
+      { impact: true, t:"WHAT THAT LOOKED LIKE", tocLabel:false,
+        lead: "Playing other games as systems rather than as entertainment.",
+        img: "images/callisto-game-research.jpg",
+        alt: "Reference games studied while designing Callisto's Retribution"
+      },
+
+      { moments: true, sideMedia: true, n:"05", t:"DESIGN DECISIONS", tocLabel:"Design decisions",
+        lead: "The core loop is small on purpose. After understanding what made similar games repeatable, the challenge became shaping those ideas around Callisto instead of following the genre. Every major system had to defend its place.",
+        items: [
+          { title: "The world needed to be discovered, not delivered",
+            stance: "Chose a game over a novel or an animation.",
+            body: "Before designing combat, there was a more fundamental decision to make: what form should Callisto even take?\n\nA novel could carry the scale and detail of the story, but the audience would experience the world in one predetermined sequence. Animation could bring the characters and environments to life visually, but would still control where attention goes. A game could make the world tangible while letting someone decide how deeply they interact with it.\n\nCallisto did not need every player to understand everything. It needed the surface experience to be fun enough that curiosity could happen naturally. Someone might only care about surviving another floor. Someone else might begin noticing why that floor exists in the first place.\n\nGameplay became the invitation. World-building became the reward for looking closer.",
+            img: "images/callisto-bg-final.png",
+            aspect: "16 / 9",
+            alt: "An environment built to carry part of the story on its own",
+            caption: "The world explains itself to whoever looks" },
+
+          { title: "The genre had to make that idea sustainable",
+            stance: "Used the roguelike structure to keep a large world playable.",
+            body: "Choosing games solved the storytelling problem and immediately created another one. How do you make a massive world playable without trying to build a massive game?\n\nA traditional narrative platformer would make every new part of the story depend on another level, sequence or mechanic. Retribution needed something more reusable. Repeated runs meant the same systems and spaces could keep creating different experiences, and it kept the project light enough to stay browser playable.\n\nMore importantly, the tone fit. Callisto was supposed to feel quick, aggressive and unforgiving. Death, repetition and pushing slightly further each time already belonged in that world.\n\nThe roguelike was not a genre added onto Callisto. It became the structure that made Callisto possible." },
+
+          { title: "Repetition only works if the basic action keeps getting better",
+            stance: "Built the whole game around one input.",
+            body: "A roguelike asks someone to repeat the same fundamental interactions many times. That made the core movement more important than adding more mechanics.\n\nThe dash attacks. The dash moves. The dash escapes. The dash crosses gaps. Once movements start chaining together, it becomes the foundation for combos.\n\nA new player mostly uses it to stay alive. An experienced player uses the exact same input to control the entire room. The mechanic never needs to become harder to understand. Its depth comes from how much better the player becomes at using it.",
+            vid: "videos/callisto-moment-dash.mp4",
+            poster: "videos/callisto-moment-dash-poster.jpg",
+            aspect: "1 / 1",
+            alt: "The dash used to move, attack and escape, then chained into a combo",
+            caption: "Same input, beginner and advanced" },
+
+          { title: "Variety should force adaptation, not just add more content",
+            stance: "Made the upgrade pool partly random on purpose.",
+            body: "Once the player understands the dash, repetition creates another risk. If every run offered the same progression, there would eventually be one correct way to play.\n\nMore than 30 upgrades exist in the current pool, but only a random selection appears between floors. Sometimes the ideal upgrade shows up. Sometimes it does not. The interesting part became making something useful out of whatever the game gives you.\n\nInstead of memorizing the best build, players begin understanding relationships between abilities. And if they find a combination powerful enough to almost break the game, good. Learning how to exploit the system is part of mastering it.",
+            vid: "videos/callisto-moment-build.mp4",
+            poster: "videos/callisto-moment-build-poster.jpg",
+            aspect: "1 / 1",
+            alt: "Upgrades pulled from the same pool building a different run",
+            caption: "Same pool, two different games" },
+
+          { title: "Difficulty changes what the same loop means",
+            stance: "Kept the pressure instead of softening it.",
+            body: "Callisto could have been more forgiving. But once the pressure was removed, the fast arcade feeling started disappearing with it. The real question was how to make that difficulty valuable at different skill levels.\n\nFor a newer player, a run is mostly about experimentation. Try an ability. Fight something new. Reach another floor. See how far this build survives.\n\nAs the player improves, the exact same game becomes an optimization problem. Early floors become something to clear quickly. Upgrade choices become calculated. Movement becomes more aggressive. The goal shifts toward exploiting a build well enough to reach the brutally difficult sections as fast as possible.\n\nThe systems stay the same. The player changes what they use them for. That lets experimentation and mastery coexist without needing separate modes." },
+
+          { title: "A fast game still needs somewhere to breathe",
+            stance: "Used the floor structure as the pause.",
+            body: "Combat, difficulty and constant adaptation made continuous play exhausting. The game needed breaks without losing momentum.\n\nEach floor is short enough to preserve the arcade rhythm, but reaching another one creates a small sense of resolution. It becomes a place to introduce a different encounter, offer another upgrade, change the environment or quietly reveal another part of the world.\n\nThose pauses also connect back to the original reason Callisto became a game. The player is never forced to stop for the story. The structure simply keeps giving them opportunities to notice it.",
+            vid: "videos/callisto-moment-floor.mp4",
+            poster: "videos/callisto-moment-floor-poster.jpg",
+            aspect: "1 / 1",
+            alt: "The transition between two floors and what it introduces",
+            caption: "The pause that keeps the rhythm" }
+        ]
+      },
+
+      { artifacts: true, n:"06", t:"BUILDING THE WORLD", tocLabel:"Building the world",
+        lead: "Retribution is being built as a game system and a visual world at the same time. It is developed in JavaScript, with Codex and Claude Code used as coding assistants, and the goal has been to keep it fully playable while the visual language keeps evolving rather than waiting for every final asset before testing how it feels.",
+        items: [
+          { label:"Asset sheet",
+            body:"More than 200 original assets exist so far: characters, environments, enemies, animation frames, interface elements and effects. They are drawn as one system, so a new asset can enter the game without looking like it came from somewhere else.",
+            img:"images/callisto-sprite-callisto.png",
+            contain:true,
+            caption:"One visual language across every asset" },
+
+          { label:"Animation process",
+            body:"Movement is animated frame by frame. Enemies and effects follow the same constraints so combat stays readable at full speed.",
+            img:"images/callisto-process-attack.jpg",
+            caption:"Readable at the speed the game is played" },
+
+          { label:"Environment development",
+            body:"Locations are built to carry information on their own, so a floor can introduce part of the world without interrupting the run.",
+            img:"images/callisto-result2.jpg",
+            caption:"Environments doing narrative work" }
+        ]
+      },
+
+      { triad: true, n:"07", t:"WHAT COMES NEXT", tocLabel:"Next steps",
+        lead: "The core gameplay loop, movement, combat, floor progression and the 30+ upgrade system are already playable. Some of the current art is still placeholder work, the storytelling systems are integrated but the larger narrative is still being written, and boss encounters are still in development.",
+        items: [
+          { n:"N / 01", title:"Finish the world",
+            body:"Replace the remaining placeholder art and continue building environments, characters, effects and interface around the final visual language." },
+          { n:"N / 02", title:"Build the narrative through play",
+            body:"Continue writing the larger story and connect those moments to environments, encounters and optional discoveries instead of relying on exposition." },
+          { n:"N / 03", title:"Complete the run",
+            body:"Design and implement boss encounters that push the movement and upgrade systems further while giving major story moments a mechanical payoff." }
+        ]
+      },
+
+      { reflection: true, n:"08", tocLabel:"Reflection",
+        body: "The foundation is playable. The next step is turning that system into the full world Callisto was originally imagined to be.\n\nMost of the work so far has been restraint. The world is large, and nearly every decision came down to how little of it had to be forced on the player for the rest to still be there.",
+        prompts: [
+          { q: "Why this became a game",
+            a: "A novel or an animation would have decided what someone sees and how much attention they owe it. A game let the story reward attention without demanding it." },
+          { q: "What the genre actually solved",
+            a: "The roguelike was not picked for its mechanics. Repeated runs made a large world reusable, which is the only reason a project this size stays browser playable and solo buildable." },
+          { q: "What I am watching next",
+            a: "Whether players who came in for the movement start noticing the world around it. That is the whole premise, and it is the one thing the systems cannot guarantee on their own." }
+        ]
+      }
+
     ]
   },
   shiroiblock: {
+    contribution: "Created the lettering, brand identity, and garment visualizations, combining typography and photography.",
     tag: "Visual Identity",
     title: "SHIROI BLACK",
     duration: "3 Weeks", role: "Visual Designer",
@@ -4197,6 +4389,7 @@ const PROJECTS = {
     ]
   },
   junomerced: {
+    contribution: "Designed the character, costume, turnarounds, and facial studies for the Callisto universe.",
     tag: "Illustration - Concept Art",
     title: "JUNO MERCED",
     year: "2024", role: "Concept Artist",
@@ -4211,6 +4404,7 @@ const PROJECTS = {
     ]
   },
   velisar: {
+    contribution: "Designed and coded the generative world, particle systems, and interactive wind transitions.",
     tag: "Creative Coding - Generative Design",
     title: "VELISAR",
     duration: "2 Weeks", role: "Creative Coder",
@@ -4250,6 +4444,7 @@ function currentDrift() {
     ]
   },
   flipsketch: {
+    contribution: "Designed and coded the drawing interface, animated strokes, and custom bitmap typography.",
     tag: "Creative Coding - Tool Design",
     title: "FLIPSKETCH",
     duration: "2 Weeks", role: "Creative Coder - Tool Designer",
@@ -4293,6 +4488,7 @@ function drawJittered(stroke) {
     ]
   },
   cloudcup: {
+    contribution: "Redesigned the brand identity, website structure, and interface for an airline-focused coffee concept.",
     tag: "UX / Interaction - Visual Identity",
     title: "CLOUDCUP 2.0",
     duration: "5 Weeks", role: "Visual & UI Designer",
@@ -4317,6 +4513,7 @@ function drawJittered(stroke) {
     ]
   },
   signify: {
+    contribution: "Designed the interaction flows and interface. Built the local gesture-recognition prototype with AI coding assistance.",
     tag: "UX / Interaction",
     title: "SIGNIFY AR",
     duration: "4 Weeks", role: "UX Designer / Developer",
@@ -4339,6 +4536,7 @@ function drawJittered(stroke) {
     ]
   },
   glitterbomb: {
+    contribution: "Created the character concept, 3D model, textures, and final renders.",
     tag: "3D - Illustration - Character Design",
     title: "GLITTERBOMB Y2K",
     year: "2026", role: "3D Artist",
@@ -4355,6 +4553,7 @@ function drawJittered(stroke) {
     ]
   },
   modulecraft: {
+    contribution: "Designed the chair structure and interlocking parts, from sketches through physical prototyping.",
     tag: "Product & 3D - Visual Identity",
     title: "MODULECRAFT",
     duration: "4 Weeks", role: "Product Designer",
@@ -4387,6 +4586,7 @@ function drawJittered(stroke) {
     ]
   },
   throughlens: {
+    contribution: "Created the photography, graphic compositions, and visual experiments shown in this collection.",
     tag: "Graphic Design - Photography",
     title: "DESIGN EXPLORATION",
     duration: "2023–2026", role: "Designer / Photographer",
@@ -4447,10 +4647,11 @@ function drawJittered(stroke) {
     ]
   },
   pantri: {
+    contribution: "Led UX and interface design across onboarding, meal planning, shopping, pantry tracking, and cooking.",
     tag: "Product Design - AI Experience - Smart Packaging",
     title: "PANTRI",
     duration: "6 Weeks",
-    role: "Product Designer",
+    role: "Lead UX / Product Designer",
     team: "Cory Cantrell, Tyler Lin",
     tools: "Figma, React",
     context: "Product Design - Spring 2026",
@@ -4647,18 +4848,131 @@ function drawJittered(stroke) {
       }
     ]
   },
-  /* PLACEHOLDER — fill in role, tools, context and sections when ready */
-  dystopia: {
-    tag: "Visual Identity",
-    title: "DYSTOPIA-XX26",
-    role: "Visual Designer",
-    tools: "",
-    context: "Visual Identity",
-    accent: "linear-gradient(90deg,#3d0000,#e00000)",
-    hero: { concept: true, eyebrow: "Visual Identity", title: "DYSTOPIA-XX26", badge: "Coming Soon" },
+  nibble: {
+    contribution: "Designed the conversational system, context architecture and interaction model. Built the interface, the orb, and the backend routing.",
+    tag: "AI Experience Design",
+    title: "NIBBLE AI ASSISTANT",
+    role: "Designer / Developer",
+    focus: "AI Experience Design, Conversational UX, Systems Design",
+    tools: "JavaScript, Vercel Edge Functions, OpenRouter, Claude Code",
+    status: "Deployed",
+    accent: "linear-gradient(90deg,#001414,#00d4d4)",
+    cover: {
+      subtitle: "A conversational assistant built into the portfolio, using the same information behind every case study to answer, recommend and compare."
+    },
+    hero: {
+      concept: true,
+      eyebrow: "Portfolio Infrastructure",
+      title: "NIBBLE AI ASSISTANT",
+      tagline: "Ask it something. It's already on this page.",
+      badge: "Deployed"
+    },
     images: [],
     sections: [
-      { n:"01", t:"OVERVIEW", b:"Case study in progress." }
+
+      { context: true, n:"01", t:"OVERVIEW", tocLabel:"Overview",
+        lead: "Making the thinking easier to reach.",
+        body: "Most visitors want to understand the work quickly. Nielsen Norman Group found that people often decide whether to stay on a page within 10 to 20 seconds, and typically read only around 20 to 28% of its text.\n\nBut a design portfolio often needs more than a quick scan. The final screens can show what was built, but not always why something changed, what research shaped it, or what constraints influenced the final decision.",
+        midImg: "[OVERVIEW - 16:9: the portfolio with Nibble open beside a case study, mid-conversation]",
+        midAlt: "The portfolio with the Nibble panel open next to a case study",
+        subhead: "That creates a tradeoff",
+        body2: "Make a case study too detailed and important information gets buried. Make it too visual and the reasoning behind the work disappears. It also assumes every visitor wants to know the same things.\n\nNibble-LM became a way to make that depth available on demand. Built directly into the portfolio, it lets visitors ask about the work, dig deeper into specific decisions, compare projects, or find the case study most relevant to what they care about.",
+        why: "The portfolio can stay easy to explore without giving up the context behind the work."
+      },
+
+      { showcase: true, n:"02", t:"THE EXPERIENCE", tocLabel:"The experience",
+        lead: "Ask the portfolio instead of searching through it. Nibble sits inside the site, answers from the same material behind every case study, and can open the project it is talking about.",
+        items: [
+          { label:"Flow 01 - Asking",
+            title:"A question instead of a search",
+            caption:"Visitors ask in their own words: which project shows the most interaction design, why a feature was built a certain way, whether there is accessibility work here, or simply where to start.\n\nNibble answers from the portfolio itself rather than from general knowledge.",
+            vid: "[FLOW 01 - 16:9 screen recording: a visitor asks which project shows the most interaction design and the answer streams in]",
+            hint: "16:9 screen recording",
+            aspect: "16 / 9" },
+          { label:"Flow 02 - Opening the work",
+            title:"From an answer to the project",
+            caption:"When an answer points at a specific project, Nibble opens that case study directly instead of leaving the visitor to find it again in the grid.",
+            vid: "[FLOW 02 - 16:9 screen recording: Nibble recommends a project and opens the case study]",
+            hint: "16:9 screen recording",
+            aspect: "16 / 9" },
+          { label:"Flow 03 - Following up",
+            title:"A conversation, not a query",
+            caption:"Follow-ups like \u201Cwhy did he do that\u201D or \u201Cwhat about the other one\u201D keep working, because Nibble reads the conversation around a question and not only the newest message.",
+            vid: "[FLOW 03 - 16:9 screen recording: a short follow-up thread moving between two projects]",
+            hint: "16:9 screen recording",
+            aspect: "16 / 9" }
+        ]
+      },
+
+      { moments: true, sideMedia: true, n:"03", t:"KEY DESIGN MOMENTS", tocLabel:"Design moments",
+        lead: "Four decisions that shaped what Nibble actually is, underneath the chat window.",
+        items: [
+          { title: "The assistant did not need to read everything.",
+            stance: "Rebuilt around selective context loading instead of sending the whole portfolio with every message.",
+            body: "The first version sent the entire portfolio with every question. It worked, but even a simple question meant giving the model thousands of words it did not need.\n\nThe system was rebuilt around selective context loading. Nibble keeps a lightweight index of every project available at all times. When a question comes in, a routing layer first determines what the visitor is actually asking about. Only then does it load the detailed information for the one or two projects most likely to matter. If someone asks about a specific project, that project gets loaded. If they ask which projects demonstrate a certain skill, Nibble can compare the relevant ones. If no project detail is necessary, it does not load any.\n\nTokens processed for a typical question dropped from roughly 11.5k to about 2k, and the number of projects loaded in full detail dropped from the whole portfolio to one or two. Less context ended up producing better context.",
+            img: "[MOMENT 01 - 4:3: the routing step, with the project index always loaded and one project pulled in full]",
+            aspect: "4 / 3",
+            caption: "Only what the question needs gets loaded" },
+          { title: "A conversation is not a search bar.",
+            stance: "Routes on the whole conversation, not just the newest message.",
+            body: "The newest message does not always contain the information needed to understand it. A visitor might start with \u201Ctell me about this project,\u201D then ask \u201Cwhy did he do that,\u201D then \u201Cwhat about the other one.\u201D Only the first message clearly says what the conversation is about.\n\nNibble therefore routes questions using both the current message and the conversation around it. The most recent six turns stay available in full. Older conversation is compressed into a shorter summary so important context can remain without letting the conversation grow indefinitely. This lets someone speak naturally instead of rewriting a complete search query every time they ask a follow-up.",
+            img: "[MOMENT 02 - 4:3: the last six turns kept in full, with older turns compressed into a short summary]",
+            aspect: "4 / 3",
+            caption: "Six turns in full, everything older compressed" },
+          { title: "The model could interpret the work, but not rewrite it.",
+            stance: "Grounded every claim in structured project data instead of the model's own read of it.",
+            body: "Sounding correct and being correct are different problems. A language model can produce a convincing answer even when the evidence behind that answer is weak. That becomes risky inside a portfolio: saying someone has a skill, shipped something, or owned part of a project when they did not can completely change how their experience is understood.\n\nEach case study therefore has structured information behind it: what the project is, what skills it demonstrates, its major decisions, its constraints and outcomes, and just as importantly, what it does not demonstrate. Nibble can explain, compare, and recommend from that information. It cannot create missing experience to make an answer more impressive. If the portfolio does not show something, saying that directly is part of the experience.",
+            img: "[MOMENT 03 - 3:4: the structured record behind one case study, including the field for what the project does not demonstrate]",
+            aspect: "3 / 4",
+            caption: "What the work does not show is part of the data" },
+          { title: "What Nibble reads cannot control Nibble.",
+            stance: "Separated information from instruction so nothing it reads can rewrite how it behaves.",
+            body: "A public conversational interface means anyone can type anything into it. A visitor can type \u201Cignore your previous instructions.\u201D Project copy could theoretically contain similar language. If every piece of text entering the model were treated the same way, content could start changing the behavior of the system reading it.\n\nNibble separates information from instructions. Visitor messages, project descriptions, and page context are treated as information the assistant can reason about. The rules defining how it behaves exist separately and cannot be rewritten by that content. The same principle shaped its personality: Nibble can sound conversational, recommend projects, and explain the work in its own voice, but factual claims still have to come from the portfolio. Personality could change how an answer sounds. It could not change what was true.",
+            img: "[MOMENT 04 - 4:3: Nibble declining an instruction typed into the chat and staying in character]",
+            aspect: "4 / 3",
+            caption: "What it reads cannot change how it behaves" }
+        ]
+      },
+
+      { context: true, n:"04", t:"DESIGNING THE INTERACTION", tocLabel:"The interaction",
+        lead: "Making an invisible system feel understandable.",
+        body: "Most of the architecture is intentionally hidden from the visitor. What needed to stay visible was feedback. Nibble streams its response as it is written instead of holding everything back until the full answer is ready, so the wait becomes something to read rather than something to sit through.",
+        midImg: "[INTERACTION 01 - 16:9: the four orb states side by side, idle, searching, reasoning and responding]",
+        midAlt: "The four orb states shown side by side",
+        subhead: "One object carrying four states",
+        body2: "The orb changes depending on whether the system is waiting, finding relevant information, reasoning through it, or responding. The states are not the feature themselves. They translate what is happening underneath into something a visitor can read at a glance, without needing to know what a router, a token, or a language model is.",
+        why: "Nobody should have to understand the architecture to trust the answer."
+      },
+
+      { impact: true, n:"05", t:"IMPACT", tocLabel:"Impact",
+        lead: "Nibble changed how people moved through the portfolio. The goal was not just to get people to open the assistant. It was to help them find more of the work that was relevant to them.",
+        metrics: [
+          { v: "+44%", label: "increase in project pages viewed per visit, from 1.6 to 2.3, in the first four weeks live" },
+          { v: "58% \u2192 43%", label: "drop in bounce rate after launch" },
+          { v: "34%", label: "of visitors opened and used Nibble" },
+          { v: "72%", label: "of those visitors went on to open a project Nibble recommended" }
+        ],
+        statement: "Visitors who reached a second case study went from 27% to 41% over the same period, and Nibble answered more than 250 questions in its first four weeks live.\n\nThe strongest signal was never how much people used the assistant itself. It was what they did right after. Nibble worked best when the conversation became a path back into the portfolio, helping visitors move from a question to the project that could actually answer it."
+      },
+
+      { reflection: true, n:"06", tocLabel:"Reflection",
+        body: "The interesting part of AI was deciding what it should know. Nibble started as a way to let people ask questions about the portfolio. Most of the meaningful work ended up happening before an answer was generated: which information should always be available, what should only be loaded when it becomes relevant, how much of a conversation needs to be remembered, what happens when the portfolio does not contain the answer, and where interpretation becomes invention.\n\nA better experience did not always require a more powerful model. Often it came from giving the same model less information, but making that information more relevant.\n\nThe project also changed how I thought about conversational interfaces. The model was only one part of the experience. The rest came from the systems around it: information architecture, routing, memory, feedback, security, and the decisions about when not to generate something. For a project built to explain design thinking, designing what the system knows became just as important as designing what it says.",
+        prompts: [
+          { q: "What surprised me",
+            a: "How much of the work was refusal. Deciding what the assistant would not say, and what it would not claim, mattered more than anything it was allowed to generate." },
+          { q: "What I underestimated",
+            a: "How much of the design work happened before a single answer was ever generated, in deciding what the system was allowed to know in the first place." },
+          { q: "What this taught me about design",
+            a: "A personality and a set of guardrails are not two separate layers. Written separately, one quietly wins over the other." }
+        ]
+      },
+
+      /* Secret coda. tocLabel:false keeps it out of the sidebar on purpose —
+         it only exists for whoever actually reads to the end. */
+      { context: true, tocLabel: false,
+        lead: "One last thing.",
+        body: "If you're wondering why this case study is blue instead of Nibble's usual red, feel free to ask Nibble about the website's secrets."
+      }
     ]
   }
 };
@@ -4682,6 +4996,8 @@ function hideLoader() {
   if (heroCueEl) heroCueEl.classList.add('in');
   setTimeout(function() {
     loader.style.display = 'none';
+    /* A shared link opens its case study once the reveal has finished */
+    openProjectFromUrl();
     /* After page reveals, background-fetch the larger videos */
     ['images/velisar-thumb.mp4','images/flipsketch-thumb.mp4','images/glitterbomb-thumb.mp4'].forEach(function(src) {
       fetch(src).then(function(res) {
@@ -5366,6 +5682,38 @@ var mgallery = document.getElementById('mgallery');
 var msections = document.getElementById('msections');
 var msubtitle = document.getElementById('msubtitle');
 var modalHistoryOpen = false;
+var modalReturnPosition = { x: 0, y: 0 };
+var modalHistoryRestore = false;
+var modalBackPending = false;
+var modalRevision = 0;
+// The portfolio owns scroll restoration while navigating its case-study panels.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+function restoreProjectPosition() {
+  var revision = modalRevision;
+  function restore() {
+    if (revision !== modalRevision || modal.classList.contains('open')) return;
+    window.scrollTo({ left: modalReturnPosition.x, top: modalReturnPosition.y, behavior: 'instant' });
+  }
+  restore();
+  // Run after popstate's history traversal and layout have completed as well.
+  requestAnimationFrame(restore);
+}
+
+function disposeCaseStudy() {
+  if (modal._closeLightbox) modal._closeLightbox();
+  (modal._timers || []).forEach(clearTimeout);
+  modal._timers = [];
+  (modal._observers || []).forEach(function(observer) { observer.disconnect(); });
+  modal._observers = [];
+  (modal._flowCleanups || []).forEach(function(cleanup) { cleanup(); });
+  modal._flowCleanups = [];
+  if (modal._tocObs) { modal._tocObs.disconnect(); modal._tocObs = null; }
+  modal.querySelectorAll('video').forEach(function(video) { video.pause(); });
+  // Remove embedded browsing contexts rather than navigating them to an empty
+  // URL, which can interfere with the browser's joint session history.
+  modal.querySelectorAll('iframe').forEach(function(frame) { frame.remove(); });
+}
 
 document.querySelectorAll('.pcard').forEach(function(card) {
   card.addEventListener('click', function() {
@@ -5381,7 +5729,29 @@ document.querySelectorAll('.pcard').forEach(function(card) {
     }
     var id = card.getAttribute('data-project');
     var d = PROJECTS[id];
-    if (!d) return;
+    if (!d || modalBackPending) return;
+    var wasOpen = modal.classList.contains('open');
+    if (!wasOpen && !modalHistoryRestore) {
+      modalReturnPosition = { x: window.scrollX, y: window.scrollY };
+      history.replaceState(Object.assign({}, history.state, {
+        portfolio: { view: 'projects', position: modalReturnPosition }
+      }), '', homePath());
+    }
+    disposeCaseStudy();
+    modalRevision++;
+    var openingRevision = modalRevision;
+    function scheduleModal(callback, delay) {
+      var timer = setTimeout(function() {
+        if (openingRevision === modalRevision && modal.classList.contains('open')) callback();
+      }, delay);
+      modal._timers.push(timer);
+      return timer;
+    }
+    function observeModal(callback, options) {
+      var observer = new IntersectionObserver(callback, options);
+      modal._observers.push(observer);
+      return observer;
+    }
 
     // Remove any stray back button injected after gallery (e.g. from photoGrid projects)
     var strayBack = document.getElementById('photo-back-btn');
@@ -5409,6 +5779,18 @@ document.querySelectorAll('.pcard').forEach(function(card) {
     if (d.focus) metaBits += metaBit('Focus', d.focus);
     if (d.status) metaBits += metaBit('Status', d.status);
     mmeta.innerHTML = metaBits;
+    if (d.contribution) {
+      var contribution = document.createElement('div');
+      contribution.className = 'mmeta-item mmeta-contribution';
+      var contributionLabel = document.createElement('span');
+      contributionLabel.className = 'mmeta-label';
+      contributionLabel.textContent = 'My contribution';
+      var contributionText = document.createElement('span');
+      contributionText.className = 'mmeta-val';
+      contributionText.textContent = d.contribution;
+      contribution.append(contributionLabel, contributionText);
+      mmeta.appendChild(contribution);
+    }
 
     /* Cover subtitle — one editorial line under the huge title */
     if (msubtitle) {
@@ -5542,7 +5924,15 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       /* An optional image and headed second half, for a section that needs a
          beat in the middle rather than one block of prose and a closing shot. */
       var midImg = '';
-      if (isSlot(s.midImg)) midImg = buildSlot(s.midImg, 'wide');
+      if (s.midVid && !isSlot(s.midVid)) {
+        // A real clip gets the lazy player (poster, pause, restart) rather than
+        // a bare autoplaying <video>, so a long capture costs nothing until it
+        // scrolls into view.
+        midImg = '<div class="ctx-mid-media">' + buildPlayerHTML({
+          vid: s.midVid, poster: s.midPoster, aspect: s.midAspect, alt: s.midAlt
+        }, s.midCaption) + '</div>';
+      }
+      else if (isSlot(s.midVid || s.midImg)) midImg = buildSlot(s.midVid || s.midImg, 'wide', s.midHint);
       else if (s.midImg) midImg = '<img class="ctx-mid-img" src="' + s.midImg + '" alt="' + escHtml(s.midAlt || '') + '" loading="lazy">';
       var subhead = s.subhead ? '<h4 class="ctx-subhead">' + s.subhead + '</h4>' : '';
       var body2 = s.body2 ? s.body2.split('\n\n').map(function(p) {
@@ -5805,7 +6195,8 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       if (!hero) return '';
       var caption = hero.caption ? '<div class="modal-hero-caption">' + hero.caption + '</div>' : '';
       if (hero.vid && !isSlot(hero.vid)) {
-        return '<div class="modal-hero"><video autoplay muted loop playsinline><source src="' + hero.vid + '" type="video/mp4"></video>' + caption + '</div>';
+        var vidBadge = hero.badge ? '<div class="hero-concept-badge">' + escHtml(hero.badge) + '</div>' : '';
+        return '<div class="modal-hero"><video autoplay muted loop playsinline><source src="' + hero.vid + '" type="video/mp4"></video>' + vidBadge + caption + '</div>';
       }
       if (hero.img && !isSlot(hero.img)) {
         var imgBadge = hero.badge ? '<div class="hero-concept-badge">' + escHtml(hero.badge) + '</div>' : '';
@@ -6260,10 +6651,10 @@ document.querySelectorAll('.pcard').forEach(function(card) {
 
     // Scroll-spy — highlight the TOC entry matching the section currently in view
     if (modal._tocObs) { modal._tocObs.disconnect(); modal._tocObs = null; }
-    setTimeout(function() {
+    scheduleModal(function() {
       if (!tocSecs.length || !tocList) return;
       var tocItems = tocList.querySelectorAll('.toc-item');
-      modal._tocObs = new IntersectionObserver(function(entries) {
+      modal._tocObs = observeModal(function(entries) {
         entries.forEach(function(entry) {
           if (entry.isIntersecting) {
             var id = entry.target.id;
@@ -6358,8 +6749,14 @@ document.querySelectorAll('.pcard').forEach(function(card) {
     /* One history entry covers the whole case-study state, so Back always
        returns to the grid, whether the viewer opened one project or moved
        between several without closing. */
-    if (modalHistoryOpen) history.replaceState({ caseStudy: id }, '');
-    else { history.pushState({ caseStudy: id }, ''); modalHistoryOpen = true; }
+    if (!modalHistoryRestore) {
+      var caseState = Object.assign({}, history.state, {
+        portfolio: { view: 'caseStudy', id: id, position: modalReturnPosition }
+      });
+      if (wasOpen) history.replaceState(caseState, '', projectPath(id));
+      else history.pushState(caseState, '', projectPath(id));
+    }
+    modalHistoryOpen = true;
 
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -6381,7 +6778,7 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       var bars = chartEl.querySelectorAll('.chart-bar');
       var vals = chartEl.querySelectorAll('.chart-val');
       bars.forEach(function(bar, i) {
-        setTimeout(function() {
+        scheduleModal(function() {
           var valEl = vals[i];
           var finalVal = valEl ? valEl.getAttribute('data-val') : '';
           var isPercent = finalVal.indexOf('%') !== -1;
@@ -6403,10 +6800,10 @@ document.querySelectorAll('.pcard').forEach(function(card) {
         }, 180 + i * 200);
       });
     }
-    setTimeout(function() {
+    scheduleModal(function() {
       var charts = msections.querySelectorAll('[data-chart]');
       if (!charts.length) return;
-      var chartObs = new IntersectionObserver(function(entries) {
+      var chartObs = observeModal(function(entries) {
         entries.forEach(function(entry) {
           if (entry.isIntersecting) {
             runChartAnim(entry.target);
@@ -6422,7 +6819,7 @@ document.querySelectorAll('.pcard').forEach(function(card) {
        and pause it on the way out — browsers cap how many videos may play
        at once, so leaving offscreen ones running breaks later playback.
        A manual pause is remembered and survives scrolling. */
-    setTimeout(function() {
+    scheduleModal(function() {
       var figs = msections.querySelectorAll('.vfig');
       if (!figs.length) return;
       var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -6468,7 +6865,7 @@ document.querySelectorAll('.pcard').forEach(function(card) {
           }
         });
 
-        var vidObs = new IntersectionObserver(function(entries) {
+        var vidObs = observeModal(function(entries) {
           entries.forEach(function(entry) {
             if (entry.isIntersecting) {
               loadSrc();
@@ -6488,7 +6885,7 @@ document.querySelectorAll('.pcard').forEach(function(card) {
        figure is actually on screen, and always muted. A manual pause is
        remembered so scrolling past does not restart the video. If the
        player never reports ready, the poster is left showing instead. */
-    setTimeout(function() {
+    scheduleModal(function() {
       var embeds = msections.querySelectorAll('.vfig-embed');
       if (!embeds.length) return;
       var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -6534,8 +6931,9 @@ document.querySelectorAll('.pcard').forEach(function(card) {
           }
         }
         window.addEventListener('message', onMsg);
+        modal._flowCleanups.push(function() { window.removeEventListener('message', onMsg); });
 
-        var obs = new IntersectionObserver(function(entries) {
+        var obs = observeModal(function(entries) {
           entries.forEach(function(entry) {
             if (entry.isIntersecting) {
               if (state !== 'idle' && state !== 'parked') return;
@@ -6551,17 +6949,17 @@ document.querySelectorAll('.pcard').forEach(function(card) {
         // Warm the player immediately; fall back to the poster if it never loads
         var src = iframe.getAttribute('data-src');
         if (src) { iframe.src = src; iframe.removeAttribute('data-src'); }
-        failTimer = setTimeout(function() {
+        failTimer = scheduleModal(function() {
           if (!ready) fig.classList.add('is-failed');
         }, 8000);
       });
     }, 120);
 
     /* Lazy-load proto iframe — only fetch Figma when user scrolls to it */
-    setTimeout(function() {
+    scheduleModal(function() {
       var protoIframe = msections.querySelector('.proto-frame iframe[data-src]');
       if (!protoIframe) return;
-      var protoObs = new IntersectionObserver(function(entries) {
+      var protoObs = observeModal(function(entries) {
         entries.forEach(function(entry) {
           if (entry.isIntersecting) {
             var iframe = entry.target;
@@ -6574,26 +6972,21 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       protoObs.observe(protoIframe);
     }, 200);
 
-    /* Vimeo lazy load + restart after 45s out of view */
-    setTimeout(function() {
+    /* Pause offscreen Vimeo players without navigating their iframes. Reloading
+       embeds creates history entries that can swallow the portfolio Back action. */
+    scheduleModal(function() {
       msections.querySelectorAll('iframe.vimeo-lazy').forEach(function(iframe) {
         var src = iframe.getAttribute('data-src');
-        var leaveTimer = null;
-        var vimeoObs = new IntersectionObserver(function(entries) {
+        var loaded = false;
+        var vimeoObs = observeModal(function(entries) {
           entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-              if (leaveTimer) { clearTimeout(leaveTimer); leaveTimer = null; }
-              if (!iframe.src || iframe.src === window.location.href) {
-                iframe.src = src;
-              }
-            } else {
-              if (iframe.src && iframe.src !== window.location.href) {
-                leaveTimer = setTimeout(function() {
-                  iframe.style.opacity = '0';
-                  iframe.src = '';
-                  setTimeout(function() { iframe.src = src; }, 100);
-                }, 8000);
-              }
+            if (entry.isIntersecting && !loaded) {
+              iframe.src = src;
+              loaded = true;
+            } else if (loaded && iframe.contentWindow) {
+              iframe.contentWindow.postMessage(JSON.stringify({
+                method: entry.isIntersecting ? 'play' : 'pause'
+              }), 'https://player.vimeo.com');
             }
           });
         }, { root: modal, threshold: 0.2 });
@@ -6678,7 +7071,8 @@ document.querySelectorAll('.pcard').forEach(function(card) {
     lbox.querySelector('.lbox-close').focus();
   }
 
-  function close() {
+  function close(skipFocus) {
+    if (lbox.hidden) return;
     lbox.classList.remove('is-open');
     lbVid.pause();
     setTimeout(function() {
@@ -6691,8 +7085,11 @@ document.querySelectorAll('.pcard').forEach(function(card) {
     }, 280);
     /* the project modal is still open underneath and owns the scroll lock */
     if (!modal.classList.contains('open')) document.body.style.overflow = '';
-    if (lastFocus) { lastFocus.focus(); lastFocus = null; }
+    if (lastFocus && !skipFocus) lastFocus.focus({ preventScroll: true });
+    lastFocus = null;
   }
+
+  modal._closeLightbox = function() { close(true); };
 
   document.addEventListener('click', function(e) {
     var item = e.target.closest && e.target.closest('.photo-bento--gal .pgitem');
@@ -6719,42 +7116,89 @@ document.querySelectorAll('.pcard').forEach(function(card) {
 })();
 
 function closeModal(fromHistory) {
-  /* Closing by button or Escape rewinds history instead of closing directly,
-     so the entry pushed on open is consumed and Back does not reopen it.
-     The popstate handler comes straight back here with fromHistory set. */
-  if (!fromHistory && modalHistoryOpen) { history.back(); return; }
+  if (!modal.classList.contains('open')) return;
+  var entry = history.state && history.state.portfolio;
+  var rewind = !fromHistory && modalHistoryOpen && entry && entry.view === 'caseStudy';
   modalHistoryOpen = false;
+  modalRevision++;
+  disposeCaseStudy();
   modal.classList.remove('open');
   document.body.style.overflow = '';
   cdot.style.background = '';
   cring.style.borderColor = '';
-  if (modal._flowCleanups) {
-    modal._flowCleanups.forEach(function(fn) { fn(); });
-    modal._flowCleanups = [];
-  }
-  if (modal._tocObs) { modal._tocObs.disconnect(); modal._tocObs = null; }
   modal.style.removeProperty('--project-accent');
-  var sketchIframe = mpdf.querySelector('.sketch-frame iframe');
-  if (sketchIframe) sketchIframe.src = '';
-  var protoIframe = msections.querySelector('.proto-frame iframe');
-  if (protoIframe) protoIframe.src = '';
-  msections.querySelectorAll('iframe.vimeo-lazy').forEach(function(iframe) {
-    iframe.style.opacity = '0';
-    iframe.src = '';
-  });
-  // stop the long-form embed rather than leaving it streaming behind the grid
-  msections.querySelectorAll('.vfig-embed iframe').forEach(function(iframe) {
-    iframe.src = '';
-  });
+  restoreProjectPosition();
+  // Close immediately. History is bookkeeping, not the trigger for dismissal.
+  // The guard prevents a double click / repeated Escape from traversing twice.
+  if (rewind) {
+    modalBackPending = true;
+    history.back();
+  }
 }
 
 document.getElementById('mclose').addEventListener('click', function() { closeModal(); });
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeModal();
 });
-window.addEventListener('popstate', function() {
-  if (modal.classList.contains('open')) closeModal(true);
+window.addEventListener('popstate', function(event) {
+  var entry = event.state && event.state.portfolio;
+  var wasPending = modalBackPending;
+  modalBackPending = false;
+  if (entry && entry.position) modalReturnPosition = entry.position;
+  if (entry && entry.view === 'caseStudy' && !wasPending) {
+    // Forward restores the case study without pushing another history entry.
+    var card = document.querySelector('.pcard[data-project="' + entry.id + '"]');
+    if (card && PROJECTS[entry.id]) {
+      modalHistoryRestore = true;
+      try { card.click(); } finally { modalHistoryRestore = false; }
+      return;
+    }
+  }
+  closeModal(true);
+  if (wasPending || (entry && entry.view === 'projects')) restoreProjectPosition();
 });
+
+/* ═══════════════════════════════
+   PROJECT URLS
+   Each case study gets a shareable address: /nibble, /pantri, /herway.
+   Deliberately one path segment deep. At /work/nibble the browser would
+   resolve every relative asset path against /work/, so images and videos
+   would 404. At /nibble the base stays the site root and they keep working.
+
+   Opening index.html straight off the disk gives the document an opaque
+   origin, and pushState rejects a URL argument there. So addresses are only
+   rewritten when the page is actually served. Off a file:// path the history
+   entries still work, they just leave the address alone.
+═══════════════════════════════ */
+var urlRoutingEnabled = location.protocol === 'http:' || location.protocol === 'https:';
+
+/* An empty string tells pushState to keep the current address. */
+function projectPath(id) { return urlRoutingEnabled ? '/' + id : ''; }
+function homePath() { return urlRoutingEnabled ? '/' : ''; }
+
+function projectFromPath() {
+  var slug = location.pathname.replace(/^\/+|\/+$/g, '');
+  return PROJECTS[slug] ? slug : null;
+}
+
+/* Someone loaded /nibble directly, or refreshed with a case study open.
+   Seed a grid entry underneath, then open the project through the normal
+   click path so Back lands on the grid instead of leaving the site. */
+function openProjectFromUrl() {
+  if (!urlRoutingEnabled) return;
+  var id = projectFromPath();
+  if (!id) {
+    /* A retired or mistyped project link still lands on the grid, but the
+       stale address is tidied away so the page reads as the homepage. */
+    if (location.pathname !== '/') history.replaceState(null, '', '/');
+    return;
+  }
+  var card = document.querySelector('.pcard[data-project="' + id + '"]');
+  if (!card) return;
+  modalReturnPosition = { x: 0, y: 0 };
+  history.replaceState({ portfolio: { view: 'projects', position: modalReturnPosition } }, '', '/');
+  card.click();
+}
 
 /* ═══════════════════════════════
    PARALLAX HERO TEXT

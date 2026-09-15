@@ -23,6 +23,7 @@ FF="$HOME/Library/Python/3.9/lib/python/site-packages/imageio_ffmpeg/binaries/ff
 SRC="${1:?usage: compress.sh <source-video> <output-name>}"
 NAME="${2:?usage: compress.sh <source-video> <output-name>}"
 SIZE="${3:-1080}"   # optional: long edge in px. 1080 is plenty.
+CRF="${4:-20}"      # optional: quality. 20 for UI recordings, 28 for gameplay.
 
 OUT="$(cd "$(dirname "$0")" && pwd)"
 
@@ -31,7 +32,7 @@ OUT="$(cd "$(dirname "$0")" && pwd)"
 "$FF" -y -i "$SRC" \
   -an \
   -vf "scale='min($SIZE,iw)':'min($SIZE,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2:flags=lanczos,fps=30" \
-  -c:v libx264 -profile:v high -crf 20 -preset slow \
+  -c:v libx264 -profile:v high -crf "$CRF" -preset slow \
   -pix_fmt yuv420p -movflags +faststart \
   "$OUT/$NAME.mp4"
 
@@ -59,6 +60,11 @@ echo "  was               $(du -h "$SRC" | cut -f1)"
 #                    20 keeps UI text crisp. 23 if you want smaller.
 #                    Screen recordings are ~97% static frames, so they
 #                    compress far better than real video at the same CRF.
+#                    Gameplay footage is the opposite: a scrolling camera and
+#                    particles mean almost every pixel changes every frame, and
+#                    CRF 20 lands around 6000 kb/s versus ~1200 for the UI
+#                    clips. Pass 28 as the 4th argument for those. Pixel art
+#                    has a small palette and survives it with no visible loss.
 # -preset slow       encoder works harder for a smaller file. Costs time
 #                    at export only, never at playback.
 # -pix_fmt yuv420p   required or Safari shows a black frame.
