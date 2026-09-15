@@ -2286,7 +2286,10 @@ footer {
 .nibble-dots {
   --nd: 5px;
   --ng: 2px;
-  --nc-dim: rgba(224,0,0,0.36);
+  /* Rest sits close under the lit peak so the whole triangle stays legible
+     at rest and the breath passes over it as a soft swell rather than
+     lighting dots that were invisible a moment earlier. */
+  --nc-dim: rgba(224,0,0,0.6);
   --nc-lit: var(--accent);
   display: inline-flex;
   flex-direction: column;
@@ -2587,8 +2590,8 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
 
 /* Close — mirrors .modal-close-x behavior */
 .nibble-close {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2596,9 +2599,8 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   border: 1px solid var(--border);
   border-radius: 0;
   color: rgba(232,228,220,0.65);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  line-height: 1;
+  /* Draws the same cross the mobile menu uses, so the two closes match and
+     the mark centres on geometry rather than on font metrics. */
   cursor: pointer;
   transition: color 0.2s ease, border-color 0.2s ease, transform 0.28s ease;
   flex-shrink: 0;
@@ -2967,15 +2969,6 @@ body.nibble-open #nibble-backdrop { opacity: 1; pointer-events: auto; }
   letter-spacing: 0.3em;
   text-transform: uppercase;
   color: rgba(232,228,220,0.28);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.nibble-hint::before {
-  content: '';
-  width: 12px;
-  height: 1px;
-  background: rgba(232,228,220,0.25);
 }
 
 /* Rugged bezel — serial-number label bottom-right of panel */
@@ -3015,7 +3008,7 @@ body.shiny {
 }
 body.shiny .nibble-dots {
   --nc-lit: #00d4d4;
-  --nc-dim: rgba(0,212,212,0.36);
+  --nc-dim: rgba(0,212,212,0.6);
 }
 
 /* ─── EASTER EGG - NIBBLE SNAKE ────────────────────────────────────
@@ -7423,7 +7416,12 @@ if (heroTitle) {
           <span class="nibble-info-tip" role="tooltip">NibbleLM is an AI assistant. It can make mistakes about Rafael's work. Verify anything important.</span>
         </button>
       </span>
-      <button class="nibble-close" id="nibble-close" type="button" aria-label="Close">✕</button>
+      <button class="nibble-close" id="nibble-close" type="button" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="3" y1="3" x2="17" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="17" y1="3" x2="3" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
     </div>
   </div>
   <div class="nibble-body" id="nibble-body"></div>
@@ -7432,7 +7430,7 @@ if (heroTitle) {
       <textarea class="nibble-input" id="nibble-input" rows="1" placeholder="ASK ANYTHING..."></textarea>
       <button class="nibble-send" id="nibble-send" type="button" aria-label="Send">SEND</button>
     </div>
-    <div class="nibble-hint">ENTER TO SEND - SHIFT+ENTER FOR NEWLINE</div>
+    <div class="nibble-hint">PRESS ENTER TO SEND, SHIFT + ENTER FOR NEW LINE</div>
   </div>
 </aside>
 
