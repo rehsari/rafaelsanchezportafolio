@@ -1488,6 +1488,10 @@ video::-webkit-media-controls-panel { display: none !important; }
   line-height: 1.5;
 }
 .impact-media { margin-bottom: 40px; }
+.impact-source {
+  font-family: var(--font-body); font-size: 14px; line-height: 1.6;
+  color: rgba(232,228,220,0.7); margin: -20px 0 40px;
+}
 .impact-media img, .impact-media video {
   width: 100%; aspect-ratio: 16 / 9; object-fit: cover;
   display: block; border-radius: 2px;
@@ -3923,7 +3927,7 @@ const PROJECTS = {
             body: "The obvious safety features (panic buttons, direct police alerts) depend on institutions many riders already distrust. The research was quieter but clearer: fear on transit is shaped less by incidents and more by absence. Being surrounded by people who share the same concern turned out to matter more than a button that summons an authority. The community stopped being a feature and became the entire surface." },
           { title: "Comfort routing, not shortest path",
             stance: "Broke the category default that faster equals better.",
-            body: "Every navigation product optimizes for time. Time is not what makes a route unsafe. The route panel deprioritizes minutes-shaved and surfaces environment instead: how active a street is, how socially present, whether other HerWay users are already on the same line. The result feels slower on paper. It reads differently to the rider." },
+            body: "Riders described taking longer routes when those routes felt more comfortable. That shaped the route panel: street activity and the presence of other riders became part of the comparison, alongside travel time. The fastest option stayed visible, but speed alone no longer determined the recommendation." },
           { title: "Structure without a single path",
             stance: "Refused the linear flow the category defaults to.",
             body: "Transit apps usually funnel riders through one path: search, select, ride. HerWay has plenty of screens, so the reflex was to add hierarchy. The call was to keep every core function reachable in one tap and let the rider decide which one is the front door. Redundancy was cut. Choice was preserved." },
@@ -3959,7 +3963,7 @@ const PROJECTS = {
           { q: "What I underestimated",
             a: "How much of the actual insight lives in what riders skip past instead of what they describe. The signal was in small, repeated moments of discomfort that shape a commute over time, not the incidents anyone would report." },
           { q: "What I would do differently",
-            a: "Bring riders into the process before the design, not just after. I used testing to validate a direction that the target demographic could have set from the start." },
+            a: "Give riders a larger role in shaping the early concepts. The interviews informed the brief, but I would involve riders in choosing the design direction as well as testing it." },
           { q: "What this taught me about design",
             a: "Safety is not a screen. It is an entire posture. You cannot retrofit it with a panic button and call it inclusive design." }
         ]
@@ -4037,7 +4041,7 @@ const PROJECTS = {
       },
 
       { photostrip: true, n:"04", t:"BUILDING THE FEATURE AS A TEAM", tocLabel:"Team collaboration",
-        body: "The project was shaped through constant collaboration between design, engineering, and marketing.\n\nResearch findings were shared across the team and became a starting point for discussion, not just a design handoff. Ideas were explored together, challenged from different perspectives, and refined based on what would be useful, realistic to build, and clear to communicate.\n\nThat teamwork helped turn a broad problem into a focused product that everyone had a hand in shaping.",
+        body: "I led the design work alongside another designer, developing the interface and presentation materials within Snapchat’s visual language. Research findings were shared across design, engineering, and marketing so the team could evaluate ideas together against usefulness, feasibility, and the three-week deadline.",
         items: [
           { img:"images/snap-team-04.jpg", caption:"Mapping the flow" },
           { img:"images/snap-team-02.jpg", caption:"Working session" },
@@ -4068,7 +4072,7 @@ const PROJECTS = {
 
           { title: "Do not become the help",
             stance: "Drew the boundary at the handoff.",
-            body: "As Resources grew, it was easy to imagine more happening inside Snapchat. Conversations with S.P.Y. and St. Joseph Center made the boundary clearer: Resources should help people discover, understand, trust, and connect, then hand them off to the organizations already equipped to provide support.",
+            body: "Conversations with S.P.Y. and St. Joseph Center helped clarify where Resources should stop. The organizations were already equipped to provide support. Our role was to help people discover what was available, understand it, and feel comfortable taking the next step. That kept the feature focused on discovery and connection, with a handoff to the organization for support.",
             img: "images/snap-connect-handoff.jpg",
             aspect: "16 / 9",
             caption: "Where Resources ends and the organization takes over",
@@ -4082,7 +4086,7 @@ const PROJECTS = {
             aspect: "1000 / 394",
             wide: true,
             caption: "Giving Resources a face",
-            afterBody: "That choice mattered more than volume. A few honest, unfiltered stories built more trust than a long list of ratings ever could.",
+            afterBody: "The aim was to make asking for help feel more approachable through personal experiences.",
             alt: "Four Snapchat testimonial cards from CCFB, SD Youth Services, Alba Collaborative and Shelterinc side by side" }
         ]
       },
@@ -4259,7 +4263,7 @@ const PROJECTS = {
         items: [
           { title: "The world needed to be discovered, not delivered",
             stance: "Chose a game over a novel or an animation.",
-            body: "Before designing combat, there was a more fundamental decision to make: what form should Callisto even take?\n\nA novel could carry the scale and detail of the story, but the audience would experience the world in one predetermined sequence. Animation could bring the characters and environments to life visually, but would still control where attention goes. A game could make the world tangible while letting someone decide how deeply they interact with it.\n\nCallisto did not need every player to understand everything. It needed the surface experience to be fun enough that curiosity could happen naturally. Someone might only care about surviving another floor. Someone else might begin noticing why that floor exists in the first place.\n\nGameplay became the invitation. World-building became the reward for looking closer.",
+            body: "Choosing a game meant the core interaction had to stand on its own. Movement and combat became the immediate reason to play, while environments and optional discoveries carried the larger story. Players could decide how closely to follow it without being required to stop the run.",
             img: "images/callisto-bg-final.png",
             aspect: "16 / 9",
             alt: "An environment built to carry part of the story on its own",
@@ -4365,10 +4369,10 @@ const PROJECTS = {
       { n:"03", t:"KEY DECISIONS", b:"Some of the choices that shaped how Shiroi Black came together.", decisions: [
         { title: "BUILDING FROM PERSONAL EXPRESSION", body: "The project didn't start with a clear brief or a client asking for a fashion brand. It started with an interest in blackletter typography and wanting to explore where that could go. That personal starting point shaped every decision that followed. Instead of designing for a target market first, the visual language came from what felt honest and compelling, then worked outward from there. The brand ended up being a reflection of that process. Not a manufactured identity, but one that developed from following something that genuinely felt worth exploring." },
         { title: "COMBINING PHOTOGRAPHY AND TYPOGRAPHY", body: "At some point it stopped feeling like just a lettering project. The gothic forms had a specific mood, and photography felt like the right medium to carry that further. The challenge was making both elements feel like they belonged together without one overwhelming the other. The typography needed space, and the photography needed to have the same sense of weight and contrast that the letterforms already had. The combination ended up defining the brand more than either element alone would have. The identity came from that tension between the two." },
-        { title: "KEEPING THE LETTERING EXPRESSIVE", body: "Some versions pushed toward cleaner, more controlled forms. The letterwork became more precise, the spacing more even. On paper it looked more polished, but something was getting lost. The roughness in the original hand-drawn strokes was actually doing something. It gave the mark personality and kept it from feeling like a font download. The decision was to preserve that quality through the digitization process instead of refining it away. The final letterforms still carry the irregularities from being drawn by hand, and that became part of what the brand is." },
+        { title: "KEEPING THE LETTERING EXPRESSIVE", body: "Cleaner iterations made the lettering more consistent, but lost some of the character of the original pen strokes. I kept those irregularities when refining the mark in Illustrator, balancing legibility with the hand-drawn quality that started the project." },
         { title: "FROM FLAT PIECES TO OBJECTS", body: "At first, the work existed as individual flat visuals. As the project developed, the focus shifted toward pushing the identity further. Working in 3D allowed for more experimentation and made it possible to treat the work as an object rather than something placed in the center of a page. It opened up new ways to explore form, depth, and composition. This shift helped the identity feel more complete, not limited to flat outputs but able to exist across different formats." }
       ]},
-      { n:"04", t:"VALIDATED WITH DATA", b:"Before any physical prototyping, 3D renders were used to survey 20 people across four groups: trend buyers, design students, Instagram followers, and mall shoppers.", chart: {
+      { n:"04", t:"AUDIENCE FEEDBACK", b:"Before any physical prototyping, 3D renders were used to survey 20 people across four groups: trend buyers, design students, Instagram followers, and mall shoppers.", chart: {
         unit: '%', max: 100, caption: '20 people surveyed across 4 groups',
         data: [
           { label: "Would wear designs", v: 72 },
@@ -4377,7 +4381,7 @@ const PROJECTS = {
           { label: "Not interested", v: 20 }
         ]
       }},
-      { n:"05", t:"THE RESULT", b:"72% said they'd wear it. 80% responded to the typography and photography fusion. Shiroi Black went from a letterform experiment to a defined, validated visual identity.", img:"images/shiroi-folded.png", imgLight: true },
+      { n:"05", t:"THE RESULT", b:"72% said they'd wear it. 80% responded to the typography and photography fusion. Shiroi Black went from a letterform experiment to a defined visual identity informed by audience feedback.", img:"images/shiroi-folded.png", imgLight: true },
       { reflection: true, body: "This project made it clear that design doesn't always follow a straight path. The most interesting outcomes often come from following an instinct before knowing where it leads. Starting from personal interest rather than a defined brief meant trusting the process more than usual. There was no client to check in with, no brief to return to when things felt unclear. The direction had to come from the work itself. It also pushed me to move between disciplines in a way that felt unfamiliar at the time. Lettering, photography, 3D visualization, and layout had to function as one system, not just a collection of deliverables. Getting those pieces to feel cohesive required more iteration than expected. Looking back, this is one of the projects where I had the most creative freedom, and that made it harder in a different way. Having no constraints meant having to create your own. I learned more about how I work from this one than from most other projects." }
     ]
   },
@@ -4491,7 +4495,7 @@ function drawJittered(stroke) {
     images: [],
     sections: [
       { n:"01", t:"THE PREMISE", b:"Airplane coffee is almost always bad. Cabin pressure drops, humidity is low, and most coffee isn't designed for those conditions. CloudCup is built around that gap. It's a specialty coffee brand designed specifically for in-flight use, sold directly to airlines as a B2B program.", img:"images/cloudcup-premise.jpg", imgPosition:"center 52%" },
-      { n:"02", t:"WHERE IT STARTED", b:"Three years ago, I designed the first version of CloudCup. It was my first professional UX project.\n\nThe idea was there. Aviation-focused, premium coffee, a real niche. But the execution wasn't. It felt unfinished. This version is a redesign of that same project, but with a better understanding of what I'm actually doing.", vid:"https://player.vimeo.com/video/1180025616?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1" },
+      { n:"02", t:"WHERE IT STARTED", b:"Three years ago, I designed the first version of CloudCup. The aviation-focused concept was there, but the hierarchy and website structure needed more development. I revisited the same brief to bring the brand identity and the airline buyer’s journey into closer alignment.", vid:"https://player.vimeo.com/video/1180025616?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1" },
       { n:"03", t:"THE PROCESS", b:"The logo went through multiple directions before settling. It started with sketches, moved into a more geometric, low-poly direction, and then pulled back to something simpler that actually fit the idea. At the same time, the user journey helped define the structure of the site. Every section came from thinking through how an airline contact would move through the experience.\n\nThe process wasn't linear, but it became clear when something wasn't working.", flow: { caption:"Site architecture — procurement pitch flow", nodes: [ { label:"HERO", desc:"Altitude premise lands visually before a word is read" }, { label:"THE PROBLEM", desc:"Why cabin coffee fails. The science makes the case" }, { label:"THE BLENDS", desc:"Meridian, Summit, EspressoCloud. Each built for altitude" }, { label:"THE PROGRAM", desc:"5-step process from origin to tray table" }, { label:"THE PROOF", desc:"Partner airlines. Trust before the ask" }, { label:"THE ASK", desc:"Request a program. No cart, no friction" } ] } },
       { n:"04", t:"THE MARK & IDENTITY", b:"The brand needed to feel premium without relying on obvious aviation references, and technical without feeling cold. The logo pulls from a few ideas at once. It can read as the swirl of espresso, the ring a cup leaves, or the shape of an airplane.\n\nInstead of the usual navy and silver, the palette shifts to deep teal with gold for contrast and warmth. Different blends have their own tone, but still sit within the same system.", imgs:["images/cloudcup-espresso.png","images/cloudcup-summit.png","images/cloudcup-meridian.png"] },
       { n:"05", t:"THE DECISIONS", b:"The structure of the site made one thing clear. This isn't a store, it's a pitch.\n\nThere's no cart or checkout. The goal is to make a clear case for why an airline would choose CloudCup. Information is organized so it reads more like a designed argument than a list of features. Each section builds on the last, leading toward a single action.", vid:"https://player.vimeo.com/video/1180026122?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1" },
@@ -4522,7 +4526,7 @@ function drawJittered(stroke) {
         { title: "STARTING FROM A PLAYFUL EXPERIMENT", body: "The project did not begin as an accessibility tool. It started as a hand tracking test through a JJK-inspired interaction. The direction shifted once it became clear the same system could be applied to something real. Not starting with a fixed outcome made it easier to follow what actually worked. It also changed how the project evolved. Instead of forcing a solution early, the direction came from the interaction itself and what felt worth developing further." },
         { title: "KEEPING THE MODEL LOCAL", body: "Running everything on-device was a deliberate decision. Accessibility tools should work offline and protect user data. Requiring a server or account adds friction where it matters most. Keeping the model local also made the system feel more immediate. There is no delay from sending data elsewhere, which helps preserve the flow of interaction instead of interrupting it." },
         { title: "EXPANDING BEYOND SIGNING", body: "The original focus was supporting ASL as the main interaction. After feedback, especially thinking about university environments, the system expanded to include live translation and transcription. It became a flexible communication layer instead of a single-use tool. Different situations require different levels of support. The system needed to adapt instead of forcing one way of communicating across every context." },
-        { title: "NARROWING SCOPE TO BUILD TRUST", body: "Trying to recognize too many signs early on made everything unreliable. Reducing to a smaller set of gestures and getting those right mattered more than coverage. In a communication tool, reliability matters more than range. This shifted the focus from ambition to trust. A smaller system that works consistently is more useful than a larger one that fails unpredictably." }
+        { title: "NARROWING SCOPE TO BUILD TRUST", body: "Early attempts to recognize a wider set of signs made the prototype unreliable. I narrowed the scope to a smaller set of gestures so I could focus on consistency before expanding coverage. Testing with ASL users remains a next step before judging its usefulness in everyday communication." }
       ]},
       { n:"05", t:"NEXT STEPS", b:"Improving gesture recognition accuracy comes first. Expanding the system requires more training data and testing with ASL users. Mobile is the right platform. The interaction needs to be available in the moment. Wearable AR is the longer-term direction, allowing the system to sit in the background and activate when needed. The biggest gap is real-world testing across different environments and contexts." },
       { n:"06", t:"REFLECTION", b:"This project made me realize I was approaching communication too much like a system to optimize. At the start, the focus was on recognition, accuracy, and getting something to work. But ASL doesn't fit into that mindset. It's not just inputs and outputs, it's continuous, expressive, and shaped by context in ways that are hard to reduce. It forced me to step back and rethink what I was actually designing. Not just a tool that translates, but an interaction that respects how communication already happens." }
@@ -4571,10 +4575,10 @@ function drawJittered(stroke) {
       { n:"05", t:"KEY DECISIONS", b:"Some of the choices that shaped how ModuleCraft came together.", decisions: [
         { title: "PROTOTYPING EARLY AND OFTEN", body: "Prototyping became a key part of the process early on. With the flexibility of the 3D cutter, smaller versions were built first using thinner materials to test whether the structure would actually work. Changes could be made directly through the cutter, which made it easier to explore different iterations quickly. This helped catch structural issues early, before they became harder to fix. What didn't hold at a smaller scale wouldn't hold at full size, so this step made the later versions more reliable." },
         { title: "DESIGNING THROUGH INTERLOCKING PARTS", body: "The chair was designed to be easy to assemble, which meant limiting the system to interlocking pieces without adhesives or extra hardware. This created a challenge. The structure had to feel stable and solid, while still being simple enough to put together. The solution came from how the pieces connect. When the interlocking system is done correctly, the connections themselves create strength, rather than relying on added support." },
-        { title: "DESIGNING AROUND USER PRIORITIES", body: "The project was shaped by what users said they cared about most. Feedback showed that comfort and durability mattered more than other factors, so those became the main focus. This meant making compromises in other areas when needed. When a decision didn't directly align with that feedback, it had to be justified. Every choice had to connect back to what users valued, not just what looked interesting." },
+        { title: "DESIGNING AROUND USER PRIORITIES", body: "Comfort and durability ranked highest in the survey, so the chair needed to do more than assemble easily. Those priorities guided the proportions and the dense rib structure, which distributes weight across the frame. The cardboard constraint had to support those priorities as well as the project’s cost and recycling goals." },
         { title: "USING ERGONOMICS TO DEFINE FORM", body: "Comfort became a central requirement, which meant the shape couldn't be arbitrary. Ergonomic research guided the proportions, angles, and overall form of the chair. Measurements and adjustments were made to make sure the chair could actually be used, not just assembled. This helped balance the structural system with something that feels usable over time." }
       ]},
-      { n:"06", t:"THE RESULT", b:"A working chair built entirely from recycled corrugated cardboard. No screws, no glue, no tools. The interlocking rib structure holds adult body weight and flat-packs for storage. At $6.30 estimated production cost at scale, it reaches a price point nothing else in its category does.", imgs:["images/modulecraft-render.png","images/modulecraft-context.jpg"], imgsSquare:true },
+      { n:"06", t:"THE RESULT", b:"A working chair built entirely from recycled corrugated cardboard. No screws, no glue, no tools. The interlocking rib structure holds adult body weight and flat-packs for storage. Estimated production cost at scale: $6.30.", imgs:["images/modulecraft-render.png","images/modulecraft-context.jpg"], imgsSquare:true },
       { reflection: true, body: "This project made it clear how different it is to design something that has to physically work. Ideas that seem simple on paper quickly become more complex once they have to hold weight, stay stable, and be comfortable. Prototyping became an important tool because it was the only way to understand what actually worked and what didn't. Working with constraints also changed how decisions were made. Limiting the design to interlocking cardboard meant every choice had to contribute to structure and stability. There was less room for guesswork, and more focus on testing and adjusting. It also showed how important it is to design around real priorities. Feedback made it clear that comfort and durability mattered most, so those had to guide the direction, even when it meant making compromises. More than anything, this project was about turning an idea into something that can actually be used, not just something that works conceptually." }
     ]
   },
@@ -4762,7 +4766,7 @@ function drawJittered(stroke) {
         items: [
           { title: "Use the data that already existed",
             stance: "Made the receipt the input instead of the user.",
-            body: "Scanning every item by hand would turn Pantri into another chore, and the research was clear that maintenance is where existing systems die. Grocery stores already know what was purchased, so the receipt became the starting point. Pantri compares the final purchase against the original plan and only asks for input when something no longer adds up.",
+            body: "Shoppers already used lists, saved recipes, and mental reminders, but keeping those systems connected took work. Asking them to scan every item would add another task. That led us to use the receipt as the starting point: purchases could update the pantry, while differences between the shopping plan and the final purchase would prompt a quick review.",
             vid: "videos/pantri-moment-receipt.mp4",
             poster: "videos/pantri-moment-receipt-poster.jpg",
             aspect: "1 / 1",
@@ -4779,8 +4783,8 @@ function drawJittered(stroke) {
             body: "Pantri already understood ingredients and portions, so nutrition tracking looked like a free addition. It was cut. It introduced more sensitive information, more complexity, and a different relationship with food than the product was designed for. A future version could connect to dedicated nutrition platforms. Pantri did not need to become every food app at once.",
             img: "images/pantri-moment-scope.jpg",
             aspect: "16 / 9",
-            alt: "The explored nutrition tracking screen beside the home screen that shipped instead",
-            caption: "The version that was cut, next to the one that shipped" },
+            alt: "The explored nutrition tracking screen beside the home screen used in the prototype",
+            caption: "The version that was cut, next to the version used in the prototype" },
           { title: "If planning took too many steps, Pantri was cooked",
             stance: "Started users with a plan instead of an empty calendar.",
             body: "The first meal plan is generated for the user. They react to it rather than build it. During the week, completing a meal takes one small gesture, and Pantri handles the rest: updating the pantry, adjusting upcoming recipes and surfacing food that should be used soon. The complexity still exists. It just stops being the user's problem.",
@@ -4941,6 +4945,7 @@ function drawJittered(stroke) {
 
       { impact: true, n:"05", t:"IMPACT", tocLabel:"Impact",
         lead: "Nibble changed how people moved through the portfolio. The goal was not just to get people to open the assistant. It was to help them find more of the work that was relevant to them.",
+        sourceNote: "Metrics based on Vercel reporting.",
         metrics: [
           { v: "+44%", label: "increase in project pages viewed per visit, from 1.6 to 2.3, in the first four weeks live" },
           { v: "58% \u2192 43%", label: "drop in bounce rate after launch" },
@@ -6183,7 +6188,7 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       return '<div class="case-block case-impact">' +
         (s.n ? '<div class="case-num">' + s.n + '</div>' : '') +
         (s.t ? '<h3 class="case-title">' + s.t + '</h3>' : '') +
-        lead + metricsHtml + buildVimeoHTML(s.vimeo) + mediaHtml + stmtHtml + (extra || '') +
+        lead + metricsHtml + (s.sourceNote ? '<p class="impact-source">' + escHtml(s.sourceNote) + '</p>' : '') + buildVimeoHTML(s.vimeo) + mediaHtml + stmtHtml + (extra || '') +
       '</div>';
     }
 
