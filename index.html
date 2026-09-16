@@ -3511,7 +3511,11 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       </div>
     </div>
 
-    <!-- ROW 4: (7+5=12) — Velisar + flipsketch -->
+    <!-- BENCHED — the case studies behind these are being rewritten. The PROJECTS
+         entries below and the brain entries in lib/projects.js are intact; restore a
+         card here and drop its `hidden: true` flag to bring one back.
+         Row math if all of these return: (7+5=12) then (5+4+3=12).
+
     <div class="pcard reveal" data-project="velisar" data-id="visual" data-f="ux"
          data-mobile-bg="images/VelisarAlt.png"
          style="grid-column:span 7;">
@@ -3541,7 +3545,9 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       </div>
     </div>
 
-    <!-- ROW 5-6: Design Exploration feature + Shiroi Black & Juno Merced stacked -->
+    -->
+
+    <!-- ROW 4-5: Design Exploration feature + Shiroi Black & ModuleCraft stacked -->
     <div class="pcard feature reveal" data-project="throughlens" data-id="photo" data-f="visual"
          style="grid-column:span 8; grid-row:span 2;">
       <div class="card-bg" style="background-image:url(images/gw-hicollage.jpg); background-position: center 22%;"></div>
@@ -3564,6 +3570,20 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       </div>
     </div>
 
+    <div class="pcard reveal d2" data-project="modulecraft" data-id="lblue" data-f="ux visual" data-mobile-bg="images/modulecraft-mobile.jpg"
+         style="grid-column:span 4;">
+      <div class="card-bg" style="background-image:url(images/modulecraft-thumb.jpg);"></div>
+      <div class="card-ov"></div><div class="card-glitch"></div>
+      <div class="card-arr">↗&#xFE0E;</div>
+      <div class="card-info">
+        <div class="card-cat">Product Design</div>
+        <div class="card-name">MODULECRAFT</div>
+      </div>
+    </div>
+
+    <!-- BENCHED — see the note above. ModuleCraft moved up into the slot Juno Merced
+         held, at span 4 instead of its old span 5.
+
     <div class="pcard reveal d2" data-project="junomerced" data-id="illus" data-f="visual"
          style="grid-column:span 4;">
       <div class="card-bg" style="background-image:url(images/img_05.jpg); background-position: center 15%;"></div>
@@ -3572,18 +3592,6 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       <div class="card-info">
         <div class="card-cat">Concept Art</div>
         <div class="card-name">JUNO MERCED</div>
-      </div>
-    </div>
-
-    <!-- ROW 7: (5+4+3=12) — ModuleCraft + CloudCup + Signify AR -->
-    <div class="pcard reveal" data-project="modulecraft" data-id="lblue" data-f="ux visual" data-mobile-bg="images/modulecraft-mobile.jpg"
-         style="grid-column:span 5;">
-      <div class="card-bg" style="background-image:url(images/modulecraft-thumb.jpg);"></div>
-      <div class="card-ov"></div><div class="card-glitch"></div>
-      <div class="card-arr">↗&#xFE0E;</div>
-      <div class="card-info">
-        <div class="card-cat">Product Design</div>
-        <div class="card-name">MODULECRAFT</div>
       </div>
     </div>
 
@@ -3608,6 +3616,8 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
         <div class="card-name">SIGNIFY AR</div>
       </div>
     </div>
+
+    -->
 
   </div>
 
@@ -4999,7 +5009,7 @@ function hideLoader() {
     /* A shared link opens its case study once the reveal has finished */
     openProjectFromUrl();
     /* After page reveals, background-fetch the larger videos */
-    ['images/velisar-thumb.mp4','images/flipsketch-thumb.mp4','images/glitterbomb-thumb.mp4'].forEach(function(src) {
+    ['images/glitterbomb-thumb.mp4'].forEach(function(src) {
       fetch(src).then(function(res) {
         var reader = res.body.getReader();
         function drain() { return reader.read().then(function(c) { if (!c.done) return drain(); }); }
@@ -7247,14 +7257,15 @@ function projectFromPath() {
 function openProjectFromUrl() {
   if (!urlRoutingEnabled) return;
   var id = projectFromPath();
-  if (!id) {
-    /* A retired or mistyped project link still lands on the grid, but the
-       stale address is tidied away so the page reads as the homepage. */
+  var card = id && document.querySelector('.pcard[data-project="' + id + '"]');
+  if (!card) {
+    /* A retired, benched or mistyped project link still lands on the grid, but
+       the stale address is tidied away so the page reads as the homepage. A
+       benched project keeps its PROJECTS entry, so the id resolves even though
+       no card is on the page — the card is what decides if it is reachable. */
     if (location.pathname !== '/') history.replaceState(null, '', '/');
     return;
   }
-  var card = document.querySelector('.pcard[data-project="' + id + '"]');
-  if (!card) return;
   modalReturnPosition = { x: 0, y: 0 };
   history.replaceState({ portfolio: { view: 'projects', position: modalReturnPosition } }, '', '/');
   card.click();
