@@ -3480,7 +3480,9 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
     <!-- ROW 3: (5+4+3=12) ordered by impressiveness -->
     <div class="pcard reveal" data-project="nibble" data-id="cyan" data-f="ux"
          style="grid-column:span 5;">
-      <div class="card-bg"></div>
+      <video class="card-bg" autoplay muted loop playsinline preload="none"
+             src="images/nibble-home.mp4" poster="images/nibble-home-poster.jpg"
+             style="object-position:top;"></video>
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
@@ -5590,7 +5592,7 @@ if (isTouchDevice) {
 
 function setVideoSpeed(v) {
   var src = v.src || v.getAttribute('src') || '';
-  if (src.indexOf('callisto') !== -1 || src.indexOf('shiroi') !== -1) {
+  if (src.indexOf('callisto') !== -1 || src.indexOf('shiroi') !== -1 || src.indexOf('nibble-home') !== -1) {
     v.playbackRate = 1;
   } else if (src.indexOf('velisar') !== -1) {
     v.playbackRate = 1; /* already 1.5x from processing */
