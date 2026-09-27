@@ -292,10 +292,12 @@ nav {
 
 /* Name glitch — two clones of the name, each clipped to a horizontal band and
    torn sideways. Stepped rather than tweened: a glitch that eases is just a
-   wipe, so every keyframe snaps and holds for its slice (1% of 9s = 90ms).
-   One burst per loop rather than two, on a long cycle with small offsets, so
-   it reads as an occasional signal fault instead of a tic. The two bands fire
-   ~45ms apart so the name shears rather than sliding as one block. */
+   wipe, so every keyframe snaps and holds for its slice (0.9% of 9s = 80ms).
+   The tear itself is full strength — the hard variant of the original pair,
+   up to 28px and full opacity — because anything softer stops reading as a
+   glitch. What changed is how often it fires: one burst per 9s loop instead
+   of two per 4s. The two bands fire ~40ms apart so the name shears rather
+   than sliding as one block. */
 .lk-glitch { opacity: 0; }
 .lk-glitch-a {
   fill: var(--accent3);
@@ -308,14 +310,16 @@ nav {
   animation: lkg2 9s steps(1, end) infinite;
 }
 @keyframes lkg1 {
-  0%, 28%, 100% { transform: none;                   opacity: 0; }
-  26%           { transform: translate(-7px, -1px);  opacity: .5; }
-  27%           { transform: translate(4px, 1px);    opacity: .3; }
+  0%, 28.7%, 100% { transform: none;                   opacity: 0; }
+  26%             { transform: translate(-26px, -2px); opacity: 1; }
+  26.9%           { transform: translate(16px, 1px);   opacity: .9; }
+  27.8%           { transform: translate(-7px, 0);     opacity: .6; }
 }
 @keyframes lkg2 {
-  0%, 28.5%, 100% { transform: none;                  opacity: 0; }
-  26.5%           { transform: translate(8px, 1px);   opacity: .5; }
-  27.5%           { transform: translate(-5px, 0);    opacity: .3; }
+  0%, 29.2%, 100% { transform: none;                   opacity: 0; }
+  26.45%          { transform: translate(28px, 2px);   opacity: 1; }
+  27.35%          { transform: translate(-17px, -1px); opacity: .9; }
+  28.25%          { transform: translate(8px, 0);      opacity: .6; }
 }
 @media (prefers-reduced-motion: reduce) {
   .lk-glitch { animation: none; opacity: 0; }
@@ -3847,7 +3851,7 @@ const PROJECTS = {
        Drop in a real path later; no code change needed.
   ═══════════════════════════════════════════════════════════ */
   herway: {
-    contribution: "Designed the user flows, interface, and interactive prototype for community-based transit support.",
+    contribution: "Designed the user flows, interface, and interactive prototype for a community-based transit app. Translated rider insights into route comparisons and community features that help women consider comfort and social presence alongside travel time.",
     tag: "UX / Interaction Design",
     title: "HER—WAY",
     duration: "16 Weeks",
@@ -3873,7 +3877,7 @@ const PROJECTS = {
 
       { context: true, n:"01", t:"WHY THIS EXISTS", tocLabel:"Why this exists",
         lead: "Public transit apps treat every commute as if it were the same. It isn't.",
-        body: "For low-income women, the ride itself is where the risk lives. Waiting on a dark corner. Skipping a route because it feels empty. Taking the long way home because it feels seen. Most transit apps optimize for the fastest path. None of them optimize for who is actually on the bus.",
+        body: "In LA Metro’s 2019 study, 60% of female riders surveyed felt safe riding during the day, compared with just 20% at night. Women surveyed identified safety concerns as the top barrier to riding transit, extending beyond the ride to waiting at stops and reaching stations.\n\nThat gap gives HerWay its starting question: how could a transit app help women weigh comfort alongside travel time? Rider interviews later shaped the community features and route comparisons.\n\nSource: <a href=\"https://thesourcearchives.metro.net/2019/09/19/metro-releases-understanding-how-women-travel-report/\" target=\"_blank\" rel=\"noopener\">LA Metro — Understanding How Women Travel (2019)</a>.",
         why: "Ignoring who moves through a system means ignoring who can't. Safety is not a feature you bolt onto a map. It is the map, for anyone who was never the default rider.",
         img: "images/herway-transit.jpg"
       },
@@ -3939,7 +3943,7 @@ const PROJECTS = {
         items: [
           { title: "Community over surveillance",
             stance: "Chose social presence instead of police integration.",
-            body: "The obvious safety features (panic buttons, direct police alerts) depend on institutions many riders already distrust. The research was quieter but clearer: fear on transit is shaped less by incidents and more by absence. Being surrounded by people who share the same concern turned out to matter more than a button that summons an authority. The community stopped being a feature and became the entire surface." },
+            body: "Riders described discomfort in empty spaces and hesitation around police-linked alerts. Those conversations shifted the design toward the presence of other riders: who shared the route, where people were gathering, and how to reach the community. Social presence became central to the experience, with the aim of helping riders feel less alone during the commute." },
           { title: "Comfort routing, not shortest path",
             stance: "Broke the category default that faster equals better.",
             body: "Riders described taking longer routes when those routes felt more comfortable. That shaped the route panel: street activity and the presence of other riders became part of the comparison, alongside travel time. The fastest option stayed visible, but speed alone no longer determined the recommendation." },
@@ -3948,7 +3952,7 @@ const PROJECTS = {
             body: "Transit apps usually funnel riders through one path: search, select, ride. HerWay has plenty of screens, so the reflex was to add hierarchy. The call was to keep every core function reachable in one tap and let the rider decide which one is the front door. Redundancy was cut. Choice was preserved." },
           { title: "Local-only ID verification",
             stance: "Gated the community without becoming another data hoard.",
-            body: "For community trust to hold, entry needed a real barrier. The instinct was to hand verification off to a vendor. The call was to run document and face matching on-device, drop the result, and never send anything upstream. The community stays gated. The user stays uncatalogued." }
+            body: "The community needed a way to establish trust without collecting more personal information than necessary. The proposed approach was on-device ID and face matching, keeping documents and images on the user’s device. The prototype explored the verification flow; technical feasibility and data handling would need validation before implementation." }
         ]
       },
 
@@ -3969,7 +3973,7 @@ const PROJECTS = {
           { v: "16",  label: "Weeks of field research and testing" },
           { v: "10",  label: "Rider interviews across three lines" }
         ],
-        statement: "The point was not a launch. It was proving that safety-first navigation is a category, not a feature bolted on top of a map. Every product I take on next starts with the question this project started with: who is this actually for, and who does the default already fail?"
+        statement: "The prototype explored how route choice changes when comfort and community sit alongside travel time. The project changed how I frame navigation problems: whose priorities shape the recommendation, and what gets overlooked when speed is the default?"
       },
 
       { reflection: true, n:"09", tocLabel:"Reflection",
@@ -3986,7 +3990,7 @@ const PROJECTS = {
     ]
   },
   resources: {
-    contribution: "Led design across a cross-functional team with two designers. Designed the interface and presentation materials within Snapchat’s existing visual language.",
+    contribution: "Led design and created the interface within Snapchat’s visual language. Over three weeks, collaborated with engineering and marketing to turn the concept into a functional prototype and helped develop presentation materials for a live presentation to 300+ Snap employees.",
     tag: "UX / Product Design - Prototyping",
     title: "RESOURCES ON SNAPCHAT",
     duration: "Summer 2026 - 3-Week Sprint",
@@ -4164,7 +4168,7 @@ const PROJECTS = {
     ]
   },
   pixelgame: {
-    contribution: "Created the gameplay, UX, artwork, and animations. Built the browser game with AI coding assistance.",
+    contribution: "Designed the gameplay systems and interface, created the original artwork and frame-by-frame animations, and built the browser game with AI coding assistance. Connected movement, combat, and progression around a single dash mechanic, with environmental storytelling that players can discover at their own pace.",
     tag: "Game Design - UX / Interaction - Illustration - World Building",
     title: "CALLISTO'S RETRIBUTION",
     duration: "Ongoing",
@@ -4212,8 +4216,8 @@ const PROJECTS = {
         lead: "One run is deliberately simple. Five steps carry the entire game, and each one assumes the player will end up somewhere different than last time.",
         items: [
           { label:"Step 01 - Enter a floor",
-            title:"Every floor is its own checkpoint",
-            caption:"Each run moves upward through a sequence of floors.\n\nEvery floor creates a small checkpoint with its own encounter, environment or decision before the player continues.",
+            title:"Every floor creates a moment to rest",
+            caption:"Each run climbs through a sequence of short floors. Moving between them gives the player a brief pause before the next encounter, upgrade choice, or discovery.",
             vid: "videos/callisto-flow-01.mp4",
             poster: "videos/callisto-flow-01-poster.jpg",
             aspect: "1 / 1",
@@ -4254,7 +4258,7 @@ const PROJECTS = {
       },
 
       { insights: true, n:"04", t:"UNDERSTANDING THE LOOP", tocLabel:"Understanding the loop",
-        lead: "Once the core direction was clear, games in similar genres became more than references. Roguelikes, arcade platformers and other fast repeatable games were played while paying attention to the systems underneath them: what made another run feel worth starting, when repetition became frustrating, how upgrades changed decisions, and how much downtime a fast game could handle before losing momentum.",
+        lead: "Roguelikes and arcade platformers became references for specific design questions: what makes another run worth starting, when does repetition become frustrating, and how much downtime breaks the rhythm? Those questions shaped Callisto’s focus on a versatile dash, changing upgrade choices, and short floors that give players room to breathe.",
         items: [
           { k:"The question that changed",
             v:"Instead of asking whether a game was simply fun, the questions became specific. Why did this encounter work? What made this upgrade actually change how I played? Why did dying make me want another run instead of making me stop?" },
@@ -4286,10 +4290,10 @@ const PROJECTS = {
 
           { title: "The genre had to make that idea sustainable",
             stance: "Used the roguelike structure to keep a large world playable.",
-            body: "Choosing games solved the storytelling problem and immediately created another one. How do you make a massive world playable without trying to build a massive game?\n\nA traditional narrative platformer would make every new part of the story depend on another level, sequence or mechanic. Retribution needed something more reusable. Repeated runs meant the same systems and spaces could keep creating different experiences, and it kept the project light enough to stay browser playable.\n\nMore importantly, the tone fit. Callisto was supposed to feel quick, aggressive and unforgiving. Death, repetition and pushing slightly further each time already belonged in that world.\n\nThe roguelike was not a genre added onto Callisto. It became the structure that made Callisto possible." },
+            body: "Choosing a game created another challenge: how could one person make a large world playable without building every part of it at once?\n\nRepeated runs let the same spaces and mechanics support different builds, encounters, and discoveries. That gave the world room to grow while keeping the scope manageable as a solo project.\n\nThe structure also fit Callisto’s tone. Death, repetition, and pushing slightly further each time belonged in a world meant to feel quick, aggressive, and unforgiving." },
 
           { title: "Repetition only works if the basic action keeps getting better",
-            stance: "Built the whole game around one input.",
+            stance: "Made the dash the foundation of movement and combat.",
             body: "A roguelike asks someone to repeat the same fundamental interactions many times. That made the core movement more important than adding more mechanics.\n\nThe dash attacks. The dash moves. The dash escapes. The dash crosses gaps. Once movements start chaining together, it becomes the foundation for combos.\n\nA new player mostly uses it to stay alive. An experienced player uses the exact same input to control the entire room. The mechanic never needs to become harder to understand. Its depth comes from how much better the player becomes at using it.",
             vid: "videos/callisto-moment-dash.mp4",
             poster: "videos/callisto-moment-dash-poster.jpg",
@@ -4659,7 +4663,7 @@ function drawJittered(stroke) {
     ]
   },
   pantri: {
-    contribution: "Led UX and interface design across onboarding, meal planning, shopping, pantry tracking, and cooking.",
+    contribution: "Led UX and interface design across onboarding, meal planning, shopping, pantry tracking, and cooking. Connected these flows into an experience that adapts when purchases change or meals are skipped, with a focus on reducing manual tracking and keeping users in control.",
     tag: "Product Design - AI Experience - Smart Packaging",
     title: "PANTRI",
     duration: "6 Weeks",
@@ -4802,7 +4806,7 @@ function drawJittered(stroke) {
             caption: "The version that was cut, next to the version used in the prototype" },
           { title: "If planning took too many steps, Pantri was cooked",
             stance: "Started users with a plan instead of an empty calendar.",
-            body: "The first meal plan is generated for the user. They react to it rather than build it. During the week, completing a meal takes one small gesture, and Pantri handles the rest: updating the pantry, adjusting upcoming recipes and surfacing food that should be used soon. The complexity still exists. It just stops being the user's problem.",
+            body: "User testing showed that Pantri needed to handle more of the adjustments when shopping didn’t follow the plan. Skipped items, extra purchases, and changing quantities became inputs for the system to adapt to, without adding work for the user. Pantri starts with a suggested meal plan and proposes changes based on actual purchases. Users can review and adjust those suggestions without rebuilding the week themselves.",
             vid: "videos/pantri-moment-plan.mp4",
             poster: "videos/pantri-moment-plan-poster.jpg",
             aspect: "1 / 1",
@@ -4824,14 +4828,14 @@ function drawJittered(stroke) {
       },
 
       { artifacts: true, n:"08", t:"MAKING THE STICKER", tocLabel:"The sticker",
-        lead: "The sticker helps shoppers choose produce based on when they plan to eat it, and gives Pantri a better freshness estimate once the fruit gets home.",
+        lead: "The sticker was designed to be useful on its own, helping shoppers judge ripeness even without the app. Pantri complements that physical cue by connecting purchases to meal planning and cooking.",
         items: [
           { img:"[STICKER 01 — 4:3: early sketches and physical sticker prototypes on fruit]",
             label:"Sketches and physical prototypes",
             caption:"Early exploration of the sticker format, placement and how the ripeness stages read at arm's length in a store." },
           { img:"[STICKER 02 — 4:3: color explorations, focus group activity and color-vision accessibility tests]",
             label:"Color and accessibility testing",
-            caption:"Focus groups compared possible palettes and tried to place the colors in order. The question was what each color communicated, not which option looked best. The final direction stayed inside the limits of the material while keeping each stage distinguishable for people with color-vision deficiencies." }
+            caption:"Focus groups compared possible palettes and tried to place the colors in order. Testing with people with color vision deficiencies helped us understand where those differences were harder to read. The sensing technology limited the available colors, so the challenge was finding a sequence that made sense to shoppers while remaining distinguishable within those constraints." }
         ]
       },
 
