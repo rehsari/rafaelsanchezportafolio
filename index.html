@@ -462,9 +462,32 @@ section { padding: 100px 48px; position: relative; z-index: 2; }
   position: relative; overflow: hidden; cursor: pointer;
   display: flex; flex-direction: column; justify-content: flex-end;
   grid-column: span 4; /* default */
+
+  /* ── Card lockup scale ──────────────────────────────────────────────
+     --card-title is the single root and it is the SAME on every card,
+     feature or not. A grid of nine tiles reads as one set only if the
+     titles are one size; varying the title by card size made the bento
+     look like three different components.
+
+       sub   = title ÷ 2φ²  (= φ³+1 = 5.236)
+       lede  = sub          (1:1, the gap equals the text it separates)
+       pad   = sub × φ²
+
+     2φ² rather than φ³ because at φ³ the subheader grew large enough to
+     wrap on the narrow cards. At 5.236 the longest line still clears the
+     narrowest card (334px) on one line.
+
+     Padding is derived from the sub, not the title: the lockup's margin
+     should scale with its smallest element, otherwise it balloons. */
+  --phi: 1.618;
+  --phi2: 2.618;
+  --phi3: 4.236;
+  --card-title: clamp(26px, 3.2vw, 50px);
+  /* max() is a legibility floor, not a design choice: below ~8px this
+     face stops being readable at 45% opacity no matter what phi says. */
+  --card-sub: max(8px, calc(var(--card-title) / 5.236));
+  --card-pad: calc(var(--card-sub) * var(--phi2));
 }
-/* Larger title on feature-sized cards */
-.pcard.feature .card-name { font-size: clamp(36px, 4.2vw, 68px); }
 .pcard[data-project="shiroiblock"] .card-bg { background-position: center center; }
 /* Glitterbomb's character sits at ~66% across the source frame, not dead center
    and not flush right. Anchoring at 85% trims the empty right edge and keeps her
@@ -569,7 +592,8 @@ video::-webkit-media-controls-panel { display: none !important; }
    other caps instead of towering above them like it does at baseline. */
 .pcard .card-legal {
   position: absolute;
-  top: 20px; left: 22px;
+  /* Same inset as .card-info so the legal line sits on the lockup's margin. */
+  top: var(--card-pad); left: var(--card-pad);
   z-index: 3;
   font-family: var(--font-mono);
   font-size: 8px;
@@ -587,7 +611,7 @@ video::-webkit-media-controls-panel { display: none !important; }
   display: inline-block;
 }
 
-.card-info { position: relative; z-index: 2; padding: clamp(20px, 1.45vw, 30px) clamp(22px, 1.6vw, 34px); }
+.card-info { position: relative; z-index: 2; padding: var(--card-pad); }
 .card-cat {
   font-family: var(--font-mono); font-size: clamp(8px, 0.58vw, 11px); letter-spacing: 0.3em;
   text-transform: uppercase; color: rgba(255,255,255,0.45);
@@ -596,12 +620,15 @@ video::-webkit-media-controls-panel { display: none !important; }
 .card-cat::before { content: ''; display: inline-block; width: 5px; height: 1px; background: currentColor; }
 .card-name {
   font-family: var(--font-display);
-  font-size: clamp(26px, 3.2vw, 50px);
+  font-size: var(--card-title);
   line-height: 0.9; color: white;
   transform: translateY(6px);
   transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
 }
 .pcard:hover .card-name { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .card-name { transform: none; transition: none; }
+}
 
 .card-arr {
   position: absolute; top: 18px; right: 18px; z-index: 2;
@@ -1727,6 +1754,36 @@ video::-webkit-media-controls-panel { display: none !important; }
   background: rgba(8,8,8,0.6); backdrop-filter: blur(6px);
 }
 
+/* Sticker hero: <shiroi-sticker> resting on the topo paper.
+   The component is a die-cut object, not a cover image, so this hero centres it
+   instead of cropping it. No object-fit, no crop. */
+.modal-hero--sticker {
+  display: grid;
+  place-items: center;
+  padding: 4%;
+  background-color: #ecebe8;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.modal-hero--sticker shiroi-sticker {
+  /* The sticker is 1.4549:1 and the padded 16:9 box is 1.907:1, so height is
+     always the binding constraint. 68% of the content width lands the sticker
+     at ~89% of the content height: as large as it can go while still leaving
+     the 16deg pointer tilt and its drop shadow room to travel before they
+     clip at the frame. Percent, not px, because the hero is already capped by
+     the modal body's 1000px max-width. */
+  width: 68%;
+  /* The canvas is the interactive surface; without this the grid item can
+     report a stale width to the component's ResizeObserver on first paint. */
+  min-width: 0;
+}
+/* The caption sits on light paper here, so the dark-on-dark treatment inverts. */
+.modal-hero--sticker .modal-hero-caption {
+  color: rgba(10,10,10,0.75);
+  background: rgba(236,235,232,0.72);
+}
+
 /* Concept hero — designed cover (no photo yet) that uses the project accent */
 .modal-hero--concept {
   background: var(--bg);
@@ -2254,7 +2311,12 @@ footer {
   .hero-lockup { max-width: 100%; }
   .projects-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 260px; }
   .pcard { grid-column: span 1!important; grid-row: span 1!important; }
-  .pcard .card-name { font-size: clamp(18px, 3.5vw, 32px); }
+  /* Re-root the scale and the rest of the lockup follows: subheader, lede
+     and padding are all derived from --card-title. Every card is the same
+     half-width tile here, so every card keeps the same root. */
+  .pcard { --card-title: clamp(18px, 3.5vw, 32px); }
+  /* No hover on touch, so the lockup rests in its final position. */
+  .pcard .card-name { transform: none; }
   #about { grid-template-columns: 1fr; }
   .about-right { display: none; }
   .divider { margin: 0 24px; }
@@ -2267,7 +2329,8 @@ footer {
 /* ── Mobile only (≤640px) ── */
 @media(max-width:640px){
   .projects-grid { grid-template-columns: 1fr; grid-auto-rows: 300px; }
-  .pcard .card-name { font-size: clamp(22px, 7vw, 36px); }
+  /* Full-width single column, so the root can climb back up. */
+  .pcard { --card-title: clamp(22px, 7vw, 36px); }
   .modal-inner { width: 100%; border-radius: 0; }
 }
 
@@ -3447,7 +3510,7 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
          intentionally minimal (under wraps); see PROJECTS.resources below. -->
     <div class="pcard feature reveal" data-project="resources" data-id="snapyellow" data-f="ux"
          style="grid-column:span 8; grid-row:span 2;">
-      <div class="card-bg" style="background-image:url(images/SnapR_Thumbnail.png); background-size:contain; background-position:center; background-repeat:no-repeat;"></div>
+      <div class="card-bg" style="background-image:url(images/SnapR_Thumbnail.png); background-size:contain; background-position:center 38%; background-repeat:no-repeat;"></div>
       <div class="card-ov"></div><div class="card-glitch"></div>
       <div class="card-legal"><span class="cr">©</span>2026 Snap Inc.</div>
       <div class="card-arr">↗&#xFE0E;</div>
@@ -3505,7 +3568,7 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
       <div class="card-arr">↗&#xFE0E;</div>
       <div class="card-info">
         <div class="card-cat">UX / Interaction</div>
-        <div class="card-name">HER—WAY</div>
+        <div class="card-name">HER-WAY</div>
       </div>
     </div>
 
@@ -3707,10 +3770,10 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
 </section>
 
 <footer>
-  <div class="fcopy">© 2026 Rafael C. Sanchez — All Rights Reserved</div>
+  <div class="fcopy">© 2026 Rafael C. Sanchez - All Rights Reserved</div>
   <div class="fcopy">UX - Product - 3D - Visual Identity</div>
   <div class="fcredits">
-    Photo Credits &mdash;
+    Photo Credits -
     <a href="https://unsplash.com/@art_almighty" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">Art Almighty</a>,
     <a href="https://unsplash.com/@val_mar" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">Val Mar</a>,
     <a href="https://unsplash.com/@efimborisov" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">Efim Borisov</a>,
@@ -3721,7 +3784,7 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
     <a href="https://unsplash.com/@markusspiske" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">Markus Spiske</a>,
     <a href="https://unsplash.com/@patrickkonior" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">Patrick Konior</a>,
     <a href="https://unsplash.com/@brookelark" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">Brooke Lark</a>
-    &mdash; via <a href="https://unsplash.com" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">Unsplash</a>
+    via <a href="https://unsplash.com" target="_blank" rel="noopener" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px;">Unsplash</a>
   </div>
 </footer>
 
@@ -3853,7 +3916,7 @@ const PROJECTS = {
   herway: {
     contribution: "Designed the user flows, interface, and interactive prototype for a community-based transit app. Translated rider insights into route comparisons and community features that help women consider comfort and social presence alongside travel time.",
     tag: "UX / Interaction Design",
-    title: "HER—WAY",
+    title: "HER-WAY",
     duration: "16 Weeks",
     role: "UX / UI Designer",
     team: "Solo",
@@ -3869,7 +3932,7 @@ const PROJECTS = {
     },
     hero: {
       img: "images/HerThumb.jpeg",
-      alt: "HER—WAY cover",
+      alt: "HER-WAY cover",
       badge: "Concept - 2025"
     },
     images: [],
@@ -4381,6 +4444,16 @@ const PROJECTS = {
     context: "Visual Identity",
     accent: "linear-gradient(90deg,#cc0077,#ff1aaa)",
     caseStudy: "https://drive.google.com/file/d/1Kyq5KmWPhGCBE_99pdqa5MKTmwUIqiG3/preview",
+    /* The mark as a physical object. A holographic die-cut of the lettering,
+       tilting to the pointer over the topo paper, which is the closest the page
+       gets to the "treat the work as an object" shift described in section 03. */
+    hero: {
+      sticker: "images/shiroi-sticker.svg",
+      topo: "images/shiroi-topo.jpg",
+      finish: "rare",
+      rotate: -3,
+      alt: "Shiroi Black lettering as a holographic die-cut sticker"
+    },
     images: [],
     sections: [
       { n:"01", t:"THE CONCEPT", b:"Shiroi means white in Japanese. Paired with Black, the name itself is the identity, built entirely on contrast. A fashion brand where blackletter typography meets atmospheric photography, designed to be worn.", img:"images/shiroi-logo.png", imgContain: true },
@@ -6253,6 +6326,21 @@ document.querySelectorAll('.pcard').forEach(function(card) {
     function buildHeroHTML(hero) {
       if (!hero) return '';
       var caption = hero.caption ? '<div class="modal-hero-caption">' + hero.caption + '</div>' : '';
+      /* Sticker hero — the <shiroi-sticker> web component instead of a flat cover.
+         The element is written now and the module is imported after the modal
+         paints (see the import beside the #mmeta relocation); until it upgrades,
+         an unknown tag is simply an empty inline box, so nothing shifts. */
+      if (hero.sticker) {
+        var topo = hero.topo ? ' style="background-image:url(' + hero.topo + ')"' : '';
+        return '<div class="modal-hero modal-hero--sticker"' + topo + '>' +
+          '<shiroi-sticker src="' + hero.sticker + '"' +
+            ' finish="' + (hero.finish || 'rare') + '"' +
+            (hero.rotate ? ' rotate="' + hero.rotate + '"' : '') +
+            (hero.secret === false ? '' : ' secret-finishes') +
+            ' aria-label="' + escHtml(hero.alt || '') + '"></shiroi-sticker>' +
+          caption +
+        '</div>';
+      }
       if (hero.vid && !isSlot(hero.vid)) {
         var vidBadge = hero.badge ? '<div class="hero-concept-badge">' + escHtml(hero.badge) + '</div>' : '';
         return '<div class="modal-hero"><video autoplay muted loop playsinline><source src="' + hero.vid + '" type="video/mp4"></video>' + vidBadge + caption + '</div>';
@@ -6680,6 +6768,17 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       heroEl.insertAdjacentElement('afterend', mmetaEl);
     } else if (mmetaEl) {
       mmetaEl.classList.remove('modal-meta--below-hero');
+    }
+
+    /* Sticker hero needs its custom element defined. Imported here rather than
+       in <head> so the WebGL component only costs anything on the one project
+       that uses it. The module self-registers and is a no-op on re-import, so
+       reopening the modal is free. If it fails the tag stays inert and the
+       hero is just the topo panel. */
+    if (msections.querySelector('shiroi-sticker')) {
+      import('./js/shiroi-sticker.js').catch(function (err) {
+        console.warn('[shiroi-sticker] could not load', err);
+      });
     }
 
     /* ── Template 2.5: sidebar TOC + scroll-spy ── */

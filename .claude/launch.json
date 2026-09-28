@@ -8,6 +8,12 @@
       "port": 8765
     },
     {
+      "name": "portfolio-alt",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["-y", "http-server", ".", "-p", "8771", "-c-1"],
+      "port": 8771
+    },
+    {
       "name": "desktop",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["-y", "http-server", "/Users/rafaelcarbajal/Desktop", "-p", "8790", "-c-1"],
