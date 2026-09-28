@@ -3372,18 +3372,29 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
              beneath the name a touch. -->
         <svg class="lockup" viewBox="0 0 927.27 382.99" aria-hidden="true" focusable="false">
           <defs>
-            <!-- Chrome: bright top, dark horizon line, bright floor. The horizon
-                 drifts slowly up and down. Coordinates are userSpaceOnUse and match
-                 the outline paths' own space (y 152-278), so the ramp lands on the
-                 row wherever .lk-art is translated to. -->
-            <linearGradient id="rs-chrome" gradientUnits="userSpaceOnUse" x1="0" y1="152" x2="0" y2="278">
-              <stop offset="0" stop-color="#f4f7fb"/>
-              <stop offset="0.28" stop-color="#c9d0dc"/>
-              <stop offset="0.47" stop-color="#7e889a"/>
-              <stop offset="0.55" stop-color="#363e4e"/>
-              <stop offset="0.64" stop-color="#aab4c5"/>
-              <stop offset="0.84" stop-color="#e6ebf2"/>
-              <stop offset="1" stop-color="#858fa1"/>
+            <!-- Chrome, matched to the shader rather than eyeballed. Three numbers
+                 are copied out of liquidMetalFragmentShader so the two rows read as
+                 the same material:
+
+                   color1 = vec3(.98,.98,1.)  -> #fafaff   the highlight
+                   color2 = vec3(.1,.1,.1+)   -> #1a1a1a   the shadow, bluer bottom-right
+                   cycleWidth = u_repetition   = 2         stripe cycles across the row
+
+                 So the ramp runs the full white-to-near-black range the shader uses
+                 (a shallower ramp is what made this row look like a different, softer
+                 metal) and repeats twice instead of once. The stop pattern below is
+                 getColorChanges()'s profile: a tight bright/dark/bright/dark flicker,
+                 then one long fall to the shadow. spreadMethod="repeat" over half the
+                 row height gives the second cycle, and lets the drift below wrap
+                 seamlessly instead of sliding a lone horizon off the end. -->
+            <linearGradient id="rs-chrome" gradientUnits="userSpaceOnUse" x1="0" y1="152" x2="0" y2="215" spreadMethod="repeat">
+              <stop offset="0" stop-color="#fafaff"/>
+              <stop offset="0.10" stop-color="#232833"/>
+              <stop offset="0.17" stop-color="#eef3fb"/>
+              <stop offset="0.24" stop-color="#1b1f28"/>
+              <stop offset="0.32" stop-color="#ffffff"/>
+              <stop offset="0.62" stop-color="#8d97a8"/>
+              <stop offset="1" stop-color="#1a1d26"/>
               <animateTransform attributeName="gradientTransform" type="translate" values="0 -12; 0 12; 0 -12" dur="7s"
                 calcMode="spline" keyTimes="0; 0.5; 1" keySplines="0.45 0 0.55 1; 0.45 0 0.55 1" repeatCount="indefinite"/>
             </linearGradient>
@@ -3479,10 +3490,24 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
                  too thin to hold one, so it flickered. The paths now live in <defs>
                  and this group draws them itself — two offset colour fringes, the
                  chrome ramp, then an iridescent wash. Same coordinates as before, so
-                 the row does not move. -->
+                 the row does not move.
+
+                 The fringes are the shader's chromatic dispersion done by hand. It
+                 samples the same stripe three times at different phases:
+
+                   stripe_r = fract(direction + dispersionRed)   shiftRed  1    /20
+                   stripe_g = fract(direction)                   unshifted
+                   stripe_b = fract(direction - dispersionBlue)  shiftBlue 0.28 /20
+
+                 Two things follow. Red and blue move in opposite directions, hence
+                 the mirrored transforms. And red is shifted 1/0.28 = 3.6x further
+                 than blue, so the row should be warm-forward with only a thin cool
+                 counter-edge. Equal-weight fringes were reading as a rainbow the
+                 shader never actually makes; the offsets and opacities below hold
+                 that 0.28 ratio. -->
             <g class="rs-designer">
-              <use href="#rs-outline" fill="#56d8ff" opacity="0.45" transform="translate(-1.1 0)"/>
-              <use href="#rs-outline" fill="#ff6a3d" opacity="0.45" transform="translate(1.1 0.5)"/>
+              <use href="#rs-outline" fill="#7ec4ff" opacity="0.3" transform="translate(-0.45 0)"/>
+              <use href="#rs-outline" fill="#ff5a2e" opacity="0.5" transform="translate(1.6 0.45)"/>
               <use href="#rs-outline" fill="url(#rs-chrome)"/>
               <use href="#rs-outline" fill="url(#rs-irid)" opacity="0.18"/>
             </g>
