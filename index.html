@@ -3377,23 +3377,23 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
                  the outline paths' own space (y 152-278), so the ramp lands on the
                  row wherever .lk-art is translated to. -->
             <linearGradient id="rs-chrome" gradientUnits="userSpaceOnUse" x1="0" y1="152" x2="0" y2="278">
-              <stop offset="0" stop-color="#ffffff"/>
-              <stop offset="0.32" stop-color="#e6ecf5"/>
-              <stop offset="0.5" stop-color="#9aa5b8"/>
-              <stop offset="0.55" stop-color="#586273"/>
-              <stop offset="0.63" stop-color="#dde5f2"/>
-              <stop offset="0.86" stop-color="#f8faff"/>
-              <stop offset="1" stop-color="#aab5c8"/>
+              <stop offset="0" stop-color="#f4f7fb"/>
+              <stop offset="0.28" stop-color="#c9d0dc"/>
+              <stop offset="0.47" stop-color="#7e889a"/>
+              <stop offset="0.55" stop-color="#363e4e"/>
+              <stop offset="0.64" stop-color="#aab4c5"/>
+              <stop offset="0.84" stop-color="#e6ebf2"/>
+              <stop offset="1" stop-color="#858fa1"/>
               <animateTransform attributeName="gradientTransform" type="translate" values="0 -12; 0 12; 0 -12" dur="7s"
                 calcMode="spline" keyTimes="0; 0.5; 1" keySplines="0.45 0 0.55 1; 0.45 0 0.55 1" repeatCount="indefinite"/>
             </linearGradient>
             <!-- Iridescent tint that drifts slowly across the row -->
             <linearGradient id="rs-irid" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="620" y2="0" spreadMethod="reflect">
-              <stop offset="0" stop-color="#7fe3ff"/>
-              <stop offset="0.3" stop-color="#8ea6ff"/>
-              <stop offset="0.55" stop-color="#ff90c8"/>
-              <stop offset="0.8" stop-color="#ffb36b"/>
-              <stop offset="1" stop-color="#7fe3ff"/>
+              <stop offset="0" stop-color="#6fd6ff"/>
+              <stop offset="0.35" stop-color="#5b7cff"/>
+              <stop offset="0.6" stop-color="#ff5a3c"/>
+              <stop offset="0.8" stop-color="#ffc46b"/>
+              <stop offset="1" stop-color="#6fd6ff"/>
               <animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="1240 0" dur="18s" repeatCount="indefinite"/>
             </linearGradient>
             <g id="rs-outline">
@@ -3415,7 +3415,7 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
             </g>
           </defs>
           <g class="lk-art" fill="#ffffff" transform="translate(0 47.29)">
-            <g class="lk-flat">
+            <g class="lk-flat" fill="#eceff4">
             <path d="M0,324.1l3.52-25.27H.34l.64-4.46h11.17l-.64,4.46h-3.18l-3.52,25.27H0Z"/>
             <path d="M17.24,316.03h4.03l-.38,2.89c-.55,4.16-1.74,5.39-5.52,5.39h-2.08c-3.82,0-4.67-1.23-4.08-5.39l1.87-13.12c.59-4.16,1.74-5.35,5.56-5.35h2.08c3.78,0,4.63,1.19,4.03,5.35l-1.1,7.9h-7.39l-.64,4.71c-.21,1.44-.13,1.95,1.1,1.95h.55c1.19,0,1.44-.51,1.61-1.95l.34-2.38ZM18.6,306.35c.21-1.44.13-1.95-1.06-1.95h-.59c-1.19,0-1.4.51-1.61,1.95l-.55,3.74h3.31l.51-3.74Z"/>
             <path d="M30.49,317.39c.21-1.7-.34-2.25-2.8-3.91-2.85-1.91-3.52-3.36-3.1-6.45l.17-1.23c.59-4.16,1.78-5.35,5.61-5.35h2.04c3.78,0,4.76,1.19,4.08,5.35l-.47,2.93h-4.03l.34-2.38c.21-1.44.13-1.95-1.1-1.95h-.55c-1.19,0-1.44.51-1.66,1.95l-.09.6c-.25,1.7.38,2.29,2.8,3.95,2.85,1.91,3.48,3.36,3.1,6.41l-.21,1.61c-.55,4.16-1.78,5.39-5.56,5.39h-2.04c-3.82,0-4.67-1.23-4.08-5.39l.47-3.27h4.03l-.38,2.76c-.21,1.44-.13,1.95,1.1,1.95h.59c1.19,0,1.44-.51,1.61-1.95l.13-1.02Z"/>
@@ -3481,10 +3481,10 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
                  chrome ramp, then an iridescent wash. Same coordinates as before, so
                  the row does not move. -->
             <g class="rs-designer">
-              <use href="#rs-outline" fill="#62e6ff" opacity="0.55" transform="translate(-1.4 0)"/>
-              <use href="#rs-outline" fill="#ff7a45" opacity="0.5" transform="translate(1.4 0.6)"/>
+              <use href="#rs-outline" fill="#56d8ff" opacity="0.45" transform="translate(-1.1 0)"/>
+              <use href="#rs-outline" fill="#ff6a3d" opacity="0.45" transform="translate(1.1 0.5)"/>
               <use href="#rs-outline" fill="url(#rs-chrome)"/>
-              <use href="#rs-outline" fill="url(#rs-irid)" opacity="0.45"/>
+              <use href="#rs-outline" fill="url(#rs-irid)" opacity="0.18"/>
             </g>
           </g>
           <!-- The base colour sits on this wrapper, not on #lk-name-src, because
