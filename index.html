@@ -3372,41 +3372,54 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
              beneath the name a touch. -->
         <svg class="lockup" viewBox="0 0 927.27 382.99" aria-hidden="true" focusable="false">
           <defs>
-            <!-- Chrome, matched to the shader rather than eyeballed. Three numbers
-                 are copied out of liquidMetalFragmentShader so the two rows read as
-                 the same material:
-
-                   color1 = vec3(.98,.98,1.)  -> #fafaff   the highlight
-                   color2 = vec3(.1,.1,.1+)   -> #1a1a1a   the shadow, bluer bottom-right
-                   cycleWidth = u_repetition   = 2         stripe cycles across the row
-
-                 So the ramp runs the full white-to-near-black range the shader uses
-                 (a shallower ramp is what made this row look like a different, softer
-                 metal) and repeats twice instead of once. The stop pattern below is
-                 getColorChanges()'s profile: a tight bright/dark/bright/dark flicker,
-                 then one long fall to the shadow. spreadMethod="repeat" over half the
-                 row height gives the second cycle, and lets the drift below wrap
-                 seamlessly instead of sliding a lone horizon off the end. -->
-            <linearGradient id="rs-chrome" gradientUnits="userSpaceOnUse" x1="0" y1="152" x2="0" y2="215" spreadMethod="repeat">
-              <stop offset="0" stop-color="#fafaff"/>
-              <stop offset="0.10" stop-color="#232833"/>
-              <stop offset="0.17" stop-color="#eef3fb"/>
-              <stop offset="0.24" stop-color="#1b1f28"/>
-              <stop offset="0.32" stop-color="#ffffff"/>
-              <stop offset="0.62" stop-color="#8d97a8"/>
-              <stop offset="1" stop-color="#1a1d26"/>
-              <animateTransform attributeName="gradientTransform" type="translate" values="0 -12; 0 12; 0 -12" dur="7s"
-                calcMode="spline" keyTimes="0; 0.5; 1" keySplines="0.45 0 0.55 1; 0.45 0 0.55 1" repeatCount="indefinite"/>
+            <!-- Steel body. No animation on this one on purpose: the horizon holds
+                 still and only the rim colour moves, which is what stops the row
+                 reading as a coloured line sliding across the letters. Coordinates
+                 are userSpaceOnUse and match the outline paths' own space (y 152-278),
+                 so the ramp lands on the row wherever .lk-art is translated to. -->
+            <linearGradient id="rs-chrome" gradientUnits="userSpaceOnUse" x1="0" y1="152" x2="0" y2="278">
+              <stop offset="0" stop-color="#C7CBD4"/>
+              <stop offset="0.34" stop-color="#ADB4BD"/>
+              <stop offset="0.47" stop-color="#959EA8"/>
+              <stop offset="0.5" stop-color="#606F78"/>
+              <stop offset="0.6" stop-color="#6B7982"/>
+              <stop offset="0.8" stop-color="#74828B"/>
+              <stop offset="1" stop-color="#A9B0BA"/>
             </linearGradient>
-            <!-- Iridescent tint that drifts slowly across the row -->
-            <linearGradient id="rs-irid" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="620" y2="0" spreadMethod="reflect">
-              <stop offset="0" stop-color="#6fd6ff"/>
-              <stop offset="0.35" stop-color="#5b7cff"/>
-              <stop offset="0.6" stop-color="#ff5a3c"/>
-              <stop offset="0.8" stop-color="#ffc46b"/>
-              <stop offset="1" stop-color="#6fd6ff"/>
-              <animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="1240 0" dur="18s" repeatCount="indefinite"/>
+            <!-- The two rim tints. Both drift along their own gradient vector
+                 (300 -45) over the same 12s, so the warm and cool edges stay in step.
+                 spreadMethod="repeat" plus a translate of exactly one vector length
+                 means the loop wraps with no seam. -->
+            <linearGradient id="rs-rim-warm" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="300" y2="-45" spreadMethod="repeat">
+              <stop offset="0" stop-color="#C7CBD4"/>
+              <stop offset="0.3" stop-color="#C7CBD4"/>
+              <stop offset="0.45" stop-color="#F2C46B"/>
+              <stop offset="0.6" stop-color="#E4553A"/>
+              <stop offset="0.75" stop-color="#C7CBD4"/>
+              <stop offset="1" stop-color="#C7CBD4"/>
+              <animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="300 -45" dur="12s" repeatCount="indefinite"/>
             </linearGradient>
+            <linearGradient id="rs-rim-cool" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="300" y2="-45" spreadMethod="repeat">
+              <stop offset="0" stop-color="#606F78"/>
+              <stop offset="0.38" stop-color="#606F78"/>
+              <stop offset="0.52" stop-color="#3F6FE0"/>
+              <stop offset="0.66" stop-color="#6FCFF0"/>
+              <stop offset="0.8" stop-color="#606F78"/>
+              <stop offset="1" stop-color="#606F78"/>
+              <animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="300 -45" dur="12s" repeatCount="indefinite"/>
+            </linearGradient>
+            <!-- Each mask is the shape minus a copy of itself nudged one way, which
+                 leaves just the sliver along one side of every stroke. Lit takes the
+                 upper-left sliver, shade the lower-right, so the two rim gradients
+                 land on opposite edges instead of on top of each other. -->
+            <mask id="rs-rim-lit" maskUnits="userSpaceOnUse" x="-10" y="140" width="950" height="150">
+              <use href="#rs-outline" fill="#fff"/>
+              <use href="#rs-outline" fill="#000" transform="translate(1 1.2)"/>
+            </mask>
+            <mask id="rs-rim-shade" maskUnits="userSpaceOnUse" x="-10" y="140" width="950" height="150">
+              <use href="#rs-outline" fill="#fff"/>
+              <use href="#rs-outline" fill="#000" transform="translate(-1 -1.2)"/>
+            </mask>
             <g id="rs-outline">
               <path d="M40.1,276.39H3.12l17.28-123.4h36.56c9.84,0,15.46,1.63,18.77,5.44,3.61,4.16,4.38,10.8,2.67,22.93l-9.46,67.08c-3.07,21.68-9.54,27.95-28.83,27.95ZM6.57,273.39h33.53c17.9,0,22.97-4.98,25.86-25.37l9.46-67.08c1.56-11.02.97-17.16-1.96-20.54-2.65-3.05-7.74-4.41-16.5-4.41H23l-16.44,117.4ZM38.38,253.68h-8.09l10.91-77.99h7.67c1.42,0,3.19.17,4.32,1.46,1.26,1.44,1.24,3.61.78,7.11l-8.6,61.24c-.64,4.78-1.51,8.17-6.99,8.17ZM33.74,250.68h4.64c2.7,0,3.34-.48,4.02-5.58l8.6-61.24c.16-1.2.54-4.04-.06-4.73-.25-.29-.97-.44-2.07-.44h-5.06l-10.07,71.99Z"/>
               <path d="M118.46,276.39h-48.1l17.28-123.4h48.1l-3.7,25.7h-20.98l-2.85,20.74h16.69l-3.7,25.7h-16.68l-3.54,25.55h20.98l-3.51,25.7ZM73.82,273.39h42.03l2.69-19.7h-20.99l4.37-31.55h16.69l2.84-19.7h-16.67l3.68-26.74h20.99l2.84-19.7h-42.03l-16.44,117.4Z"/>
@@ -3488,28 +3501,14 @@ body.shiny .ns-close:hover { background: rgba(0,212,212,0.1); }
             <!-- DESIGNER & ARTIST. The shader used to paint this row, and painted it
                  badly: the bevel is a distance-to-edge field and these strokes are
                  too thin to hold one, so it flickered. The paths now live in <defs>
-                 and this group draws them itself — two offset colour fringes, the
-                 chrome ramp, then an iridescent wash. Same coordinates as before, so
-                 the row does not move.
-
-                 The fringes are the shader's chromatic dispersion done by hand. It
-                 samples the same stripe three times at different phases:
-
-                   stripe_r = fract(direction + dispersionRed)   shiftRed  1    /20
-                   stripe_g = fract(direction)                   unshifted
-                   stripe_b = fract(direction - dispersionBlue)  shiftBlue 0.28 /20
-
-                 Two things follow. Red and blue move in opposite directions, hence
-                 the mirrored transforms. And red is shifted 1/0.28 = 3.6x further
-                 than blue, so the row should be warm-forward with only a thin cool
-                 counter-edge. Equal-weight fringes were reading as a rainbow the
-                 shader never actually makes; the offsets and opacities below hold
-                 that 0.28 ratio. -->
+                 and this group draws them itself — the steel body, then a warm rim
+                 and a cool rim clipped to opposite edges of every stroke. The rects
+                 are full-row and the masks do the shaping, so nothing here changes
+                 the row's position. -->
             <g class="rs-designer">
-              <use href="#rs-outline" fill="#7ec4ff" opacity="0.3" transform="translate(-0.45 0)"/>
-              <use href="#rs-outline" fill="#ff5a2e" opacity="0.5" transform="translate(1.6 0.45)"/>
               <use href="#rs-outline" fill="url(#rs-chrome)"/>
-              <use href="#rs-outline" fill="url(#rs-irid)" opacity="0.18"/>
+              <rect x="-10" y="140" width="950" height="150" fill="url(#rs-rim-warm)" opacity="0.9" mask="url(#rs-rim-lit)"/>
+              <rect x="-10" y="140" width="950" height="150" fill="url(#rs-rim-cool)" opacity="0.95" mask="url(#rs-rim-shade)"/>
             </g>
           </g>
           <!-- The base colour sits on this wrapper, not on #lk-name-src, because
@@ -3994,7 +3993,7 @@ const PROJECTS = {
     proto: "https://www.figma.com/embed?embed_host=share&url=https://www.figma.com/proto/DxMew8YhX3WAtXESoshI5R/Herway?node-id=191-452&t=zeKj0o8s9zVh0mao-1",
     thumb: "images/herway-thumb.jpg",
     cover: {
-      subtitle: "A community-first transit app for women. Safety by presence, not surveillance."
+      subtitle: "Route planning, rider information, and optional community in one transit experience."
     },
     hero: {
       img: "images/HerThumb.jpeg",
@@ -4004,116 +4003,135 @@ const PROJECTS = {
     images: [],
     sections: [
 
-      { context: true, n:"01", t:"WHY THIS EXISTS", tocLabel:"Why this exists",
-        lead: "Public transit apps treat every commute as if it were the same. It isn't.",
-        body: "In LA Metro’s 2019 study, 60% of female riders surveyed felt safe riding during the day, compared with just 20% at night. Women surveyed identified safety concerns as the top barrier to riding transit, extending beyond the ride to waiting at stops and reaching stations.\n\nThat gap gives HerWay its starting question: how could a transit app help women weigh comfort alongside travel time? Rider interviews later shaped the community features and route comparisons.\n\nSource: <a href=\"https://thesourcearchives.metro.net/2019/09/19/metro-releases-understanding-how-women-travel-report/\" target=\"_blank\" rel=\"noopener\">LA Metro — Understanding How Women Travel (2019)</a>.",
-        why: "Ignoring who moves through a system means ignoring who can't. Safety is not a feature you bolt onto a map. It is the map, for anyone who was never the default rider.",
-        img: "images/herway-transit.jpg"
+      { context: true, n:"01", t:"OVERVIEW", tocLabel:"Overview",
+        lead: "A route can tell someone how to get home and still leave them unsure about taking it.",
+        body: "HerWay began with an assignment to identify a transportation issue in Los Angeles and develop a digital product around it. The project focused on women’s experiences using public transportation in South Los Angeles.\n\nForty riders were interviewed about how they chose routes, what made them hesitate, and what they did when a trip felt uncertain. Their decisions extended beyond time and distance. Riders also considered the conditions of the ride, who would be around, and whether they could stay connected to someone during the trip.\n\nSome already managed that uncertainty by sharing their location, traveling with others, or avoiding certain trips.",
+        subhead: "The wider pattern",
+        body2: "LA Metro’s Understanding How Women Travel study reflected the broader concern. Among female riders surveyed, 60% reported feeling safe riding during the day, compared with 20% at night. Concerns also extended to waiting at stops and reaching stations.\n\nSource: <a href=\"https://thesourcearchives.metro.net/2019/09/19/metro-releases-understanding-how-women-travel-report/\" target=\"_blank\" rel=\"noopener\">LA Metro — Understanding How Women Travel (2019)</a>.",
+        why: "How might a transit product help someone understand where a route goes, what the ride may be like, and what support is available around it?",
+        img: "images/herway-transit.jpg",
+        alt: "A woman waiting alone on a transit platform as a train blurs past"
       },
 
-      { triad: true, n:"02", t:"HOW I APPROACHED THIS", tocLabel:"Approach",
-        lead: "Three lenses ran in parallel through the whole project. Every decision was tested against all three.",
+      { showcase: true, n:"02", t:"CORE FLOWS", tocLabel:"Core flows",
+        lead: "Plan your trip, stay connected, and get more out of the routes you already take. HerWay keeps transit at the center while adding community, rewards, messaging, and relevant alerts around the journey.",
         items: [
-          { n:"P / 01", title:"Listen first",
-            body:"Ten rider interviews before a single frame. The brief was never the brief — the commute was." },
-          { n:"P / 02", title:"Prototype fast",
-            body:"Low-fidelity flows in week two. Testing them in week three. Rebuilding what didn't survive contact." },
-          { n:"P / 03", title:"Refuse the default",
-            body:"Every category convention got a second look. Most were kept. A few were the whole reason the app exists." }
+          { label:"Flow 01 - Plan your trip",
+            title:"Everything starts with the route",
+            caption:"Search for a destination, compare options, and choose how to get there.\n\nThe map acts as the main starting point, with stops, arrival times, route details, and service information available throughout the trip.",
+            vid: "videos/herway-flow-01.mp4",
+            poster: "videos/herway-flow-01-poster.jpg",
+            aspect: "1 / 1" },
+          { label:"Flow 02 - Stay connected to your community",
+            title:"See what is happening around your trip",
+            caption:"Switch between routing and community without leaving Home.\n\nRiders can browse route updates, questions, events, and posts from other riders, then interact when something is useful or relevant to their journey.",
+            vid: "videos/herway-flow-02.mp4",
+            poster: "videos/herway-flow-02-poster.jpg",
+            aspect: "1 / 1" },
+          { label:"Flow 03 - Get rewarded for traveling",
+            title:"Your regular trips can earn progress",
+            caption:"HerWay rewards riders for completing routes and traveling with others.\n\nDaily challenges and shared trips earn points that can be used toward transit rewards, giving riders another reason to stay engaged with the routes they already take.",
+            vid: "videos/herway-flow-03.mp4",
+            poster: "videos/herway-flow-03-poster.jpg",
+            aspect: "1 / 1" },
+          { label:"Flow 04 - Connect and coordinate",
+            title:"Move from public conversation to private planning",
+            caption:"Groups and messaging give riders different ways to connect around shared routes, schedules, and interests.\n\nSomeone can discover a group, join a conversation, view another rider’s profile, and continue coordinating through private chat without leaving HerWay.",
+            vid: "videos/herway-flow-04.mp4",
+            poster: "videos/herway-flow-04-poster.jpg",
+            aspect: "1 / 1" },
+          { label:"Flow 05 - Stay informed about what matters to you",
+            title:"Alerts shaped around your trip",
+            caption:"HerWay surfaces updates based on the routes, communities, and information a rider chooses to follow.\n\nAlerts can highlight service changes, relevant community activity, reported issues, or other updates riders find valuable without requiring them to constantly check the app.",
+            vid: "videos/herway-flow-05.mp4",
+            poster: "videos/herway-flow-05-poster.jpg",
+            aspect: "1 / 1" }
         ]
       },
 
-      { insights: true, n:"03", t:"WHAT RIDERS ACTUALLY SAID", tocLabel:"Research",
-        lead: "Field interviews with ten women across three transit lines. What follows is what showed up more than twice.",
+      { triad: true, n:"03", t:"WHAT SHAPED THE DIRECTION", tocLabel:"Research",
+        lead: "The interviews identified an information gap within the broader safety problem. Forty public-transit riders in South Los Angeles took part, and three patterns helped turn a broad topic into specific product priorities.",
         items: [
-          { k:"On absence",
-            v:"Empty carriages read as more dangerous than crowded ones, regardless of the actual incident data on either." },
-          { k:"On authority",
-            v:"Panic buttons that call police were the first feature riders asked to be able to turn off." },
-          { k:"On speed",
-            v:"Nobody optimized their commute for the fastest route. Every rider had a slower route they took by default." },
-          { k:"On community",
-            v:"Riders on the same line already recognized each other. The app just had to make that visible." }
+          { n:"F / 01", title:"Riders were already adjusting their behavior",
+            body:"Participants described traveling with others, sharing their location, or avoiding trips when they felt uncertain. Those behaviors pointed toward support before and during the journey.\n\nProduct response → Information and coordination available throughout the trip." },
+          { n:"F / 02", title:"Transit information left some questions unanswered",
+            body:"Directions and arrival times addressed the logistics of travel, but riders also wanted context about the experience. That led to rider information within bus and route details.\n\nProduct response → Rider context alongside route information." },
+          { n:"F / 03", title:"Social support already existed outside transit tools",
+            body:"Traveling together and staying in contact were existing ways people managed uncertainty. HerWay brought optional coordination into the same experience as routing.\n\nProduct response → Community browsing, groups, and private messaging." }
         ]
       },
 
-      { showcase: true, n:"04", t:"THE CORE FLOWS", tocLabel:"Core flows",
-        lead: "Three surfaces that carry the entire product. Everything else is one tap away from one of these.",
+      { n:"04", t:"COMPETITIVE ANALYSIS", tocLabel:"Competitive analysis",
+        b: "HerWay brings transit planning and rider community into the same experience. Google Maps supports transit within a broader navigation product. Moovit and Transit focus more directly on the transit journey. HerWay explores connecting that journey to a community where riders can follow updates, form groups, and coordinate directly.",
+        deploy: {
+          columns: [
+            { label:"Capability",  key:"cap" },
+            { label:"Google Maps", key:"gmaps",   num:true },
+            { label:"Moovit",      key:"moovit",  num:true },
+            { label:"Transit",     key:"transit", num:true },
+            { label:"HerWay",      key:"herway",  num:true, flag:true }
+          ],
+          rows: [
+            { cap:"Public transportation as the primary focus",        gmaps:"—", moovit:"✓", transit:"✓", herway:"✓" },
+            { cap:"Transit route planning",                            gmaps:"✓", moovit:"✓", transit:"✓", herway:"✓" },
+            { cap:"Rider-contributed crowding information",            gmaps:"✓", moovit:"✓", transit:"✓", herway:"✓" },
+            { cap:"Feed for route-related questions, updates, events", gmaps:"—", moovit:"—", transit:"—", herway:"✓" },
+            { cap:"Groups organized around shared routes or schedules",gmaps:"—", moovit:"—", transit:"—", herway:"✓" },
+            { cap:"In-app private messaging between riders",           gmaps:"—", moovit:"—", transit:"—", herway:"✓" },
+            { cap:"Community designed specifically for women",         gmaps:"—", moovit:"—", transit:"—", herway:"✓" }
+          ],
+          caption: "✓ documented feature, or designed feature in HerWay. — not identified in the reviewed product documentation. Availability varies by location. HerWay’s features are prototyped, not live services. Retrospective comparison. Sources: Google Maps, Moovit, Transit."
+        }
+      },
+
+      { moments: true, n:"05", t:"KEY DESIGN MOMENTS", tocLabel:"Design moments",
+        lead: "Five decisions that shaped what the product became, and what it deliberately left out.",
         items: [
-          { img: "images/herway-context1.jpg",
-            label:"Flow 01 - Home + live route",
-            title:"Presence over search",
-            caption:"The default view surfaces riders on your line before it surfaces a search bar. Search still exists — it just is not the front door." },
-          { img: "images/herway-context2.jpg",
-            label:"Flow 02 - Community layer",
-            title:"One tap to the community",
-            caption:"Alerts, route buddies, and incident reports live one tap from the map, always. No secondary nav to remember." },
-          { img: "[FLOW 03 — 4:3 screen: comfort-routing panel showing 3 route options ranked by environment]",
-            label:"Flow 03 - Comfort routing",
-            title:"Slower on paper, safer in feel",
-            caption:"Routes are ranked by social presence and street activity, not raw minutes. The fastest option is still visible — it just is not the recommended one." }
+          { title: "Put rider context where the decision happens",
+            stance: "Connect community information directly to the trip.",
+            body: "Across the initial 40 rider interviews, people described the trip in terms that went beyond arrival time: who was around, how the ride felt, and whether anything unusual was happening.\n\nRider-generated information could live in the community feed, but requiring someone to find an update, remember it, and return to routing would leave that connection to the rider.\n\nHerWay places relevant signals directly in bus and route details. Rider counts indicate participation around the trip, ratings describe the reported experience, and alerts surface unusual activity that may deserve attention.\n\nTogether, those signals provide context at the point of comparison without presenting one number as a guarantee of safety.",
+            img: "[MOMENT 01 — route panel annotated to explain the purpose of rider counts, ratings, and alerts]" },
+          { title: "Community had to work for people who never post",
+            stance: "Make the experience useful at different levels of participation.",
+            body: "Community could not depend on everyone contributing. Preece, Nonnecke, and Andrews studied participation across 375 online communities; among respondents who never posted, 53.9% selected “just reading/browsing is enough” as a reason for remaining passive.\n\nSource: <a href=\"https://www.dhi.ac.uk/san/waysofbeing/data/communities-murphy-preece-2004b.pdf\" target=\"_blank\" rel=\"noopener\">Preece, Nonnecke &amp; Andrews — The top five reasons for lurking (2004)</a>.\n\nHerWay supports three ways to engage.\n\nRead — browse updates, events, and information shared by others.\n\nParticipate — ask questions, contribute a post, or join a group conversation.\n\nCoordinate — message another rider directly when making plans together.\n\nThese are options rather than stages someone must complete. Reading an update can be the entire interaction.\n\nThat shaped the relationship between the feed, groups, and messaging: direct connection is available, while the everyday value of community remains accessible without it.",
+            img: "[MOMENT 02 — three equally weighted examples showing reading, participating, and coordinating]" },
+          { title: "Shared presence should support ordinary travel",
+            stance: "Make room for the people and activity around the system.",
+            body: "Safety came up repeatedly in the field interviews, but riders also talked about the ordinary experience around transit: waiting, commuting at night, recognizing familiar routes, and staying aware of what was happening nearby.\n\nA product built only around incidents would make warnings the main way riders encounter the community.\n\nHerWay includes ordinary activity alongside alerts: route questions, local events, rider updates, and travel coordination. Groups provide a way to recognize shared routines and organize around them.\n\nThe product direction centered on mutual support rather than police-linked monitoring. Rider counts and community activity make participation visible, while conversations offer a way to act on those connections.\n\nThe intention is to help riders feel informed and less alone. Whether that translates into greater comfort or safer travel would require further evaluation.",
+            img: "[MOMENT 03 — everyday community content shown alongside an alert and a coordination example]" },
+          { title: "Let people follow the connection between tasks",
+            stance: "Testing showed that a feature could exist without being discovered.",
+            body: "Across three rounds of five usability participants, one recurring behavior was that people tended to stay in Home while planning a trip. Keeping community in a separate section meant riders could complete the core task without discovering much of the support around it.\n\nThe design brought routing and community together through a sliding tab switcher within Home. Both became available from the place participants already used while remaining clearly distinguished.\n\nTesting also prompted a broader look at navigation. A rider’s task may cross maps, posts, groups, and conversations, so additional entry points connected chats, the feed, and the map.\n\nRelated information could be reached from more than one place, reducing the need to return to a section’s starting point.",
+            img: "[MOMENT 04 — earlier Home, the testing observation, the revised routing/community switcher, then a path connecting map, feed, and conversation]" },
+          { title: "Consider access and privacy together",
+            stance: "A women-centered community raised questions the interface alone could not resolve.",
+            body: "The concept needed an approach to community access that considered both trust and the sensitivity of verification information.\n\nNIST’s Digital Identity Guidelines recommend minimizing the personal information collected and disclosed during identity proofing, including using derived attributes when the underlying information does not need to be exposed.\n\nSource: <a href=\"https://pages.nist.gov/800-63-4/sp800-63a/\" target=\"_blank\" rel=\"noopener\">NIST SP 800-63A — Digital Identity Guidelines</a>.\n\nThe prototype explored that principle through on-device verification intended to keep verification material local rather than storing it as part of a rider’s profile.\n\nThe proposed flow still introduced tradeoffs. Verification adds effort, can fail, and may exclude people incorrectly. A useful implementation would need to establish what the method can reliably verify and provide a way forward when it gets something wrong.\n\nThe prototype explored the interaction; accuracy, data handling, and the effect on community trust remained questions for further development.",
+            img: "[MOMENT 05 — verification flow showing what is checked, what is not stored, and a path for failed verification]" }
         ]
       },
 
-      { diagram: true, n:"05", t:"THE FORM WE DESIGNED FOR", tocLabel:"Form system",
-        lead: "The app is built in three layers. Each layer answers a different rider question, and each layer can be removed without breaking the one below it.",
-        diagramLabel: "The Stack",
-        diagramSub: "3 layers - 1 rider",
-        layers: [
-          { title:"Surface",   items:["Map","Live route","Route ranking","Search"] },
-          { title:"Community", items:["Route buddies","Incident feed","Nearby riders","Reactions"] },
-          { title:"Trust",     items:["Local ID verify","On-device face match","No upstream data","Reversible auth"] }
-        ],
-        caption: "Every screen in the app sits in exactly one layer. Cross-layer traffic runs on tap, not on hidden state."
-      },
-
-      { moments: true, n:"06", t:"KEY DESIGN MOMENTS", tocLabel:"Design moments",
-        lead: "Four choices that defined what HerWay became, and four things it refused to be.",
-        items: [
-          { title: "Community over surveillance",
-            stance: "Chose social presence instead of police integration.",
-            body: "Riders described discomfort in empty spaces and hesitation around police-linked alerts. Those conversations shifted the design toward the presence of other riders: who shared the route, where people were gathering, and how to reach the community. Social presence became central to the experience, with the aim of helping riders feel less alone during the commute." },
-          { title: "Comfort routing, not shortest path",
-            stance: "Broke the category default that faster equals better.",
-            body: "Riders described taking longer routes when those routes felt more comfortable. That shaped the route panel: street activity and the presence of other riders became part of the comparison, alongside travel time. The fastest option stayed visible, but speed alone no longer determined the recommendation." },
-          { title: "Structure without a single path",
-            stance: "Refused the linear flow the category defaults to.",
-            body: "Transit apps usually funnel riders through one path: search, select, ride. HerWay has plenty of screens, so the reflex was to add hierarchy. The call was to keep every core function reachable in one tap and let the rider decide which one is the front door. Redundancy was cut. Choice was preserved." },
-          { title: "Local-only ID verification",
-            stance: "Gated the community without becoming another data hoard.",
-            body: "The community needed a way to establish trust without collecting more personal information than necessary. The proposed approach was on-device ID and face matching, keeping documents and images on the user’s device. The prototype explored the verification flow; technical feasibility and data handling would need validation before implementation." }
-        ]
-      },
-
-      { photostrip: true, n:"07", t:"TESTING IN THE WILD", tocLabel:"Testing",
-        lead: "Weeks 10 through 14. Riders were handed the prototype on the platform and asked to plan a trip home.",
-        items: [
-          { img:"[TEST 01 — 3:4 photo: rider holding phone at a lit bus stop]",  caption:"Line 24 - 8:14pm" },
-          { img:"[TEST 02 — 3:4 photo: hands tapping the route ranking panel]", caption:"Route ranking" },
-          { img:"[TEST 03 — 3:4 photo: incident-report sheet halfway up]",       caption:"Report sheet" },
-          { img:"[TEST 04 — 3:4 photo: rider seated, phone in lap, night ride]", caption:"Line 09 - 9:41pm" }
-        ]
-      },
-
-      { impact: true, n:"08", t:"WHAT THIS SHIFTED", tocLabel:"Impact",
-        lead: "The prototype did not ship. Here is what it changed anyway.",
+      { impact: true, n:"06", t:"OUTCOME", tocLabel:"Outcome",
+        lead: "A connected prototype shaped by research and usability testing.",
         metrics: [
-          { v: "40+", label: "Wireframes and mockups iterated" },
-          { v: "16",  label: "Weeks of field research and testing" },
-          { v: "10",  label: "Rider interviews across three lines" }
+          { v: "40", label: "Riders interviewed in South Los Angeles" },
+          { v: "3",  label: "Rounds of usability testing, with revisions between each" },
+          { v: "15", label: "Participants across the three testing rounds" }
         ],
-        statement: "The prototype explored how route choice changes when comfort and community sit alongside travel time. The project changed how I frame navigation problems: whose priorities shape the recommendation, and what gets overlooked when speed is the default?"
+        statement: "HerWay developed into a Figma prototype connecting route planning, ride information, community updates, groups, and private messaging. The research informed what the product needed to address; testing exposed how its structure could prevent people from reaching those features. The final design brought routing and community together within Home and provided multiple entry points across related tasks. The project produced a concrete interaction model that could be tested and developed further. It did not establish a reduction in incidents or a measured improvement in rider confidence.",
+        img: "[OUTCOME — 16:9 final prototype overview showing the revised experience]"
       },
 
-      { reflection: true, n:"09", tocLabel:"Reflection",
-        body: "This project pushed me to design for a reality I do not personally live. Most of the work was slowing down enough to hear what riders were already saying, and being intentional about which parts of that made it into the product and which parts got left out. Empathy stopped being a soft word and started functioning as a prioritization tool.",
+      { reflection: true, n:"07", tocLabel:"Reflection",
+        body: "HerWay began with concerns about safety and developed into a product focused on information, shared presence, and optional coordination. That shift clarified where a digital experience might contribute: helping riders understand a trip and access support around it.",
         prompts: [
-          { q: "What I underestimated",
-            a: "How much of the actual insight lives in what riders skip past instead of what they describe. The signal was in small, repeated moments of discomfort that shape a commute over time, not the incidents anyone would report." },
-          { q: "What I would do differently",
-            a: "Give riders a larger role in shaping the early concepts. The interviews informed the brief, but I would involve riders in choosing the design direction as well as testing it." },
-          { q: "What this taught me about design",
-            a: "Safety is not a screen. It is an entire posture. You cannot retrofit it with a panic button and call it inclusive design." }
+          { q: "Research needed to influence what was built",
+            a: "The interviews connected rider behavior to product decisions. Existing ways of managing uncertainty informed the route information, groups, and coordination features. Designing for experiences outside my own perspective also required questioning assumptions about what feels useful, reassuring, or intrusive." },
+          { q: "Testing needed to challenge the structure",
+            a: "Participants staying in Home exposed a gap between how the app was organized and how people actually explored it. Routing and community were brought closer together, and connections across the product were reconsidered. A clear information architecture needs to account for the paths people take through it." },
+          { q: "Information creates responsibility",
+            a: "Ratings, rider counts, and alerts can appear authoritative even when the information is limited or old. Another iteration would examine how to communicate freshness and uncertainty, distinguish rider reports from service information, and handle routes with little community activity." },
+          { q: "Riders should help choose the direction earlier",
+            a: "Future work would involve riders more directly in comparing early concepts, alongside testing the interface. That would help evaluate which forms of information and connection are valuable enough to justify the attention, participation, and trust they require." }
         ]
       }
     ]
@@ -5026,8 +5044,6 @@ function drawJittered(stroke) {
       { context: true, n:"01", t:"OVERVIEW", tocLabel:"Overview",
         lead: "Making the thinking easier to reach.",
         body: "Most visitors want to understand the work quickly. Nielsen Norman Group found that people often decide whether to stay on a page within 10 to 20 seconds, and typically read only around 20 to 28% of its text.\n\nBut a design portfolio often needs more than a quick scan. The final screens can show what was built, but not always why something changed, what research shaped it, or what constraints influenced the final decision.",
-        midImg: "[OVERVIEW - 16:9: the portfolio with Nibble open beside a case study, mid-conversation]",
-        midAlt: "The portfolio with the Nibble panel open next to a case study",
         subhead: "That creates a tradeoff",
         body2: "Make a case study too detailed and important information gets buried. Make it too visual and the reasoning behind the work disappears. It also assumes every visitor wants to know the same things.\n\nNibble-LM became a way to make that depth available on demand. Built directly into the portfolio, it lets visitors ask about the work, dig deeper into specific decisions, compare projects, or find the case study most relevant to what they care about.",
         why: "The portfolio can stay easy to explore without giving up the context behind the work."
