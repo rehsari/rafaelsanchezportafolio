@@ -1787,6 +1787,32 @@ video::-webkit-media-controls-panel { display: none !important; }
   background: rgba(236,235,232,0.72);
 }
 
+/* Chair hero: <flatpack-chair> in the standard 16:9 cover frame.
+   The component clears to its own cardboard paper, so the frame is painted the
+   same colour underneath. That way the still render — a 4:3 image on that exact
+   paper — sits on a seamless field while it waits, and the swap to the live
+   chair reads as the same picture rather than a different panel. */
+.modal-hero--chair {
+  background-color: #e7e3dd;
+}
+.modal-hero--chair flatpack-chair {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* The component defaults to 4 / 3; this frame is 16 / 9 and already sized. */
+  aspect-ratio: auto;
+  min-width: 0;
+}
+/* contain, not the inherited cover: the still is 4:3 and cropping it to 16:9
+   would cut the backrest and the base off the chair. */
+.modal-hero--chair .hero-fallback {
+  object-fit: contain;
+}
+.modal-hero--chair .modal-hero-caption {
+  color: rgba(10,10,10,0.75);
+  background: rgba(231,227,221,0.72);
+}
+
 /* Concept hero — designed cover (no photo yet) that uses the project accent */
 .modal-hero--concept {
   background: var(--bg);
@@ -4732,8 +4758,17 @@ function drawJittered(stroke) {
     duration: "4 Weeks", role: "Product Designer",
     tools: "Adobe Illustrator, Laser cutter",
     caseStudy: "https://drive.google.com/file/d/1vG8n3oWmztDybCSz6trVwA-iHJle-S3q/preview",
-    context: "Product Design — Sustainable Furniture",
+    context: "Academic Furniture Project - 2022",
     accent: "linear-gradient(90deg,#001a3d,#1a6fd4)",
+    /* The chair itself, drawn in code and turnable, instead of a photograph of it.
+       A flat-pack object whose whole idea is the rib structure reads better when
+       you can rotate it than from any single fixed angle. Desktop only — the
+       still render below carries phones and anything without WebGL. */
+    hero: {
+      chair: true,
+      img: "images/modulecraft-chair.png",
+      alt: "The ModuleCraft lounge chair, built from interlocking corrugated cardboard ribs"
+    },
     images: [],
     sections: [
       { n:"01", t:"THE PROBLEM", b:"Furniture is one of those things that feels too expensive for what it is, especially in dorm rooms and transitional spaces where you know you will be moving in a year. ModuleCraft came from a simple constraint: what if the chair cost almost nothing and could be recycled when you were done with it?", img:"images/modulecraft-problem.jpg" },
@@ -6388,6 +6423,15 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       if (typeof str !== 'string') return false;
       return /^\s*\[.+\]\s*$/.test(str);
     }
+    /* Memoised: the probe canvas is only ever created once per page. */
+    var webglOK = null;
+    function hasWebGL() {
+      if (webglOK === null) {
+        try { webglOK = !!document.createElement('canvas').getContext('webgl'); }
+        catch (e) { webglOK = false; }
+      }
+      return webglOK;
+    }
     function slotLabel(str) {
       return String(str || '').replace(/^\s*\[/, '').replace(/\]\s*$/, '');
     }
@@ -6420,6 +6464,17 @@ document.querySelectorAll('.pcard').forEach(function(card) {
             (hero.rotate ? ' rotate="' + hero.rotate + '"' : '') +
             (hero.secret === false ? '' : ' secret-finishes') +
             ' aria-label="' + escHtml(hero.alt || '') + '"></shiroi-sticker>' +
+          caption +
+        '</div>';
+      }
+      /* Chair hero — the <flatpack-chair> WebGL component. The still render is
+         written now and swapped for the component after the modal paints, and
+         only on desktop with WebGL (see the import beside the #mmeta
+         relocation). Both occupy the same 16:9 box, so the swap shifts
+         nothing; if it never happens the still is the hero. */
+      if (hero.chair) {
+        return '<div class="modal-hero modal-hero--chair">' +
+          '<img class="hero-fallback" src="' + hero.img + '" alt="' + escHtml(hero.alt || '') + '" loading="eager">' +
           caption +
         '</div>';
       }
@@ -6860,6 +6915,24 @@ document.querySelectorAll('.pcard').forEach(function(card) {
     if (msections.querySelector('shiroi-sticker')) {
       import('./js/shiroi-sticker.js').catch(function (err) {
         console.warn('[shiroi-sticker] could not load', err);
+      });
+    }
+
+    /* Chair hero — same deal, with two extra gates. Phones get the still and
+       never fetch the module, and so does any desktop without WebGL, so the
+       hero can't degrade into an error. The still and the component fill the
+       same frame, so replacing one with the other costs no layout shift. */
+    var chairHero = msections.querySelector('.modal-hero--chair');
+    if (chairHero && window.matchMedia('(min-width: 768px)').matches && hasWebGL()) {
+      import('./js/flatpack-chair.js').then(function () {
+        var still = chairHero.querySelector('.hero-fallback');
+        if (!still) return;
+        var chair = document.createElement('flatpack-chair');
+        chair.setAttribute('finish', 'cardboard');
+        chair.setAttribute('aria-label', still.alt);
+        still.replaceWith(chair);
+      }).catch(function (err) {
+        console.warn('[flatpack-chair] could not load', err);
       });
     }
 
