@@ -1432,6 +1432,7 @@ video::-webkit-media-controls-panel { display: none !important; }
   margin: 0; max-width: 680px;
 }
 .moment-body + .moment-body { margin-top: 14px; }
+.moment-body strong { font-weight: 500; color: rgba(232,228,220,0.92); }
 .moment-media { margin-top: 24px; }
 .moment-body--after { margin-top: 24px; }
 .moment-media img, .moment-media video {
@@ -1811,6 +1812,63 @@ video::-webkit-media-controls-panel { display: none !important; }
 .modal-hero--chair .modal-hero-caption {
   color: rgba(10,10,10,0.75);
   background: rgba(231,227,221,0.72);
+}
+
+/* Glitter hero — the self-contained Glitter 2K viewer in an iframe. Same deal
+   as the chair, except the viewer ships its own three.js and its own CSS, so
+   it is sandboxed in a document rather than imported as a component. Nothing
+   below leaks past .modal-hero--glitter and .gv-egg.
+
+   The frame is the stock 16:9 .modal-hero, unchanged — the point is that this
+   reads as the same object as every other project cover. The only addition is
+   the background, set to the viewer's own #36363a so the letterboxed edges
+   match the render instead of flashing --surface while the iframe boots. */
+.modal-hero--glitter { background-color: #36363a; }
+.modal-hero--glitter iframe {
+  width: 100%; height: 100%;
+  display: block; border: 0;
+}
+
+/* The easter egg: the same character with the effects switched off. Above
+   #modal (5000) and its close button (5100), below the custom cursor. */
+.gv-egg {
+  position: fixed; inset: 0; z-index: 5200;
+  display: flex; align-items: center; justify-content: center;
+  padding: clamp(16px, 4vw, 56px);
+  background: rgba(8,8,8,0.92);
+  opacity: 0;
+  transition: opacity 0.28s cubic-bezier(0.22,1,0.36,1);
+}
+.gv-egg.in { opacity: 1; }
+.gv-egg-frame {
+  position: relative;
+  width: 100%; max-width: 880px;
+  aspect-ratio: 16 / 9;
+  background: #36363a;
+  border: 1px solid rgba(232,228,220,0.06);
+  transform: scale(0.98);
+  transition: transform 0.28s cubic-bezier(0.22,1,0.36,1);
+}
+.gv-egg.in .gv-egg-frame { transform: scale(1); }
+.gv-egg-frame iframe { width: 100%; height: 100%; display: block; border: 0; }
+.gv-egg-close {
+  position: absolute; top: -34px; right: 0;
+  background: none; border: 0; padding: 4px 2px;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: rgba(232,228,220,0.65);
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+.gv-egg-close:hover, .gv-egg-close:focus-visible { color: var(--text); }
+.gv-egg-label {
+  position: absolute; left: 0; top: -34px;
+  font-family: var(--font-mono); font-size: 9px;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: rgba(232,228,220,0.4);
+}
+@media (prefers-reduced-motion: reduce) {
+  .gv-egg, .gv-egg-frame { transition: none; }
 }
 
 /* Concept hero — designed cover (no photo yet) that uses the project accent */
@@ -2394,6 +2452,8 @@ footer {
      lighting dots that were invisible a moment earlier. */
   --nc-dim: rgba(224,0,0,0.6);
   --nc-lit: var(--accent);
+  /* The bloom. Offset 0, blur 14px, no spread: a halo, not a drop shadow. */
+  --nc-glow: 0 0 14px rgba(224,0,0,0.5);
   display: inline-flex;
   flex-direction: column;
   align-items: center;
@@ -2441,8 +2501,8 @@ footer {
 .nibble-dots[data-state="idle"] .ndr:nth-child(3) i:nth-child(2) { animation-delay: 0.39s; animation-duration: 2.55s; }
 .nibble-dots[data-state="idle"] .ndr:nth-child(4) i:nth-child(1) { animation-delay: 0.32s; animation-duration: 3.1s;  }
 @keyframes nd-wave {
-  0%, 100% { background: var(--nc-dim); }
-  50%      { background: var(--nc-lit); }
+  0%, 100% { background: var(--nc-dim); box-shadow: none; }
+  50%      { background: var(--nc-lit); box-shadow: var(--nc-glow); }
 }
 
 /* THINKING — fast cascade for the in-line typing indicator */
@@ -2453,7 +2513,7 @@ footer {
 .nibble-dots[data-state="thinking"] .ndr:nth-child(1) i { animation-delay: 0.24s; }
 @keyframes nd-think {
   0%, 100% { background: var(--nc-dim); }
-  50%      { background: var(--nc-lit); box-shadow: 0 0 6px rgba(224,0,0,0.5); }
+  50%      { background: var(--nc-lit); box-shadow: var(--nc-glow); }
 }
 
 /* LOADING — perimeter walk, clockwise. 9 perimeter dots, interior dot
@@ -2473,7 +2533,7 @@ footer {
 .nibble-dots[data-state="loading"] .ndr:nth-child(2) i:nth-child(2) { animation: none; background: var(--nc-dim); }
 @keyframes nd-walk {
   0%, 100%  { background: var(--nc-dim); box-shadow: none; }
-  10%, 20%  { background: var(--nc-lit); box-shadow: 0 0 5px rgba(224,0,0,0.55); }
+  10%, 20%  { background: var(--nc-lit); box-shadow: var(--nc-glow); }
 }
 
 /* TYPING — no CSS auto-loop. Dots hold dim; JS pulses them ONCE per
@@ -2487,7 +2547,7 @@ footer {
 }
 .nibble-dots[data-state="typing"] .ndr i.spk {
   background: var(--nc-lit);
-  box-shadow: 0 0 4px rgba(224,0,0,0.42);
+  box-shadow: var(--nc-glow);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3112,6 +3172,7 @@ body.shiny {
 body.shiny .nibble-dots {
   --nc-lit: #00d4d4;
   --nc-dim: rgba(0,212,212,0.6);
+  --nc-glow: 0 0 14px rgba(0,212,212,0.5);
 }
 
 /* ─── EASTER EGG - NIBBLE SNAKE ────────────────────────────────────
@@ -4016,7 +4077,6 @@ const PROJECTS = {
     status: "Prototype",
     accent: "linear-gradient(90deg,#5500bb,#9933ff)",
     caseStudy: "https://drive.google.com/file/d/1nIHutsvigg8HqGb3iOhPbZQ8nuD1SALs/preview",
-    proto: "https://www.figma.com/embed?embed_host=share&url=https://www.figma.com/proto/DxMew8YhX3WAtXESoshI5R/Herway?node-id=191-452&t=zeKj0o8s9zVh0mao-1",
     thumb: "images/herway-thumb.jpg",
     cover: {
       subtitle: "Route planning, rider information, and optional community in one transit experience."
@@ -4110,29 +4170,47 @@ const PROJECTS = {
         }
       },
 
-      { moments: true, n:"05", t:"KEY DESIGN MOMENTS", tocLabel:"Design moments",
+      { moments: true, sideMedia: true, n:"05", t:"KEY DESIGN MOMENTS", tocLabel:"Design moments",
         lead: "Five decisions that shaped what the product became, and what it deliberately left out.",
         items: [
           { title: "Put rider context where the decision happens",
             stance: "Connect community information directly to the trip.",
-            body: "Across the initial 40 rider interviews, people described the trip in terms that went beyond arrival time: who was around, how the ride felt, and whether anything unusual was happening.\n\nRider-generated information could live in the community feed, but requiring someone to find an update, remember it, and return to routing would leave that connection to the rider.\n\nHerWay places relevant signals directly in bus and route details. Rider counts indicate participation around the trip, ratings describe the reported experience, and alerts surface unusual activity that may deserve attention.\n\nTogether, those signals provide context at the point of comparison without presenting one number as a guarantee of safety.",
-            img: "[MOMENT 01 — route panel annotated to explain the purpose of rider counts, ratings, and alerts]" },
+            body: "Across 40 rider interviews, people described trips in terms beyond arrival time: who was around, how the ride felt, and whether anything unusual was happening.\n\nHerWay brings those signals directly into route details. Rider counts show participation, ratings reflect the reported experience, and alerts surface unusual activity.\n\nTogether, they add context at the point of comparison without presenting any single signal as a guarantee of safety.",
+            vid: "videos/herway-moment-01.mp4",
+            poster: "videos/herway-moment-01-poster.jpg",
+            aspect: "1 / 1",
+            caption: "Rider context sits where the route is chosen",
+            alt: "HerWay route details showing rider counts, ratings, and alerts alongside arrival information" },
           { title: "Community had to work for people who never post",
             stance: "Make the experience useful at different levels of participation.",
-            body: "Community could not depend on everyone contributing. Preece, Nonnecke, and Andrews studied participation across 375 online communities; among respondents who never posted, 53.9% selected “just reading/browsing is enough” as a reason for remaining passive.\n\nSource: <a href=\"https://www.dhi.ac.uk/san/waysofbeing/data/communities-murphy-preece-2004b.pdf\" target=\"_blank\" rel=\"noopener\">Preece, Nonnecke &amp; Andrews — The top five reasons for lurking (2004)</a>.\n\nHerWay supports three ways to engage.\n\nRead — browse updates, events, and information shared by others.\n\nParticipate — ask questions, contribute a post, or join a group conversation.\n\nCoordinate — message another rider directly when making plans together.\n\nThese are options rather than stages someone must complete. Reading an update can be the entire interaction.\n\nThat shaped the relationship between the feed, groups, and messaging: direct connection is available, while the everyday value of community remains accessible without it.",
-            img: "[MOMENT 02 — three equally weighted examples showing reading, participating, and coordinating]" },
+            body: "Community could not depend on everyone contributing. In a study of 375 online communities, 53.9% of non-posting respondents said that simply reading or browsing was enough.\n\nSource: <a href=\"https://www.dhi.ac.uk/san/waysofbeing/data/communities-murphy-preece-2004b.pdf\" target=\"_blank\" rel=\"noopener\">Preece, Nonnecke &amp; Andrews — The top five reasons for lurking (2004)</a>.\n\nHerWay supports three levels of engagement:\n\n<strong>Read</strong> — browse updates, events, and information.\n\n<strong>Participate</strong> — post, ask questions, or join group conversations.\n\n<strong>Coordinate</strong> — message another rider directly.\n\nThese are options, not stages. The community remains useful even when someone only reads.",
+            img: "images/herway-moment-02.jpg",
+            aspect: "16 / 9",
+            caption: "Simply reading questions, experiences, and discussions gives people value from the community.",
+            alt: "Diagram contrasting the few riders who post with the many who only read" },
           { title: "Shared presence should support ordinary travel",
             stance: "Make room for the people and activity around the system.",
-            body: "Safety came up repeatedly in the field interviews, but riders also talked about the ordinary experience around transit: waiting, commuting at night, recognizing familiar routes, and staying aware of what was happening nearby.\n\nA product built only around incidents would make warnings the main way riders encounter the community.\n\nHerWay includes ordinary activity alongside alerts: route questions, local events, rider updates, and travel coordination. Groups provide a way to recognize shared routines and organize around them.\n\nThe product direction centered on mutual support rather than police-linked monitoring. Rider counts and community activity make participation visible, while conversations offer a way to act on those connections.\n\nThe intention is to help riders feel informed and less alone. Whether that translates into greater comfort or safer travel would require further evaluation.",
-            img: "[MOMENT 03 — everyday community content shown alongside an alert and a coordination example]" },
+            body: "Safety came up often in interviews, but riders also described the everyday experience of transit: waiting, commuting at night, familiar routes, and staying aware of what was nearby.\n\nHerWay balances alerts with ordinary activity such as route questions, events, rider updates, and coordination. Groups help riders recognize shared routines and connect around them.\n\nThe direction centered on mutual support rather than monitoring, helping riders stay informed and feel less alone without claiming that community activity guarantees safer travel.",
+            vid: "videos/herway-moment-03.mp4",
+            poster: "videos/herway-moment-03-poster.jpg",
+            aspect: "1 / 1",
+            caption: "Ordinary activity on the map, not only alerts",
+            alt: "Rider counts and community activity visible along nearby routes" },
           { title: "Let people follow the connection between tasks",
             stance: "Testing showed that a feature could exist without being discovered.",
-            body: "Across three rounds of five usability participants, one recurring behavior was that people tended to stay in Home while planning a trip. Keeping community in a separate section meant riders could complete the core task without discovering much of the support around it.\n\nThe design brought routing and community together through a sliding tab switcher within Home. Both became available from the place participants already used while remaining clearly distinguished.\n\nTesting also prompted a broader look at navigation. A rider’s task may cross maps, posts, groups, and conversations, so additional entry points connected chats, the feed, and the map.\n\nRelated information could be reached from more than one place, reducing the need to return to a section’s starting point.",
-            img: "[MOMENT 04 — earlier Home, the testing observation, the revised routing/community switcher, then a path connecting map, feed, and conversation]" },
+            body: "Across three rounds of five usability participants, people tended to stay in Home while planning a trip. Keeping community separate meant much of its value could go unnoticed.\n\nThe design brought routing and community together through a tab switcher within Home, placing both where participants already spent their time.\n\nTesting also led to more connections between maps, posts, groups, and chats, allowing related information to be reached from multiple places instead of returning to a section’s starting point.",
+            img: "images/herway-moment-04.jpg",
+            aspect: "16 / 9",
+            caption: "The earlier Home, and the revised Home that put routing and community side by side",
+            alt: "The map-only Home beside the revised Home with a Routing and Feed switcher" },
           { title: "Consider access and privacy together",
             stance: "A women-centered community raised questions the interface alone could not resolve.",
-            body: "The concept needed an approach to community access that considered both trust and the sensitivity of verification information.\n\nNIST’s Digital Identity Guidelines recommend minimizing the personal information collected and disclosed during identity proofing, including using derived attributes when the underlying information does not need to be exposed.\n\nSource: <a href=\"https://pages.nist.gov/800-63-4/sp800-63a/\" target=\"_blank\" rel=\"noopener\">NIST SP 800-63A — Digital Identity Guidelines</a>.\n\nThe prototype explored that principle through on-device verification intended to keep verification material local rather than storing it as part of a rider’s profile.\n\nThe proposed flow still introduced tradeoffs. Verification adds effort, can fail, and may exclude people incorrectly. A useful implementation would need to establish what the method can reliably verify and provide a way forward when it gets something wrong.\n\nThe prototype explored the interaction; accuracy, data handling, and the effect on community trust remained questions for further development.",
-            img: "[MOMENT 05 — verification flow showing what is checked, what is not stored, and a path for failed verification]" }
+            body: "Community access needed to balance trust with the sensitivity of verification data. NIST recommends minimizing the personal information collected and disclosed during identity proofing.\n\nSource: <a href=\"https://pages.nist.gov/800-63-4/sp800-63a/\" target=\"_blank\" rel=\"noopener\">NIST SP 800-63A — Digital Identity Guidelines</a>.\n\nHerWay explored on-device verification so sensitive verification material could stay local instead of becoming part of a rider’s stored profile.\n\nThis made verification a gate to access rather than another source of personal data for the platform to retain.",
+            vid: "videos/herway-moment-05.mp4",
+            poster: "videos/herway-moment-05-poster.jpg",
+            aspect: "1 / 1",
+            caption: "A one-time check that stays on the device",
+            alt: "The HerWay verification step offering a state ID, passport, or driver's license" }
         ]
       },
 
@@ -4144,7 +4222,8 @@ const PROJECTS = {
           { v: "15", label: "Participants across the three testing rounds" }
         ],
         statement: "HerWay developed into a Figma prototype connecting route planning, ride information, community updates, groups, and private messaging. The research informed what the product needed to address; testing exposed how its structure could prevent people from reaching those features. The final design brought routing and community together within Home and provided multiple entry points across related tasks. The project produced a concrete interaction model that could be tested and developed further. It did not establish a reduction in incidents or a measured improvement in rider confidence.",
-        img: "[OUTCOME — 16:9 final prototype overview showing the revised experience]"
+        img: "images/herway-outcome.jpg",
+        alt: "A rider using HerWay beside the final prototype's Home and route comparison screens"
       },
 
       { reflection: true, n:"07", tocLabel:"Reflection",
@@ -4742,6 +4821,16 @@ function drawJittered(stroke) {
     tools: "Blender - Procreate",
     context: "3D Character Design - Rendering",
     accent: "linear-gradient(90deg,#003d10,#00aa33)",
+    /* The character itself, turnable, instead of a frame of the render. The
+       whole project is a model that was built to be looked at from any angle,
+       so a fixed camera is the one thing the cover should not be. Self-
+       contained in /glitter-viewer and loaded in an iframe, so its three.js
+       and its CSS never touch this page. Five clicks on it opens clean.html. */
+    hero: {
+      glitter: true,
+      alt: "Glitter 2K, a 3D character you can turn",
+      caption: "Drag to rotate"
+    },
     images: [],
     sections: [
       { n:"01", t:"CONCEPT", b:"A 3D character inspired by late 90s and early 2000s console games. Chunky geometry, oversaturated color, and the kind of attitude that era did well. Built from scratch in Blender with Procreate handling the concept and textures.", vid:"https://player.vimeo.com/video/1180005831?badge=0&autopause=0&player_id=0&app_id=58479&autoplay=1&muted=1&loop=1&controls=0&title=0&byline=0&portrait=0" },
@@ -4963,12 +5052,12 @@ function drawJittered(stroke) {
       },
 
       { photostrip: true, n:"05", t:"IN THE AISLE", tocLabel:"In the aisle",
-        lead: "Interviews happened where the decisions happen, not in a conference room.",
+        lead: "Interviews, working sessions and testing, kept close to the people the product was for.",
         items: [
-          { img:"[RESEARCH 01 — 3:4 photo: interview in the produce section]", caption:"Produce section" },
-          { img:"[RESEARCH 02 — 3:4 photo: a shopper's phone list held next to the shelf]", caption:"Lists in use" },
-          { img:"[RESEARCH 03 — 3:4 photo: raw interview notes and quote cards]", caption:"Notes" },
-          { img:"[RESEARCH 04 — 3:4 photo: affinity wall of grouped research themes]", caption:"Themes" }
+          { vid:"videos/pantri-research-interview.mp4", caption:"Interviews" },
+          { vid:"videos/pantri-research-work.mp4", caption:"Working sessions" },
+          { vid:"videos/pantri-research-color-test.mp4", caption:"Color testing" },
+          { vid:"videos/pantri-research-testing.mp4", caption:"Usability testing" }
         ]
       },
 
@@ -4986,9 +5075,11 @@ function drawJittered(stroke) {
           { title: "Making personalization optional",
             stance: "Designed Pantri to stay useful even with less data.",
             body: "Receipt access makes Pantri more personalized by automatically updating the pantry, recipes, and meal plan. But the experience was also designed for people who may not be comfortable sharing their purchase history.\n\nWithout receipt data, users could still track produce through the color-changing stickers, understand what should be used first, and get general guidance on what to buy and when. Sharing more data improves the experience, but it is not what makes Pantri useful in the first place.",
-            img: "[MOMENT 02 — 3:4: Pantri running without receipt access, relying on sticker-based freshness tracking and general guidance]",
-            aspect: "3 / 4",
-            caption: "Personalization improves the experience, it does not define it" },
+            vid: "videos/pantri-moment-personalization.mp4",
+            poster: "videos/pantri-moment-personalization-poster.jpg",
+            aspect: "1 / 1",
+            caption: "Personalization improves the experience, it does not define it",
+            alt: "The Pantri receipt data setting, showing what the app reads, what it never touches and the toggle that turns it off" },
           { title: "Leave calorie tracking out",
             stance: "Refused the obvious adjacent feature.",
             body: "Pantri already understood ingredients and portions, so nutrition tracking looked like a free addition. It was cut. It introduced more sensitive information, more complexity, and a different relationship with food than the product was designed for. A future version could connect to dedicated nutrition platforms. Pantri did not need to become every food app at once.",
@@ -5022,10 +5113,10 @@ function drawJittered(stroke) {
       { artifacts: true, n:"08", t:"MAKING THE STICKER", tocLabel:"The sticker",
         lead: "The sticker was designed to be useful on its own, helping shoppers judge ripeness even without the app. Pantri complements that physical cue by connecting purchases to meal planning and cooking.",
         items: [
-          { img:"[STICKER 01 — 4:3: early sketches and physical sticker prototypes on fruit]",
+          { img:"images/pantri-sticker-sketches.jpg",
             label:"Sketches and physical prototypes",
             caption:"Early exploration of the sticker format, placement and how the ripeness stages read at arm's length in a store." },
-          { img:"[STICKER 02 — 4:3: color explorations, focus group activity and color-vision accessibility tests]",
+          { img:"images/pantri-sticker-color.jpg",
             label:"Color and accessibility testing",
             caption:"Focus groups compared possible palettes and tried to place the colors in order. Testing with people with color vision deficiencies helped us understand where those differences were harder to read. The sensing technology limited the available colors, so the challenge was finding a sequence that made sense to shoppers while remaining distinguishable within those constraints." }
         ]
@@ -5205,8 +5296,8 @@ function hideLoader() {
   if (heroCueEl) heroCueEl.classList.add('in');
   setTimeout(function() {
     loader.style.display = 'none';
-    /* A shared link opens its case study once the reveal has finished */
-    openProjectFromUrl();
+    /* Any leftover project address is tidied back to the homepage */
+    resetProjectUrl();
     /* After page reveals, background-fetch the larger videos */
     ['images/glitterbomb-thumb.mp4'].forEach(function(src) {
       fetch(src).then(function(res) {
@@ -6478,6 +6569,19 @@ document.querySelectorAll('.pcard').forEach(function(card) {
           caption +
         '</div>';
       }
+      /* Glitter hero — the viewer is a whole document, not a component, so it
+         goes in an iframe and brings its own three.js. Nothing to swap in
+         afterwards and nothing to import: the frame is the hero from the
+         first paint. The viewer leaves wheel events alone, so the case study
+         still scrolls normally when the pointer is over it. */
+      if (hero.glitter) {
+        return '<div class="modal-hero modal-hero--glitter">' +
+          '<iframe src="/glitter-viewer/index.html?v=2"' +
+            ' title="' + escHtml(hero.alt || 'Glitter 2K, 3D character') + '"' +
+            ' loading="lazy"></iframe>' +
+          caption +
+        '</div>';
+      }
       if (hero.vid && !isSlot(hero.vid)) {
         var vidBadge = hero.badge ? '<div class="hero-concept-badge">' + escHtml(hero.badge) + '</div>' : '';
         return '<div class="modal-hero"><video autoplay muted loop playsinline><source src="' + hero.vid + '" type="video/mp4"></video>' + vidBadge + caption + '</div>';
@@ -6934,6 +7038,92 @@ document.querySelectorAll('.pcard').forEach(function(card) {
       }).catch(function (err) {
         console.warn('[flatpack-chair] could not load', err);
       });
+    }
+
+    /* Glitter hero — nothing to swap in, the iframe is already the hero. This
+       only wires the easter egg: five taps on the character opens clean.html,
+       the same model with the effects switched off.
+
+       /glitter-viewer is same-origin, so the counter is a listener added to
+       the viewer's document at runtime. Nothing inside that folder is edited.
+       A tap is a pointerup that moved less than 6px — otherwise every
+       drag-to-rotate would count toward the five. */
+    var glitterHero = msections.querySelector('.modal-hero--glitter');
+    if (glitterHero) {
+      var gvFrame = glitterHero.querySelector('iframe');
+      var gvTaps = 0, gvTimer = null, gvX = 0, gvY = 0, gvEgg = null;
+
+      var gvWatch = null;
+
+      var closeEgg = function () {
+        if (!gvEgg) return;
+        var el = gvEgg;
+        gvEgg = null;
+        document.removeEventListener('keydown', onEggKey);
+        if (gvWatch) { gvWatch.disconnect(); gvWatch = null; }
+        el.classList.remove('in');
+        /* Drop the iframe on the way out so the second viewer stops running. */
+        window.setTimeout(function () {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }, 300);
+      };
+
+      var onEggKey = function (e) {
+        if (e.key === 'Escape') { e.stopPropagation(); closeEgg(); }
+      };
+
+      var openEgg = function () {
+        if (gvEgg) return;
+        gvEgg = document.createElement('div');
+        gvEgg.className = 'gv-egg';
+        gvEgg.innerHTML =
+          '<div class="gv-egg-frame">' +
+            '<div class="gv-egg-label">No effects</div>' +
+            '<button type="button" class="gv-egg-close" aria-label="Close">Close &times;</button>' +
+            '<iframe src="/glitter-viewer/clean.html?v=2" title="Glitter 2K, no effects" loading="lazy"></iframe>' +
+          '</div>';
+        document.body.appendChild(gvEgg);
+        gvEgg.querySelector('.gv-egg-close').addEventListener('click', closeEgg);
+        gvEgg.addEventListener('click', function (e) {
+          if (e.target === gvEgg) closeEgg();
+        });
+        document.addEventListener('keydown', onEggKey);
+
+        /* If the case study itself goes away underneath (back button, history),
+           the overlay goes with it. Watching the class rather than hooking
+           closeModal keeps this entirely additive. */
+        var modalEl = document.getElementById('modal');
+        if (modalEl && window.MutationObserver) {
+          gvWatch = new MutationObserver(function () {
+            if (!modalEl.classList.contains('open')) closeEgg();
+          });
+          gvWatch.observe(modalEl, { attributes: true, attributeFilter: ['class'] });
+        }
+
+        requestAnimationFrame(function () {
+          if (gvEgg) gvEgg.classList.add('in');
+        });
+      };
+
+      var armEgg = function (doc) {
+        doc.addEventListener('pointerdown', function (e) {
+          gvX = e.clientX; gvY = e.clientY;
+        }, true);
+        doc.addEventListener('pointerup', function (e) {
+          if (Math.abs(e.clientX - gvX) > 6 || Math.abs(e.clientY - gvY) > 6) return;
+          gvTaps++;
+          window.clearTimeout(gvTimer);
+          gvTimer = window.setTimeout(function () { gvTaps = 0; }, 1200);
+          if (gvTaps >= 5) { gvTaps = 0; openEgg(); }
+        }, true);
+      };
+
+      if (gvFrame) {
+        gvFrame.addEventListener('load', function () {
+          try { armEgg(gvFrame.contentDocument); }
+          catch (err) { console.warn('[glitter-viewer] egg not armed', err); }
+        });
+      }
     }
 
     /* ── Template 2.5: sidebar TOC + scroll-spy ── */
@@ -7442,6 +7632,17 @@ document.querySelectorAll('.pcard').forEach(function(card) {
   }, true);
 })();
 
+/* Put the address back on the homepage once nothing is open. Closing used to
+   leave this entirely to the Back traversal below, so whenever that traversal
+   did not land the bar kept naming a case study that was no longer on screen. */
+function normalizeClosedUrl() {
+  if (modal.classList.contains('open')) return;
+  if (!urlRoutingEnabled || location.pathname === '/') return;
+  history.replaceState({ portfolio: { view: 'projects', position: modalReturnPosition } }, '', '/');
+}
+
+var modalBackTimer = null;
+
 function closeModal(fromHistory) {
   if (!modal.classList.contains('open')) return;
   var entry = history.state && history.state.portfolio;
@@ -7459,7 +7660,23 @@ function closeModal(fromHistory) {
   // The guard prevents a double click / repeated Escape from traversing twice.
   if (rewind) {
     modalBackPending = true;
+    clearTimeout(modalBackTimer);
+    /* modalBackPending blocks card clicks (see the .pcard handler) so a double
+       click or a held Escape cannot traverse twice. It is cleared by popstate —
+       but a programmatic back does not always produce one. A p5 sketch frame
+       adds entries of its own, and some browsers drop the call when it is made
+       from inside a click. When that happened the guard stayed latched for the
+       rest of the visit and swallowed every later project click, with the
+       address still reading the project that had just been closed. */
+    modalBackTimer = setTimeout(function() {
+      modalBackTimer = null;
+      if (!modalBackPending) return;
+      modalBackPending = false;
+      normalizeClosedUrl();
+    }, 400);
     history.back();
+  } else if (!fromHistory) {
+    normalizeClosedUrl();
   }
 }
 
@@ -7470,6 +7687,8 @@ document.addEventListener('keydown', function(e) {
 window.addEventListener('popstate', function(event) {
   var entry = event.state && event.state.portfolio;
   var wasPending = modalBackPending;
+  clearTimeout(modalBackTimer);
+  modalBackTimer = null;
   modalBackPending = false;
   if (entry && entry.position) modalReturnPosition = entry.position;
   if (entry && entry.view === 'caseStudy' && !wasPending) {
@@ -7487,7 +7706,9 @@ window.addEventListener('popstate', function(event) {
 
 /* ═══════════════════════════════
    PROJECT URLS
-   Each case study gets a shareable address: /nibble, /pantri, /herway.
+   An open case study shows its own address: /nibble, /pantri, /herway. It is
+   written on the way in and cleared on the way out, so the bar always agrees
+   with what is on screen — but it is never read back to decide what to open.
    Deliberately one path segment deep. At /work/nibble the browser would
    resolve every relative asset path against /work/, so images and videos
    would 404. At /nibble the base stays the site root and they keep working.
@@ -7508,30 +7729,14 @@ var PROJECT_SLUGS = { pixelgame: 'callisto', throughlens: 'exploration' };
 function projectPath(id) { return urlRoutingEnabled ? '/' + (PROJECT_SLUGS[id] || id) : ''; }
 function homePath() { return urlRoutingEnabled ? '/' : ''; }
 
-function projectFromPath() {
-  var slug = location.pathname.replace(/^\/+|\/+$/g, '');
-  for (var id in PROJECT_SLUGS) { if (PROJECT_SLUGS[id] === slug) return id; }
-  return PROJECTS[slug] ? slug : null;
-}
-
-/* Someone loaded /nibble directly, or refreshed with a case study open.
-   Seed a grid entry underneath, then open the project through the normal
-   click path so Back lands on the grid instead of leaving the site. */
-function openProjectFromUrl() {
+/* A project address is only ever written while someone is browsing; it is never
+   read back. Arriving on /nibble — a refresh, a bookmark, a return visit —
+   starts at the grid, so nobody is dropped back into a case study they had
+   already left. The address is rewritten to the homepage straight away, which
+   also keeps it from disagreeing with a closed panel. */
+function resetProjectUrl() {
   if (!urlRoutingEnabled) return;
-  var id = projectFromPath();
-  var card = id && document.querySelector('.pcard[data-project="' + id + '"]');
-  if (!card) {
-    /* A retired, benched or mistyped project link still lands on the grid, but
-       the stale address is tidied away so the page reads as the homepage. A
-       benched project keeps its PROJECTS entry, so the id resolves even though
-       no card is on the page — the card is what decides if it is reachable. */
-    if (location.pathname !== '/') history.replaceState(null, '', '/');
-    return;
-  }
-  modalReturnPosition = { x: 0, y: 0 };
-  history.replaceState({ portfolio: { view: 'projects', position: modalReturnPosition } }, '', '/');
-  card.click();
+  if (location.pathname !== '/') history.replaceState(null, '', '/');
 }
 
 /* ═══════════════════════════════

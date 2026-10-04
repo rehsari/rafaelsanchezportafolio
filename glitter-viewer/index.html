@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Glitter 2K</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=Archivo:wght@400;500;600&display=swap">
+<style>
+/* Layout: full-bleed CRT stage, tape-deck control rack docked right (bottom drawer on phones). Single committed dark look. */
+:root {
+  --bg: #19191c;
+  --panel: rgba(20, 20, 23, 0.9);
+  --fg: #ece7dc;
+  --dim: #8f8b96;
+  --line: #34333a;
+  --accent: #66dcf5;
+  --rec: #ff4157;
+  --font-osd: "VT323", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-ui: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 13px; overflow: hidden; }
+.app { position: relative; height: 100%; display: flex; }
+.stage { position: relative; flex: 1; min-width: 0; height: 100%; overflow: hidden; touch-action: none; }
+.stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.stage canvas:active { cursor: grabbing; }
+
+/* VHS on-screen display */
+.osd { position: absolute; inset: 0; pointer-events: none; font-family: var(--font-osd); color: #f4f1ea; text-shadow: 2px 0 0 rgba(255,40,80,.55), -2px 0 0 rgba(60,220,255,.45); font-size: clamp(22px, 3.2vw, 34px); letter-spacing: .04em; line-height: 1; }
+.osd .tl { position: absolute; top: calc(18px + env(safe-area-inset-top, 0px)); left: 22px; display: flex; gap: .6em; }
+.osd .bl { position: absolute; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); left: 22px; }
+.osd .tr { position: absolute; top: calc(18px + env(safe-area-inset-top, 0px)); right: 22px; }
+.osd[hidden] { display: none !important; }
+
+.status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-family: var(--font-osd); font-size: 28px; color: var(--fg); text-align: center; padding-inline: 16px; }
+
+/* Control rack */
+.rack { width: 312px; flex: none; height: 100%; overflow-y: auto; background: var(--panel); border-left: 1px solid var(--line); padding: 16px 18px 28px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px; backdrop-filter: blur(6px); }
+.rack[hidden] { display: none !important; }
+.rack header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.rack h1 { font-family: var(--font-osd); font-weight: 400; font-size: 30px; margin: 0; letter-spacing: .03em; text-wrap: balance; }
+.rack h1 .dot { display: inline-block; width: .32em; height: .32em; border-radius: 50%; background: var(--rec); margin-right: .3em; vertical-align: .18em; }
+.sub { color: var(--dim); font-size: 12px; margin: 4px 0 0; line-height: 1.45; }
+fieldset { border: 0; border-top: 1px solid var(--line); padding: 12px 0 0; margin: 0; display: flex; flex-direction: column; gap: 11px; min-width: 0; }
+legend { font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); padding: 0 8px 0 0; }
+.presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.chip { font: 500 12px var(--font-ui); color: var(--fg); background: transparent; border: 1px solid var(--line); padding: 7px 4px; cursor: pointer; border-radius: 2px; }
+.chip:hover { border-color: var(--dim); }
+.chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 10px; }
+.row label { font-size: 12.5px; }
+.row output { font-family: var(--font-osd); font-size: 18px; color: var(--accent); font-variant-numeric: tabular-nums; min-width: 3ch; text-align: right; }
+.row input[type=range] { grid-column: 1 / -1; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 18px; background: transparent; margin: 0; }
+input[type=range]::-webkit-slider-runnable-track { height: 2px; background: var(--line); }
+input[type=range]::-moz-range-track { height: 2px; background: var(--line); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 16px; margin-top: -7px; background: var(--fg); border: 0; border-radius: 1px; }
+input[type=range]::-moz-range-thumb { width: 10px; height: 16px; background: var(--fg); border: 0; border-radius: 1px; }
+input[type=range]:focus-visible::-webkit-slider-thumb { background: var(--accent); }
+input[type=range]:focus-visible::-moz-range-thumb { background: var(--accent); }
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; font-size: 12.5px; }
+.toggle input { appearance: none; -webkit-appearance: none; width: 30px; height: 16px; border: 1px solid var(--dim); border-radius: 0; position: relative; margin: 0; cursor: pointer; flex: none; }
+.toggle input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; background: var(--dim); transition: transform .12s; }
+.toggle input:checked { border-color: var(--accent); }
+.toggle input:checked::after { transform: translateX(14px); background: var(--accent); }
+.toggle input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+select, input[type=color] { font: 500 12.5px var(--font-ui); color: var(--fg); background: var(--bg); border: 1px solid var(--line); padding: 5px 6px; border-radius: 2px; }
+input[type=color] { width: 44px; height: 26px; padding: 1px 2px; }
+.btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.btn { font: 500 12.5px var(--font-ui); color: var(--fg); background: var(--bg); border: 1px solid var(--line); padding: 8px 10px; cursor: pointer; border-radius: 2px; }
+.btn:hover { border-color: var(--dim); }
+.btn.primary { border-color: var(--accent); color: var(--accent); }
+button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hint { color: var(--dim); font-size: 11.5px; line-height: 1.45; margin: 0; }
+kbd { font-family: var(--font-osd); font-size: 15px; border: 1px solid var(--line); padding: 0 4px; }
+textarea.out { width: 100%; box-sizing: border-box; height: 120px; font: 11px ui-monospace, Menlo, monospace; background: var(--bg); color: var(--fg); border: 1px solid var(--line); resize: vertical; }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); font: 600 12.5px var(--font-ui); padding: 8px 14px; border-radius: 2px; z-index: 10; }
+.rackToggle { position: absolute; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 5; font: 600 12px var(--font-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--fg); background: var(--panel); border: 1px solid var(--line); padding: 9px 12px; cursor: pointer; }
+.rackToggle[hidden] { display: none !important; }
+
+@media (max-width: 760px) {
+  .app { flex-direction: column; }
+  .stage { flex: 1 1 auto; height: auto; min-height: 0; }
+  .rack { width: 100%; height: 46%; border-left: 0; border-top: 1px solid var(--line); padding-inline: 16px; }
+  .osd { font-size: 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .toggle input::after { transition: none; } }
+</style>
+
+</head>
+<body>
+<div class="app" id="app">
+  <div class="stage" id="stage">
+    <div class="osd" id="osd" aria-hidden="true">
+      <div class="tl"><span id="osdMode">PLAY ▶</span></div>
+      <div class="tr">SP</div>
+      <div class="bl" id="osdTime">0:00:00</div>
+    </div>
+    <div class="status" id="status">LOADING TAPE…</div>
+    <button class="rackToggle" id="rackToggle" type="button" aria-controls="rack">Controls</button>
+  </div>
+
+  <aside class="rack" id="rack" aria-label="Viewer controls">
+    <header>
+      <div>
+        <h1><span class="dot"></span>Glitter 2K</h1>
+        <p class="sub">Drag to orbit, scroll to zoom. <kbd>Space</kbd> pause, <kbd>H</kbd> hide panel.</p>
+      </div>
+    </header>
+
+    <fieldset>
+      <legend>Look</legend>
+      <div class="presets" role="group" aria-label="Presets">
+        <button class="chip" type="button" data-preset="vhs">VHS</button>
+        <button class="chip" type="button" data-preset="ps1">PS1</button>
+        <button class="chip" type="button" data-preset="chunky">Chunky</button>
+        <button class="chip" type="button" data-preset="clean">Clean</button>
+      </div>
+    </fieldset>
+
+    <div id="controls"></div>
+
+    <fieldset>
+      <legend>Scene</legend>
+      <div class="row"><label for="c-anim">Animation</label><select id="c-anim"></select></div>
+      <div class="row"><label for="c-framing">Framing</label>
+        <select id="c-framing"><option value="full">Full body</option><option value="bust">Waist up</option><option value="face">Head</option></select></div>
+      <label class="toggle" for="c-autorotate">Auto-rotate<input type="checkbox" id="c-autorotate"></label>
+      <label class="toggle" for="c-upright">Auto-fix upside down<input type="checkbox" id="c-upright"></label>
+      <div class="row"><label for="c-bg">Background</label><input type="color" id="c-bg"></div>
+      <div class="btns">
+        <button class="btn" type="button" id="b-pause">Pause</button>
+        <button class="btn" type="button" id="b-flip">Flip 180°</button>
+        <button class="btn" type="button" id="b-turn">Turn around</button>
+        <button class="btn" type="button" id="b-reset">Reset camera</button>
+      </div>
+    </fieldset>
+
+
+    <fieldset>
+      <legend>Use on your site</legend>
+      <div class="btns">
+        <button class="btn primary" type="button" id="b-copy">Copy settings</button>
+      </div>
+      <p class="hint">Paste the copied block into <b>embed.html</b>, replacing the existing <code>VIEWER_CONFIG</code>.</p>
+      <textarea class="out" id="out" hidden readonly aria-label="Settings code"></textarea>
+    </fieldset>
+  </aside>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* Website version: no control panel and no model uploading. The look is fixed by the settings below
+   and scales with the viewer height, so it looks the same at any embed size. */
+window.VIEWER_CONFIG = {
+  "showPanel": false,
+  "model": "model.glb",
+  "settings": {
+    "anim": 0,
+    "framing": "bust",
+    "autorotate": true,
+    "upright": true,
+    "bg": "#36363a",
+    "flipX": false,
+    "turnY": false,
+    "preset": "custom",
+    "pixel": 3,
+    "wobble": 0.05,
+    "crisp": true,
+    "shading": "flat",
+    "levels": 36,
+    "dither": 0.6,
+    "sat": 1.8,
+    "contrast": 0.85,
+    "chroma": 1.5,
+    "bleed": 0.3,
+    "jitter": 0.05,
+    "grain": 0.8,
+    "scan": 0.15,
+    "vignette": 0.5,
+    "osd": true
+  }
+};
+window.VIEWER_CONFIG = window.VIEWER_CONFIG || { showPanel: true, model: "model.glb", settings: {} };
+</script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const CFG = window.VIEWER_CONFIG;
+const $ = (id) => document.getElementById(id);
+
+/* ---------- settings ---------- */
+const PRESETS = {
+  vhs:    { pixel: 4, wobble: 0.3, crisp: true,  levels: 16, dither: 0.25, sat: 1.4, contrast: 1.05, shading: 'flat', chroma: 3.5, bleed: 0.6,  grain: 0.45, scan: 0.15, jitter: 0.35, vignette: 0.3,  osd: true },
+  ps1:    { pixel: 3, wobble: 0.7, crisp: true,  levels: 24, dither: 0.8,  sat: 1.1, contrast: 1.0,  shading: 'flat', chroma: 0,   bleed: 0,    grain: 0.06, scan: 0,    jitter: 0,    vignette: 0.15, osd: false },
+  chunky: { pixel: 8, wobble: 0.5, crisp: true,  levels: 7,  dither: 0.45, sat: 1.4, contrast: 1.1,  shading: 'toon', chroma: 3,   bleed: 0.3,  grain: 0.25, scan: 0.35, jitter: 0.15, vignette: 0.3,  osd: true },
+  clean:  { pixel: 1, wobble: 0,   crisp: false, levels: 64, dither: 0,    sat: 1.0, contrast: 1.0,  shading: 'flat', chroma: 0,   bleed: 0,    grain: 0,    scan: 0,    jitter: 0,    vignette: 0,    osd: false },
+};
+const SCENE_DEFAULTS = { preset: 'vhs', anim: 0, framing: 'bust', autorotate: false, upright: true, bg: '#36363a', flipX: false, turnY: false };
+const S = Object.assign({}, SCENE_DEFAULTS, PRESETS.vhs, CFG.settings || {});
+
+const SCHEMA = [
+  { group: 'Pixels', items: [
+    { key: 'pixel', label: 'Pixel size', min: 1, max: 14, step: 1, fmt: v => v + 'px' },
+    { key: 'wobble', label: 'Vertex wobble', min: 0, max: 1, step: 0.05 },
+    { key: 'crisp', label: 'Crisp textures (no smoothing)', type: 'toggle' },
+  ]},
+  { group: 'Color', items: [
+    { key: 'shading', label: 'Shading', type: 'select', options: [['flat', 'Flat (unlit)'], ['toon', 'Toon (stepped light)']] },
+    { key: 'levels', label: 'Color levels', min: 2, max: 64, step: 1, fmt: v => v >= 64 ? 'off' : v },
+    { key: 'dither', label: 'Dither', min: 0, max: 1, step: 0.05 },
+    { key: 'sat', label: 'Saturation', min: 0, max: 2, step: 0.05 },
+    { key: 'contrast', label: 'Contrast', min: 0.5, max: 1.6, step: 0.05 },
+  ]},
+  { group: 'Tape', items: [
+    { key: 'chroma', label: 'Red / cyan split', min: 0, max: 8, step: 0.5, fmt: v => v + 'px' },
+    { key: 'bleed', label: 'Color bleed', min: 0, max: 1, step: 0.05 },
+    { key: 'jitter', label: 'Line jitter', min: 0, max: 1, step: 0.05 },
+    { key: 'grain', label: 'Grain', min: 0, max: 1, step: 0.05 },
+    { key: 'scan', label: 'Scanlines', min: 0, max: 1, step: 0.05 },
+    { key: 'vignette', label: 'Vignette', min: 0, max: 1, step: 0.05 },
+    { key: 'osd', label: 'Tape overlay text', type: 'toggle' },
+  ]},
+];
+const fmtNum = v => (Math.round(v * 100) / 100).toFixed(v % 1 === 0 ? 0 : 2);
+
+/* ---------- renderer & scene ---------- */
+const stage = $('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+stage.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(S.bg);
+const camera = new THREE.PerspectiveCamera(30, 1, 0.01, 200);
+camera.position.set(0, 1.6, 6);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08; controls.enablePan = false;
+// Website mode (no panel): same drag-to-rotate and zoom, but keyboard shortcuts are off.
+const EMBED = CFG.showPanel === false;
+controls.autoRotateSpeed = 1.2;
+
+const hemi = new THREE.HemisphereLight(0xffffff, 0x444455, 1.4);
+const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(2.5, 4, 3);
+scene.add(hemi, key);
+
+const pivot = new THREE.Group();   // holds orientation fix
+scene.add(pivot);
+
+const rt = new THREE.WebGLRenderTarget(2, 2, { type: THREE.HalfFloatType, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthBuffer: true });
+
+const snapUniforms = { uSnap: { value: 0 }, uSnapRes: { value: new THREE.Vector2(320, 240) } };
+
+const post = new THREE.ShaderMaterial({
+  uniforms: {
+    tDiffuse: { value: rt.texture }, lowRes: { value: new THREE.Vector2() }, outRes: { value: new THREE.Vector2() },
+    time: { value: 0 }, dpr: { value: 1 },
+    chroma: { value: 0 }, bleed: { value: 0 }, grain: { value: 0 }, scan: { value: 0 }, jitter: { value: 0 },
+    levels: { value: 64 }, dither: { value: 0 }, sat: { value: 1 }, contrast: { value: 1 }, vignette: { value: 0 },
+  },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+  fragmentShader: `
+    precision highp float;
+    uniform sampler2D tDiffuse; uniform vec2 lowRes; uniform vec2 outRes; uniform float time; uniform float dpr;
+    uniform float chroma, bleed, grain, scan, jitter, levels, dither, sat, contrast, vignette;
+    varying vec2 vUv;
+    float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+    vec3 toSRGB(vec3 c){ c = max(c, 0.0); return mix(c * 12.92, 1.055 * pow(c, vec3(1.0/2.4)) - 0.055, step(0.0031308, c)); }
+    vec3 samp(vec2 uv){ return toSRGB(texture2D(tDiffuse, clamp(uv, 0.0, 1.0)).rgb); }
+    vec3 split(vec2 uv, float o){ return vec3(samp(uv + vec2(o, 0.0)).r, samp(uv).g, samp(uv - vec2(o, 0.0)).b); }
+    const mat3 toYIQ = mat3(0.299, 0.596, 0.211, 0.587, -0.274, -0.523, 0.114, -0.322, 0.312);
+    const mat3 fromYIQ = mat3(1.0, 1.0, 1.0, 0.956, -0.272, -1.106, 0.621, -0.647, 1.703);
+    float bayer2(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
+    float bayer4(vec2 a){ return bayer2(0.5 * a) * 0.25 + bayer2(a); }
+    void main(){
+      vec2 uv = vUv;
+      // tape tracking: per-line horizontal jitter + a slow rolling band
+      float line = floor(uv.y * lowRes.y);
+      float tf = floor(time * 24.0);
+      float j = hash(vec2(line, tf)) - 0.5;
+      float wave = sin(uv.y * 9.0 + time * 1.7) * sin(uv.y * 31.0 - time * 3.1);
+      float bandY = fract(1.0 - time * 0.06);
+      float band = exp(-pow((uv.y - bandY) * 30.0, 2.0));
+      uv.x += jitter * (j * 0.9 / lowRes.x + wave * 0.0012 + band * (hash(vec2(line, tf + 7.0)) - 0.3) * 0.02);
+
+      float o = chroma * dpr / outRes.x;
+      vec3 c = split(uv, o);
+      if (bleed > 0.0) {
+        float bw = (1.0 + bleed * 2.5) / lowRes.x;
+        vec2 iq = vec2(0.0);
+        for (int k = -2; k <= 2; k++) iq += (toYIQ * split(uv + vec2(float(k) * bw, 0.0), o)).yz;
+        iq /= 5.0;
+        vec3 yiq = toYIQ * c;
+        yiq.yz = mix(yiq.yz, iq, bleed);
+        c = fromYIQ * yiq;
+      }
+      float l = dot(c, vec3(0.299, 0.587, 0.114));
+      c = mix(vec3(l), c, sat);
+      c = (c - 0.5) * contrast + 0.5;
+      if (levels < 63.5) {
+        float th = mix(0.5, bayer4(floor(uv * lowRes)), dither);
+        float n = levels - 1.0;
+        c = floor(clamp(c, 0.0, 1.0) * n + th) / n;
+      }
+      float s = 0.5 + 0.5 * sin(gl_FragCoord.y * 3.14159 / (1.5 * dpr));
+      c *= 1.0 - scan * 0.4 * (1.0 - s);
+      vec2 gp = floor(gl_FragCoord.xy / max(dpr, 1.0));
+      float g = hash(gp + fract(time * 7.13) * vec2(97.0, 13.0)) - 0.5;
+      float gc = hash(gp.yx * 1.7 + fract(time * 3.7) * 31.0) - 0.5;
+      c += grain * (vec3(g) * 0.16 + vec3(gc, -gc, gc * 0.5) * 0.05);
+      c += band * jitter * 0.04;
+      vec2 q = vUv - 0.5;
+      c *= 1.0 - vignette * dot(q, q) * 1.8;
+      gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
+    }`,
+  depthTest: false, depthWrite: false,
+});
+const postScene = new THREE.Scene();
+postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), post));
+const postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+/* ---------- model ---------- */
+let model = null, mixer = null, clips = [], actions = [], extraActions = [], meshes = [], textures = new Set();
+let paused = false, objectUrl = null;
+const clock = new THREE.Clock();
+let tapeTime = 0;
+
+const toonRamp = (() => {
+  const d = new Uint8Array([90, 90, 90, 255, 175, 175, 175, 255, 255, 255, 255, 255]);
+  const t = new THREE.DataTexture(d, 3, 1, THREE.RGBAFormat);
+  t.minFilter = t.magFilter = THREE.NearestFilter; t.needsUpdate = true; return t;
+})();
+
+function addSnap(mat) {
+  mat.onBeforeCompile = (sh) => {
+    sh.uniforms.uSnap = snapUniforms.uSnap; sh.uniforms.uSnapRes = snapUniforms.uSnapRes;
+    sh.vertexShader = 'uniform float uSnap; uniform vec2 uSnapRes;\n' + sh.vertexShader.replace('#include <project_vertex>',
+      `#include <project_vertex>
+       if (uSnap > 0.5) { vec4 p = gl_Position; p.xy = floor(p.xy / p.w * uSnapRes + 0.5) / uSnapRes * p.w; gl_Position = p; }`);
+  };
+  mat.customProgramCacheKey = () => 'snap';
+  return mat;
+}
+
+function prepareMaterials(root) {
+  meshes = [];
+  root.traverse((o) => {
+    if (!o.isMesh) return;
+    o.frustumCulled = false;
+    const src = Array.isArray(o.material) ? o.material[0] : o.material;
+    const tex = src.map || src.emissiveMap || null;
+    const color = src.map ? src.color.clone() : (src.emissiveMap ? new THREE.Color(1, 1, 1) : (src.color ? src.color.clone() : new THREE.Color(0.8, 0.8, 0.8)));
+    if (tex) textures.add(tex);
+    const common = { map: tex, color, side: THREE.DoubleSide, transparent: src.transparent, alphaTest: src.alphaTest, opacity: src.opacity };
+    o.userData.flat = addSnap(new THREE.MeshBasicMaterial(common));
+    o.userData.toon = addSnap(new THREE.MeshToonMaterial({ ...common, gradientMap: toonRamp }));
+    meshes.push(o);
+  });
+}
+
+function applyShading() {
+  for (const m of meshes) m.material = S.shading === 'toon' ? m.userData.toon : m.userData.flat;
+}
+let lastCrisp = null;
+function applyTextureFilter(force) {
+  if (!force && lastCrisp === S.crisp) return;
+  lastCrisp = S.crisp;
+  for (const t of textures) {
+    t.magFilter = S.crisp ? THREE.NearestFilter : THREE.LinearFilter;
+    t.minFilter = S.crisp ? THREE.NearestMipmapNearestFilter : THREE.LinearMipmapLinearFilter;
+    t.needsUpdate = true;
+  }
+}
+
+const findBone = (re) => { let f = null; model.traverse(o => { if (!f && (o.isBone || o.type === 'Object3D') && re.test(o.name)) f = o; }); return f; };
+const wpos = (o) => o.getWorldPosition(new THREE.Vector3());
+
+function orient() {
+  if (!model) return;
+  // Pose the first frame, then rotate the whole character so head is above feet and it faces the camera.
+  pivot.quaternion.identity(); pivot.position.set(0, 0, 0);
+  if (mixer) mixer.update(0);
+  pivot.updateMatrixWorld(true);
+  const q = new THREE.Quaternion();
+  if (S.upright) {
+    const head = findBone(/head$/i) || findBone(/head/i);
+    const lf = findBone(/left_?foot$/i), rf = findBone(/right_?foot$/i);
+    const hips = findBone(/hips$/i) || findBone(/pelvis/i);
+    const ls = findBone(/left_?(shoulder|arm)$/i), rs = findBone(/right_?(shoulder|arm)$/i);
+    if (head && (hips || (lf && rf))) {
+      const base = (lf && rf) ? wpos(lf).add(wpos(rf)).multiplyScalar(0.5) : wpos(hips);
+      const up = wpos(head).sub(base).normalize();
+      const Y = new THREE.Vector3(0, 1, 0);
+      if (up.dot(Y) < -0.999) q.setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI);
+      else q.setFromUnitVectors(up, Y);
+      if (ls && rs) {
+        const lr = wpos(ls).sub(wpos(rs)).applyQuaternion(q); // character's left, in fixed space
+        const fwd = new THREE.Vector3().crossVectors(lr, Y); fwd.y = 0;
+        if (fwd.lengthSq() > 1e-6) {
+          const ang = Math.atan2(fwd.x, fwd.z);
+          q.premultiply(new THREE.Quaternion().setFromAxisAngle(Y, -ang));
+        }
+      }
+    }
+  }
+  if (S.flipX) q.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI));
+  if (S.turnY) q.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI));
+  pivot.quaternion.copy(q);
+  pivot.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(pivot, true);
+  const c = box.getCenter(new THREE.Vector3());
+  pivot.position.set(-c.x, -box.min.y, -c.z);
+  pivot.updateMatrixWorld(true);
+  frame();
+}
+
+function frame() {
+  if (!model) return;
+  const box = new THREE.Box3().setFromObject(pivot, true);
+  const size = box.getSize(new THREE.Vector3());
+  const h = size.y, top = box.max.y;
+  let ty, fitH;
+  if (S.framing === 'face') { fitH = h * 0.24; ty = top - fitH * 0.5; }
+  else if (S.framing === 'bust') { fitH = h * 0.52; ty = top - fitH * 0.5; }
+  else { fitH = h * 1.08; ty = box.min.y + h * 0.5; }
+  const fov = THREE.MathUtils.degToRad(camera.fov);
+  const fitW = Math.max(size.x, size.z) * (S.framing === 'full' ? 1.1 : 0.9);
+  const dist = Math.max((fitH / 2) / Math.tan(fov / 2), (fitW / 2) / (Math.tan(fov / 2) * camera.aspect)) * 1.12;
+  controls.target.set(0, ty, 0);
+  camera.position.set(0, ty + fitH * 0.04, dist);
+  camera.near = dist / 100; camera.far = dist * 50; camera.updateProjectionMatrix();
+  controls.minDistance = dist * 0.25; controls.maxDistance = dist * 4;
+  controls.update();
+}
+
+function playAnim(i) {
+  if (!mixer) return;
+  actions.forEach(a => a.stop());
+  if (i >= 0 && actions[i]) actions[i].reset().play();
+  orient();
+}
+
+// Turn a .gltf JSON whose main buffer is an embedded data: URI into an in-memory GLB,
+// so nothing is fetched through data:/blob: URLs (some hosts block those).
+function toGLB(buf) {
+  const u8 = new Uint8Array(buf);
+  if (u8[0] === 0x67 && u8[1] === 0x6C && u8[2] === 0x54 && u8[3] === 0x46) return buf; // already "glTF" binary
+  const json = JSON.parse(new TextDecoder().decode(u8));
+  let bin = null;
+  const b0 = json.buffers && json.buffers[0];
+  if (b0 && typeof b0.uri === 'string' && b0.uri.startsWith('data:')) {
+    const s = atob(b0.uri.slice(b0.uri.indexOf(',') + 1));
+    bin = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) bin[i] = s.charCodeAt(i);
+    delete b0.uri; b0.byteLength = bin.length;
+  }
+  let jb = new TextEncoder().encode(JSON.stringify(json));
+  const jPad = (4 - (jb.length % 4)) % 4;
+  const bPad = bin ? (4 - (bin.length % 4)) % 4 : 0;
+  const jLen = jb.length + jPad, bLen = bin ? bin.length + bPad : 0;
+  const total = 12 + 8 + jLen + (bin ? 8 + bLen : 0);
+  const out = new ArrayBuffer(total), dv = new DataView(out), o8 = new Uint8Array(out);
+  dv.setUint32(0, 0x46546C67, true); dv.setUint32(4, 2, true); dv.setUint32(8, total, true);
+  dv.setUint32(12, jLen, true); dv.setUint32(16, 0x4E4F534A, true);
+  o8.set(jb, 20); o8.fill(0x20, 20 + jb.length, 20 + jLen);
+  if (bin) { const p = 20 + jLen; dv.setUint32(p, bLen, true); dv.setUint32(p + 4, 0x004E4942, true); o8.set(bin, p + 8); }
+  return out;
+}
+
+function parseGLTF(buf, path) {
+  return new Promise((resolve, reject) => {
+    const loader = new GLTFLoader();
+    // Use <img>-based texture loading instead of fetch(): works for blob: images inside .glb files
+    // on hosts that restrict fetch. GLTFLoader picks its texture loader synchronously inside parse().
+    const own = Object.prototype.hasOwnProperty.call(window, 'createImageBitmap');
+    const saved = window.createImageBitmap;
+    try { window.createImageBitmap = undefined; loader.parse(buf, path, resolve, reject); }
+    catch (e) { reject(e); }
+    finally { if (own) window.createImageBitmap = saved; else delete window.createImageBitmap; }
+  });
+}
+
+function showError(msg, err) {
+  console.error(err);
+  $('status').hidden = false;
+  $('status').innerHTML = '';
+  const a = document.createElement('div'); a.textContent = msg;
+  const b = document.createElement('div'); b.textContent = String((err && err.message) || err || '').slice(0, 220);
+  b.style.cssText = 'font: 12px ui-monospace, Menlo, monospace; color: var(--dim); margin-top: 10px; max-width: 46ch;';
+  $('status').append(a, b);
+}
+
+async function loadModel(source) {
+  $('status').hidden = false; $('status').textContent = 'LOADING TAPE…';
+  let gltf;
+  try {
+    let buf, path = '';
+    if (typeof source === 'string') {
+      const res = await fetch(source);
+      if (!res.ok) throw new Error(`Server answered ${res.status} for ${source}`);
+      buf = await res.arrayBuffer();
+      path = THREE.LoaderUtils.extractUrlBase(source);
+      if (path === './') path = '';
+    } else {
+      buf = await source.arrayBuffer();
+    }
+    gltf = await parseGLTF(toGLB(buf), path);
+  } catch (err) {
+    showError('COULD NOT READ THAT MODEL. TRY A .GLB EXPORT.', err);
+    return;
+  }
+  try {
+    setupModel(gltf);
+  } catch (err) {
+    showError('MODEL LOADED, BUT THE VIEWER HIT AN ERROR.', err);
+  }
+}
+
+function setupModel(gltf) {
+  {
+    if (model) { pivot.remove(model); mixer && mixer.stopAllAction(); }
+    textures = new Set();
+    model = gltf.scene;
+    pivot.add(model);
+    prepareMaterials(model);
+    applyShading(); applyTextureFilter(true);
+    mixer = new THREE.AnimationMixer(model);
+    // Body clips are the ones that move bones; tiny helper clips (like a face swap) play alongside.
+    const body = [], extra = [];
+    const seen = new Set();
+    const sig = (c) => c.duration.toFixed(3) + '|' + c.tracks.length + '|' + c.tracks.slice(0, 4).map(t => Array.from(t.values.slice(0, 8)).map(v => v.toFixed(4)).join(',')).join(';');
+    gltf.animations.forEach(c => {
+      if (c.tracks.length <= 6) { extra.push(c); return; }
+      const s = sig(c); if (seen.has(s)) return; seen.add(s); body.push(c);   // skip exact duplicate clips
+    });
+    clips = body;
+    actions = body.map(c => mixer.clipAction(c));
+    extraActions = extra.map(c => { const a = mixer.clipAction(c); a.play(); return a; });
+    const sel = $('c-anim'); sel.innerHTML = '';
+    body.forEach((c, i) => sel.add(new Option(`Animation ${i + 1} · ${c.duration.toFixed(1)}s`, i)));
+    sel.add(new Option('Rest pose', -1));
+    if (S.anim >= body.length) S.anim = body.length ? 0 : -1;
+    sel.value = S.anim;
+    playAnim(+S.anim);
+    $('status').hidden = true;
+  }
+}
+
+/* ---------- sizing ---------- */
+let W = 1, H = 1;
+function resize() {
+  const r = stage.getBoundingClientRect();
+  W = Math.max(1, r.width); H = Math.max(1, r.height);
+  renderer.setSize(W, H, false);
+  camera.aspect = W / H; camera.updateProjectionMatrix();
+  applyPixel();
+}
+// The look is defined for a viewer 900px tall and scales with the viewer's height, so a small or
+// large embed shows the same image (same number of pixel rows, same split/grain/scanline size).
+const REF_H = 900;
+function applyPixel() {
+  const dpr = renderer.getPixelRatio();
+  const k = S.fixedScale === false ? 1 : H / REF_H;
+  const px = S.pixel <= 1 ? 1 / dpr : Math.max(1 / dpr, S.pixel * k);   // screen px per rendered pixel
+  const lw = Math.max(16, Math.round(W / px)), lh = Math.max(16, Math.round(H / px));
+  const samples = S.pixel <= 1 ? 4 : 0;                                   // smooth edges for the Clean look
+  if (rt.samples !== samples) { rt.dispose(); rt.samples = samples; }
+  rt.setSize(lw, lh);
+  post.uniforms.lowRes.value.set(lw, lh);
+  post.uniforms.outRes.value.set(W * dpr, H * dpr);
+  post.uniforms.dpr.value = dpr * k;   // device px per reference px
+  const g = 1 + S.wobble * 5;
+  snapUniforms.uSnapRes.value.set(lw * 0.5 / g, lh * 0.5 / g);
+  snapUniforms.uSnap.value = S.wobble > 0 ? 1 : 0;
+}
+new ResizeObserver(() => { resize(); frame(); }).observe(stage);
+
+/* ---------- apply settings ---------- */
+function applyAll() {
+  for (const k of ['chroma', 'bleed', 'grain', 'scan', 'jitter', 'levels', 'dither', 'sat', 'contrast', 'vignette']) post.uniforms[k].value = +S[k];
+  scene.background.set(S.bg);
+  controls.autoRotate = !!S.autorotate;
+  $('osd').hidden = !S.osd;
+  applyPixel(); applyShading(); applyTextureFilter();
+}
+
+/* ---------- panel ---------- */
+const controlsEl = $('controls');
+const inputs = {};
+for (const grp of SCHEMA) {
+  const fs = document.createElement('fieldset');
+  fs.innerHTML = `<legend>${grp.group}</legend>`;
+  for (const it of grp.items) {
+    const id = 'c-' + it.key;
+    let el;
+    if (it.type === 'toggle') {
+      el = document.createElement('label'); el.className = 'toggle'; el.htmlFor = id;
+      el.innerHTML = `${it.label}<input type="checkbox" id="${id}">`;
+    } else if (it.type === 'select') {
+      el = document.createElement('div'); el.className = 'row';
+      el.innerHTML = `<label for="${id}">${it.label}</label><select id="${id}">${it.options.map(([v, t]) => `<option value="${v}">${t}</option>`).join('')}</select>`;
+    } else {
+      el = document.createElement('div'); el.className = 'row';
+      el.innerHTML = `<label for="${id}">${it.label}</label><output for="${id}" id="${id}-o"></output><input type="range" id="${id}" min="${it.min}" max="${it.max}" step="${it.step}">`;
+    }
+    fs.appendChild(el);
+    inputs[it.key] = it;
+  }
+  controlsEl.appendChild(fs);
+}
+
+function syncUI() {
+  for (const [k, it] of Object.entries(inputs)) {
+    const el = $('c-' + k);
+    if (it.type === 'toggle') el.checked = !!S[k];
+    else if (it.type === 'select') el.value = S[k];
+    else { el.value = S[k]; $('c-' + k + '-o').textContent = it.fmt ? it.fmt(+S[k]) : fmtNum(+S[k]); }
+  }
+  $('c-framing').value = S.framing; $('c-autorotate').checked = !!S.autorotate; $('c-upright').checked = !!S.upright; $('c-bg').value = S.bg;
+  document.querySelectorAll('[data-preset]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.preset === S.preset)));
+}
+
+controlsEl.addEventListener('input', (e) => {
+  const k = e.target.id.replace(/^c-/, ''); const it = inputs[k]; if (!it) return;
+  S[k] = it.type === 'toggle' ? e.target.checked : it.type === 'select' ? e.target.value : +e.target.value;
+  S.preset = 'custom'; applyAll(); syncUI();
+});
+document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => {
+  Object.assign(S, PRESETS[b.dataset.preset]); S.preset = b.dataset.preset; applyAll(); syncUI();
+}));
+$('c-anim').addEventListener('change', e => { S.anim = +e.target.value; playAnim(S.anim); });
+$('c-framing').addEventListener('change', e => { S.framing = e.target.value; frame(); });
+$('c-autorotate').addEventListener('change', e => { S.autorotate = e.target.checked; applyAll(); });
+$('c-upright').addEventListener('change', e => { S.upright = e.target.checked; orient(); });
+$('c-bg').addEventListener('input', e => { S.bg = e.target.value; applyAll(); });
+$('b-flip').addEventListener('click', () => { S.flipX = !S.flipX; orient(); });
+$('b-turn').addEventListener('click', () => { S.turnY = !S.turnY; orient(); });
+$('b-reset').addEventListener('click', frame);
+const setPaused = (p) => { paused = p; $('b-pause').textContent = p ? 'Play' : 'Pause'; $('osdMode').textContent = p ? 'PAUSE ❚❚' : 'PLAY ▶'; };
+$('b-pause').addEventListener('click', () => setPaused(!paused));
+
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 1800); }
+$('b-copy').addEventListener('click', () => {
+  const keep = { ...S }; delete keep.preset;
+  const code = `window.VIEWER_CONFIG = ${JSON.stringify({ showPanel: false, model: 'model.glb', settings: keep }, null, 2)};`;
+  const out = $('out'); out.value = code;
+  const fallback = () => { out.hidden = false; out.focus(); out.select(); toast('Select and copy the code below'); };
+  try { navigator.clipboard.writeText(code).then(() => { out.hidden = false; toast('Settings copied'); }, fallback); } catch { fallback(); }
+});
+
+const rack = $('rack'), rackToggle = $('rackToggle');
+function setRack(open) { rack.hidden = !open; rackToggle.textContent = open ? 'Hide' : 'Controls'; rackToggle.setAttribute('aria-expanded', String(open)); requestAnimationFrame(resize); }
+rackToggle.addEventListener('click', () => setRack(rack.hidden));
+window.addEventListener('keydown', (e) => {
+  if (EMBED) return;
+  if (e.target.closest && e.target.closest('input, select, textarea')) return;
+  if (e.code === 'Space') { e.preventDefault(); setPaused(!paused); }
+  if (e.key === 'h' || e.key === 'H') { if (CFG.showPanel !== false) setRack(rack.hidden); }
+});
+if (CFG.showPanel === false) { rack.hidden = true; rackToggle.hidden = true; }
+else setRack(true);
+
+/* ---------- loop ---------- */
+function tc(t) { const s = Math.floor(t); return `${Math.floor(s / 3600)}:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; }
+// Only draw while the viewer is on screen and the tab is visible (saves battery on your site).
+let onScreen = true;
+if ('IntersectionObserver' in window) new IntersectionObserver((en) => { onScreen = en[0].isIntersecting; }).observe(stage);
+function loop() {
+  requestAnimationFrame(loop);
+  const dt = Math.min(clock.getDelta(), 0.1);
+  if (!onScreen || document.hidden) return;
+  if (!paused) { mixer && mixer.update(dt); tapeTime += dt; }
+  post.uniforms.time.value += dt;
+  controls.update();
+  renderer.setRenderTarget(rt); renderer.render(scene, camera);
+  renderer.setRenderTarget(null); renderer.render(postScene, postCam);
+  $('osdTime').textContent = tc(tapeTime);
+}
+
+resize(); applyAll(); syncUI();
+loadModel(CFG.model || 'model.glb');
+loop();
+window.__viewer = { S, orient, frame, pivot, get model() { return model; } };
+</script>
+
+</body>
+</html>
