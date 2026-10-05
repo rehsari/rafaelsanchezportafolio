@@ -4148,25 +4148,23 @@ const PROJECTS = {
       },
 
       { n:"04", t:"COMPETITIVE ANALYSIS", tocLabel:"Competitive analysis",
-        b: "HerWay brings transit planning and rider community into the same experience. Google Maps supports transit within a broader navigation product. Moovit and Transit focus more directly on the transit journey. HerWay explores connecting that journey to a community where riders can follow updates, form groups, and coordinate directly.",
+        b: "Riders already move between these tools. Google Maps handles transit inside a broader navigation product, Transit focuses on the journey itself, and Uber is where people end up when transit stops feeling like a reasonable option. Routing was never the gap. None of them treat other riders as part of the information.",
         deploy: {
           columns: [
             { label:"Capability",  key:"cap" },
             { label:"Google Maps", key:"gmaps",   num:true },
-            { label:"Moovit",      key:"moovit",  num:true },
+            { label:"Uber",        key:"uber",    num:true },
             { label:"Transit",     key:"transit", num:true },
             { label:"HerWay",      key:"herway",  num:true, flag:true }
           ],
           rows: [
-            { cap:"Public transportation as the primary focus",        gmaps:"—", moovit:"✓", transit:"✓", herway:"✓" },
-            { cap:"Transit route planning",                            gmaps:"✓", moovit:"✓", transit:"✓", herway:"✓" },
-            { cap:"Rider-contributed crowding information",            gmaps:"✓", moovit:"✓", transit:"✓", herway:"✓" },
-            { cap:"Feed for route-related questions, updates, events", gmaps:"—", moovit:"—", transit:"—", herway:"✓" },
-            { cap:"Groups organized around shared routes or schedules",gmaps:"—", moovit:"—", transit:"—", herway:"✓" },
-            { cap:"In-app private messaging between riders",           gmaps:"—", moovit:"—", transit:"—", herway:"✓" },
-            { cap:"Community designed specifically for women",         gmaps:"—", moovit:"—", transit:"—", herway:"✓" }
+            { cap:"Public transit as the primary focus",            gmaps:"—", uber:"—", transit:"✓", herway:"✓" },
+            { cap:"Transit route planning",                         gmaps:"✓", uber:"✓", transit:"✓", herway:"✓" },
+            { cap:"Rider-contributed crowding information",         gmaps:"✓", uber:"—", transit:"✓", herway:"✓" },
+            { cap:"Rider community tied to specific routes",        gmaps:"—", uber:"—", transit:"—", herway:"✓" },
+            { cap:"Built specifically for women riders",            gmaps:"—", uber:"—", transit:"—", herway:"✓" }
           ],
-          caption: "✓ documented feature, or designed feature in HerWay. — not identified in the reviewed product documentation. Availability varies by location. HerWay’s features are prototyped, not live services. Retrospective comparison. Sources: Google Maps, Moovit, Transit."
+          caption: "✓ documented feature, or designed feature in HerWay. — not identified in the reviewed product documentation. Uber offers public transit directions in select cities only. HerWay’s features are prototyped, not live services. Retrospective comparison. Sources: Google Maps, Uber, Transit."
         }
       },
 
@@ -4185,7 +4183,7 @@ const PROJECTS = {
             stance: "Make the experience useful at different levels of participation.",
             body: "Community could not depend on everyone contributing. In a study of 375 online communities, 53.9% of non-posting respondents said that simply reading or browsing was enough.\n\nSource: <a href=\"https://www.dhi.ac.uk/san/waysofbeing/data/communities-murphy-preece-2004b.pdf\" target=\"_blank\" rel=\"noopener\">Preece, Nonnecke &amp; Andrews — The top five reasons for lurking (2004)</a>.\n\nHerWay supports three levels of engagement:\n\n<strong>Read</strong> — browse updates, events, and information.\n\n<strong>Participate</strong> — post, ask questions, or join group conversations.\n\n<strong>Coordinate</strong> — message another rider directly.\n\nThese are options, not stages. The community remains useful even when someone only reads.",
             img: "images/herway-moment-02.jpg",
-            aspect: "16 / 9",
+            aspect: "3 / 4",
             caption: "Simply reading questions, experiences, and discussions gives people value from the community.",
             alt: "Diagram contrasting the few riders who post with the many who only read" },
           { title: "Shared presence should support ordinary travel",
@@ -4390,18 +4388,20 @@ const PROJECTS = {
       },
 
       { insights: true, n:"08", t:"HOW SUCCESS WOULD BE MEASURED", tocLabel:"Measuring success",
-        lead: "If developed further, success should describe whether Resources creates a useful connection, not how long someone stays in it.",
+        lead: "If developed further, success would be measured by how well Resources helps someone find and reach useful support, not by how long they stay in the experience.",
         items: [
           { k:"Discovery",
-            v:"Whether the resources someone finds are actually relevant to what they were looking for." },
+            v:"How often people find resources that match what they are looking for." },
           { k:"Handoff",
-            v:"How often a session ends with a successful handoff to a verified organization." },
+            v:"How often someone moves from a resource to a clear next step with a verified organization." },
           { k:"Time to help",
-            v:"How long it takes to reach useful support, treated as something to shorten rather than extend." },
+            v:"How long it takes someone to go from looking for help to something they can act on." },
           { k:"Follow-through",
-            v:"Contacts made or applications started after the handoff leaves Snapchat." },
+            v:"What happens after someone leaves Snapchat, such as making contact or starting an application." },
           { k:"Accuracy",
-            v:"Whether resource information stays correct, current and safe to act on." }
+            v:"How often resource information is correct, current, and safe to use." },
+          { k:"Trust",
+            v:"Whether people feel confident enough in the information to take the next step." }
         ]
       },
 
@@ -4828,8 +4828,7 @@ function drawJittered(stroke) {
        and its CSS never touch this page. Five clicks on it opens clean.html. */
     hero: {
       glitter: true,
-      alt: "Glitter 2K, a 3D character you can turn",
-      caption: "Drag to rotate"
+      alt: "Glitter 2K, a 3D character you can turn"
     },
     images: [],
     sections: [
@@ -5250,7 +5249,7 @@ function drawJittered(stroke) {
         sourceNote: "Metrics based on Vercel reporting.",
         metrics: [
           { v: "+44%", label: "increase in project pages viewed per visit, from 1.6 to 2.3, in the first four weeks live" },
-          { v: "58% \u2192 43%", label: "drop in bounce rate after launch" },
+          { v: "-26%", label: "drop in bounce rate after launch, from 58% to 43%" },
           { v: "34%", label: "of visitors opened and used Nibble" },
           { v: "72%", label: "of those visitors went on to open a project Nibble recommended" }
         ],
